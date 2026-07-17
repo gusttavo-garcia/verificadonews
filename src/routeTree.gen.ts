@@ -9,38 +9,335 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VideosRouteImport } from './routes/videos'
+import { Route as TransparenciaRouteImport } from './routes/transparencia'
+import { Route as TermosRouteImport } from './routes/termos'
+import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as SitesRouteImport } from './routes/sites'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as PesquisarRouteImport } from './routes/pesquisar'
+import { Route as MetodologiaRouteImport } from './routes/metodologia'
+import { Route as GolpesRouteImport } from './routes/golpes'
+import { Route as FakeNewsRouteImport } from './routes/fake-news'
+import { Route as EmpresasRouteImport } from './routes/empresas'
+import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VerificacaoSlugRouteImport } from './routes/verificacao.$slug'
 
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransparenciaRoute = TransparenciaRouteImport.update({
+  id: '/transparencia',
+  path: '/transparencia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitesRoute = SitesRouteImport.update({
+  id: '/sites',
+  path: '/sites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesquisarRoute = PesquisarRouteImport.update({
+  id: '/pesquisar',
+  path: '/pesquisar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MetodologiaRoute = MetodologiaRouteImport.update({
+  id: '/metodologia',
+  path: '/metodologia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GolpesRoute = GolpesRouteImport.update({
+  id: '/golpes',
+  path: '/golpes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FakeNewsRoute = FakeNewsRouteImport.update({
+  id: '/fake-news',
+  path: '/fake-news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmpresasRoute = EmpresasRouteImport.update({
+  id: '/empresas',
+  path: '/empresas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriasRoute = CategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VerificacaoSlugRoute = VerificacaoSlugRouteImport.update({
+  id: '/verificacao/$slug',
+  path: '/verificacao/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/categorias': typeof CategoriasRoute
+  '/contato': typeof ContatoRoute
+  '/empresas': typeof EmpresasRoute
+  '/fake-news': typeof FakeNewsRoute
+  '/golpes': typeof GolpesRoute
+  '/metodologia': typeof MetodologiaRoute
+  '/pesquisar': typeof PesquisarRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sites': typeof SitesRoute
+  '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
+  '/transparencia': typeof TransparenciaRoute
+  '/videos': typeof VideosRoute
+  '/verificacao/$slug': typeof VerificacaoSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/categorias': typeof CategoriasRoute
+  '/contato': typeof ContatoRoute
+  '/empresas': typeof EmpresasRoute
+  '/fake-news': typeof FakeNewsRoute
+  '/golpes': typeof GolpesRoute
+  '/metodologia': typeof MetodologiaRoute
+  '/pesquisar': typeof PesquisarRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sites': typeof SitesRoute
+  '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
+  '/transparencia': typeof TransparenciaRoute
+  '/videos': typeof VideosRoute
+  '/verificacao/$slug': typeof VerificacaoSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/categorias': typeof CategoriasRoute
+  '/contato': typeof ContatoRoute
+  '/empresas': typeof EmpresasRoute
+  '/fake-news': typeof FakeNewsRoute
+  '/golpes': typeof GolpesRoute
+  '/metodologia': typeof MetodologiaRoute
+  '/pesquisar': typeof PesquisarRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sites': typeof SitesRoute
+  '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
+  '/transparencia': typeof TransparenciaRoute
+  '/videos': typeof VideosRoute
+  '/verificacao/$slug': typeof VerificacaoSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/categorias'
+    | '/contato'
+    | '/empresas'
+    | '/fake-news'
+    | '/golpes'
+    | '/metodologia'
+    | '/pesquisar'
+    | '/privacidade'
+    | '/sitemap.xml'
+    | '/sites'
+    | '/sobre'
+    | '/termos'
+    | '/transparencia'
+    | '/videos'
+    | '/verificacao/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/categorias'
+    | '/contato'
+    | '/empresas'
+    | '/fake-news'
+    | '/golpes'
+    | '/metodologia'
+    | '/pesquisar'
+    | '/privacidade'
+    | '/sitemap.xml'
+    | '/sites'
+    | '/sobre'
+    | '/termos'
+    | '/transparencia'
+    | '/videos'
+    | '/verificacao/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/categorias'
+    | '/contato'
+    | '/empresas'
+    | '/fake-news'
+    | '/golpes'
+    | '/metodologia'
+    | '/pesquisar'
+    | '/privacidade'
+    | '/sitemap.xml'
+    | '/sites'
+    | '/sobre'
+    | '/termos'
+    | '/transparencia'
+    | '/videos'
+    | '/verificacao/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CategoriasRoute: typeof CategoriasRoute
+  ContatoRoute: typeof ContatoRoute
+  EmpresasRoute: typeof EmpresasRoute
+  FakeNewsRoute: typeof FakeNewsRoute
+  GolpesRoute: typeof GolpesRoute
+  MetodologiaRoute: typeof MetodologiaRoute
+  PesquisarRoute: typeof PesquisarRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SitesRoute: typeof SitesRoute
+  SobreRoute: typeof SobreRoute
+  TermosRoute: typeof TermosRoute
+  TransparenciaRoute: typeof TransparenciaRoute
+  VideosRoute: typeof VideosRoute
+  VerificacaoSlugRoute: typeof VerificacaoSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transparencia': {
+      id: '/transparencia'
+      path: '/transparencia'
+      fullPath: '/transparencia'
+      preLoaderRoute: typeof TransparenciaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sites': {
+      id: '/sites'
+      path: '/sites'
+      fullPath: '/sites'
+      preLoaderRoute: typeof SitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesquisar': {
+      id: '/pesquisar'
+      path: '/pesquisar'
+      fullPath: '/pesquisar'
+      preLoaderRoute: typeof PesquisarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/metodologia': {
+      id: '/metodologia'
+      path: '/metodologia'
+      fullPath: '/metodologia'
+      preLoaderRoute: typeof MetodologiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/golpes': {
+      id: '/golpes'
+      path: '/golpes'
+      fullPath: '/golpes'
+      preLoaderRoute: typeof GolpesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fake-news': {
+      id: '/fake-news'
+      path: '/fake-news'
+      fullPath: '/fake-news'
+      preLoaderRoute: typeof FakeNewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/empresas': {
+      id: '/empresas'
+      path: '/empresas'
+      fullPath: '/empresas'
+      preLoaderRoute: typeof EmpresasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categorias': {
+      id: '/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof CategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +345,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/verificacao/$slug': {
+      id: '/verificacao/$slug'
+      path: '/verificacao/$slug'
+      fullPath: '/verificacao/$slug'
+      preLoaderRoute: typeof VerificacaoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CategoriasRoute: CategoriasRoute,
+  ContatoRoute: ContatoRoute,
+  EmpresasRoute: EmpresasRoute,
+  FakeNewsRoute: FakeNewsRoute,
+  GolpesRoute: GolpesRoute,
+  MetodologiaRoute: MetodologiaRoute,
+  PesquisarRoute: PesquisarRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SitesRoute: SitesRoute,
+  SobreRoute: SobreRoute,
+  TermosRoute: TermosRoute,
+  TransparenciaRoute: TransparenciaRoute,
+  VideosRoute: VideosRoute,
+  VerificacaoSlugRoute: VerificacaoSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
