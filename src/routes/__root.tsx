@@ -77,14 +77,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Verificado News — Checagem de fatos e combate à desinformação" },
+      {
+        name: "description",
+        content:
+          "Descubra se uma notícia, vídeo, imagem, empresa ou golpe é verdadeiro antes de compartilhar. Plataforma brasileira de checagem de fatos.",
+      },
+      { name: "author", content: "Verificado News" },
+      { property: "og:title", content: "Verificado News — Checagem de fatos" },
+      {
+        property: "og:description",
+        content:
+          "Verifique notícias, golpes, empresas e sites antes de acreditar ou compartilhar.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
