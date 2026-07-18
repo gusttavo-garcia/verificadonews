@@ -44,7 +44,7 @@ export function PageHero({
         </div>
         {showSearch && (
           <div className="mt-8">
-            <SearchBar />
+            <SearchBar align="left" />
           </div>
         )}
       </div>
