@@ -6,7 +6,7 @@ import { formatDate, type Article } from "@/lib/mock-data";
 export function ArticleCard({ article }: { article: Article }) {
   return (
     <Link
-      to="/verificacao/$slug"
+      to="/$slug"
       params={{ slug: article.slug }}
       className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card transition hover:border-primary/40 hover:shadow-sm"
     >

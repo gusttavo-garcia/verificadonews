@@ -23,7 +23,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           "/contato",
           "/privacidade",
           "/termos",
-          ...articles.map((a) => `/verificacao/${a.slug}`),
+          ...articles.map((a) => `/${a.slug}`),
         ];
         const urls = paths
           .map(

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff } from "lucide-react";
+import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon } from "lucide-react";
 import { PageShell, PageHero } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -301,7 +301,22 @@ function PainelPage() {
               <tbody>
                 {data.articles.map((a: any) => (
                   <tr key={a.id} className="border-t border-border">
-                    <td className="px-4 py-3 font-medium text-foreground">{a.title}</td>
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      <div>{a.title}</div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const url = `${window.location.origin}/${a.slug}`;
+                          navigator.clipboard.writeText(url);
+                          toast.success("Link copiado!");
+                        }}
+                        className="mt-1 inline-flex items-center gap-1 text-xs font-normal text-muted-foreground hover:text-primary"
+                        title="Clique para copiar"
+                      >
+                        <LinkIcon className="h-3 w-3" />
+                        <span className="truncate">/{a.slug}</span>
+                      </button>
+                    </td>
                     {isAdmin && (
                       <td className="px-4 py-3 text-muted-foreground">
                         {a.author_name ?? "—"}
