@@ -8,8 +8,21 @@ export function ArticleCard({ article }: { article: Article }) {
     <Link
       to="/verificacao/$slug"
       params={{ slug: article.slug }}
-      className="group flex h-full flex-col justify-between rounded-xl border border-border bg-card p-5 transition hover:border-primary/40 hover:shadow-sm"
+      className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card transition hover:border-primary/40 hover:shadow-sm"
     >
+      {article.image && (
+        <div className="aspect-[16/9] w-full overflow-hidden bg-muted">
+          <img
+            src={article.image}
+            alt={article.title}
+            loading="lazy"
+            width={640}
+            height={360}
+            className="h-full w-full object-cover transition group-hover:scale-[1.02]"
+          />
+        </div>
+      )}
+      <div className="flex flex-1 flex-col justify-between p-5">
       <div>
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <VerdictBadge verdict={article.verdict} />
@@ -27,6 +40,7 @@ export function ArticleCard({ article }: { article: Article }) {
         <span className="inline-flex items-center gap-1">
           <Eye className="h-3.5 w-3.5" /> {article.views.toLocaleString("pt-BR")}
         </span>
+      </div>
       </div>
     </Link>
   );

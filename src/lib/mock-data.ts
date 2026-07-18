@@ -26,8 +26,24 @@ export interface Article {
   date: string;
   views: number;
   type: "noticia" | "golpe" | "empresa" | "site" | "video" | "fake";
+  image?: string;
   sources?: { label: string; url: string }[];
 }
+
+const IMG: Record<string, string> = {
+  "reforma-tributaria-2026": "/__l5e/assets-v1/864f663c-0cb0-481a-b111-e1ebb68cd1dd/reforma-tributaria.jpg",
+  "golpe-pix-falso-banco": "/__l5e/assets-v1/7f8eff35-7547-4eac-abab-d0c23c2a5cb5/golpe-pix.jpg",
+  "vacina-gripe-2026": "/__l5e/assets-v1/ca3e6ddc-bcd6-4410-81d4-7089ca40a091/vacina-gripe.jpg",
+  "celebridade-crise-publica": "/__l5e/assets-v1/4a1817b4-57da-4b21-a6d9-e92390a50001/celebridade.jpg",
+  "loja-online-fraude": "/__l5e/assets-v1/83ed2817-94a2-43af-951d-326dbdc57bbf/loja-fraude.jpg",
+  "video-manifestacao-editado": "/__l5e/assets-v1/b81dbac7-e38e-4753-981e-96b62f5cc71f/manifestacao.jpg",
+  "brasil-argentina-analise": "/__l5e/assets-v1/bb5de1ba-56a8-48d5-98a7-cbff7102fabe/brasil-argentina.jpg",
+  "site-clone-receita-federal": "/__l5e/assets-v1/2c55d823-f570-4788-aeda-0ae5725fe752/site-clone.jpg",
+  "queimadas-amazonia-2026": "/__l5e/assets-v1/0d477dc2-8dfb-4d09-91ea-75a129d417ef/queimadas-amazonia.jpg",
+  "premio-atriz-brasileira": "/__l5e/assets-v1/cbbba1f3-d2b9-4595-9477-97d7a49b4f6f/premio-atriz.jpg",
+  "decreto-governo-economia": "/__l5e/assets-v1/23aec2b3-b95c-4f54-b618-f1525c51d307/decreto-governo.jpg",
+  "app-emprestimo-fantasma": "/__l5e/assets-v1/270916e4-8532-4d46-b5db-b79301588e58/app-emprestimo.jpg",
+};
 
 export const articles: Article[] = [
   {
@@ -163,6 +179,10 @@ export const articles: Article[] = [
     type: "golpe",
   },
 ];
+
+for (const a of articles) {
+  if (IMG[a.slug]) a.image = IMG[a.slug];
+}
 
 export const categories: Category[] = [
   "Política",

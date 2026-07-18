@@ -39,7 +39,7 @@ export const listMyArticles = createServerFn({ method: "GET" })
     const admin = await isAdmin(context);
     let query = context.supabase
       .from("articles")
-      .select("id, slug, title, status, category, verdict, author_name, author_id, created_at, updated_at, published_at, views")
+      .select("id, slug, title, status, category, verdict, author_name, author_id, created_at, updated_at, published_at, views, image_url")
       .order("updated_at", { ascending: false });
     if (!admin) query = query.eq("author_id", context.userId);
     const { data, error } = await query;
@@ -58,6 +58,7 @@ export const createArticle = createServerFn({ method: "POST" })
         category: z.string().min(1),
         verdict: verdictEnum,
         type: typeEnum.default("noticia"),
+        image_url: z.string().url().optional().or(z.literal("").transform(() => undefined)),
       })
       .parse(input),
   )
@@ -102,6 +103,7 @@ export const updateArticle = createServerFn({ method: "POST" })
         category: z.string().optional(),
         verdict: verdictEnum.optional(),
         type: typeEnum.optional(),
+        image_url: z.string().url().nullable().optional(),
       })
       .parse(input),
   )
