@@ -435,6 +435,15 @@ function PainelPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
+                        {isAdmin && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => startEdit(a)}
+                          >
+                            <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
+                          </Button>
+                        )}
                         {a.status === "draft" && (
                           <Button
                             size="sm"
