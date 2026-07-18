@@ -75,3 +75,48 @@ export const setUserRole = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+// Admin creates a new user (editor or admin) with email + password.
+export const createUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        email: z.string().email(),
+        password: z.string().min(8, "Mínimo 8 caracteres"),
+        displayName: z.string().min(1),
+        role: z.enum(["editor", "admin"]),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: created, error: cErr } = await supabaseAdmin.auth.admin.createUser({
+      email: data.email,
+      password: data.password,
+      email_confirm: true,
+      user_metadata: { display_name: data.displayName },
+    });
+    if (cErr || !created.user) {
+      throw new Error(cErr?.message ?? "Não foi possível criar o usuário.");
+    }
+
+    const userId = created.user.id;
+
+    // Ensure profile has the requested display name (trigger sets a default).
+    await supabaseAdmin
+      .from("profiles")
+      .upsert({ id: userId, display_name: data.displayName }, { onConflict: "id" });
+
+    // Replace default 'reader' role with the requested role.
+    await supabaseAdmin.from("user_roles").delete().eq("user_id", userId);
+    const { error: rErr } = await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: userId, role: data.role });
+    if (rErr) throw new Error(rErr.message);
+
+    return { ok: true, userId };
+  });
