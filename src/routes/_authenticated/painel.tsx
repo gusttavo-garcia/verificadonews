@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon, Pencil } from "lucide-react";
+import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon, Pencil, Upload, X } from "lucide-react";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth, useIsStaff } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { categories } from "@/lib/mock-data";
 import {
   createArticle,
@@ -316,19 +317,11 @@ function PainelPage() {
               />
             </div>
             <div>
-              <Label htmlFor="image_url">Imagem de destaque (URL)</Label>
-              <Input
-                id="image_url"
-                type="url"
-                placeholder="https://..."
+              <Label>Imagem de destaque</Label>
+              <ImageUploader
                 value={form.image_url}
-                onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                onChange={(url) => setForm({ ...form, image_url: url })}
               />
-              {form.image_url && (
-                <div className="mt-2 aspect-[16/9] w-full max-w-sm overflow-hidden rounded-lg border border-border bg-muted">
-                  <img src={form.image_url} alt="Prévia" className="h-full w-full object-cover" />
-                </div>
-              )}
             </div>
             <div>
               <Label htmlFor="body">Conteúdo</Label>
