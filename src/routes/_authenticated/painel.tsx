@@ -202,6 +202,21 @@ function PainelPage() {
               />
             </div>
             <div>
+              <Label htmlFor="image_url">Imagem de destaque (URL)</Label>
+              <Input
+                id="image_url"
+                type="url"
+                placeholder="https://..."
+                value={form.image_url}
+                onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+              />
+              {form.image_url && (
+                <div className="mt-2 aspect-[16/9] w-full max-w-sm overflow-hidden rounded-lg border border-border bg-muted">
+                  <img src={form.image_url} alt="Prévia" className="h-full w-full object-cover" />
+                </div>
+              )}
+            </div>
+            <div>
               <Label htmlFor="body">Conteúdo</Label>
               <Textarea
                 id="body"
