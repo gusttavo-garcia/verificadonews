@@ -58,7 +58,10 @@ export const createArticle = createServerFn({ method: "POST" })
         category: z.string().min(1),
         verdict: verdictEnum,
         type: typeEnum.default("noticia"),
-        image_url: z.string().url().optional().or(z.literal("").transform(() => undefined)),
+        image_url: z
+          .string()
+          .optional()
+          .transform((v) => (v && v.length > 0 ? v : undefined)),
       })
       .parse(input),
   )
@@ -103,7 +106,7 @@ export const updateArticle = createServerFn({ method: "POST" })
         category: z.string().optional(),
         verdict: verdictEnum.optional(),
         type: typeEnum.optional(),
-        image_url: z.string().url().nullable().optional(),
+        image_url: z.string().nullable().optional(),
         author_id: z.string().uuid().optional(),
       })
       .parse(input),
