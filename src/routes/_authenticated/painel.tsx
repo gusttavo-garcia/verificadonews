@@ -27,6 +27,7 @@ import {
   unpublishArticle,
 } from "@/lib/articles.functions";
 import { listUsers, setUserRole } from "@/lib/users.functions";
+import { createUser } from "@/lib/users.functions";
 import type { AppRole } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/painel")({
@@ -357,6 +358,7 @@ function UsersSection({ currentUserId }: { currentUserId: string | null }) {
   const qc = useQueryClient();
   const list = useServerFn(listUsers);
   const setRole = useServerFn(setUserRole);
+  const createFn = useServerFn(createUser);
 
   const { data, isLoading } = useQuery({
     queryKey: ["panel-users"],
@@ -373,14 +375,107 @@ function UsersSection({ currentUserId }: { currentUserId: string | null }) {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
   });
 
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    displayName: "",
+    role: "editor" as "editor" | "admin",
+  });
+
+  const mCreate = useMutation({
+    mutationFn: () => createFn({ data: form }),
+    onSuccess: () => {
+      toast.success("Usuário criado.");
+      setShowForm(false);
+      setForm({ email: "", password: "", displayName: "", role: "editor" });
+      qc.invalidateQueries({ queryKey: ["panel-users"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+
   return (
     <section className="mx-auto max-w-6xl px-4 pb-16">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold">Usuários</h2>
-        <p className="text-sm text-muted-foreground">
-          Promova leitores a editores ou administradores. A mudança é imediata.
-        </p>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold">Usuários</h2>
+          <p className="text-sm text-muted-foreground">
+            Promova leitores a editores ou administradores. A mudança é imediata.
+          </p>
+        </div>
+        <Button onClick={() => setShowForm((v) => !v)}>
+          {showForm ? (
+            <>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+            </>
+          ) : (
+            <>
+              <Plus className="mr-2 h-4 w-4" /> Novo usuário
+            </>
+          )}
+        </Button>
       </div>
+
+      {showForm && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            mCreate.mutate();
+          }}
+          className="mb-6 space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="new-user-name">Nome</Label>
+              <Input
+                id="new-user-name"
+                value={form.displayName}
+                onChange={(e) => setForm({ ...form, displayName: e.target.value })}
+                required
+                minLength={1}
+              />
+            </div>
+            <div>
+              <Label htmlFor="new-user-email">E-mail</Label>
+              <Input
+                id="new-user-email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="new-user-password">Senha provisória</Label>
+              <Input
+                id="new-user-password"
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
+                minLength={8}
+              />
+            </div>
+            <div>
+              <Label>Função</Label>
+              <Select
+                value={form.role}
+                onValueChange={(v) => setForm({ ...form, role: v as typeof form.role })}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="editor">Editor</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Button type="submit" disabled={mCreate.isPending}>
+            {mCreate.isPending ? "Criando…" : "Criar usuário"}
+          </Button>
+        </form>
+      )}
+
       <div className="overflow-hidden rounded-2xl border border-border bg-card">
         {isLoading ? (
           <div className="p-8 text-center text-muted-foreground">Carregando…</div>
