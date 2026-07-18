@@ -27,6 +27,7 @@ import {
   unpublishArticle,
 } from "@/lib/articles.functions";
 import { listUsers, setUserRole } from "@/lib/users.functions";
+import { createUser } from "@/lib/users.functions";
 import type { AppRole } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/painel")({
