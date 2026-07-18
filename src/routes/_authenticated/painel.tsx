@@ -345,9 +345,41 @@ function PainelPage() {
                 </Select>
               </div>
             </div>
-            <Button type="submit" disabled={mCreate.isPending}>
-              Salvar rascunho
-            </Button>
+            {isAdmin && editingId && (
+              <div>
+                <Label>Autor</Label>
+                <Select
+                  value={form.author_id}
+                  onValueChange={(v) => setForm({ ...form, author_id: v })}
+                >
+                  <SelectTrigger><SelectValue placeholder="Selecionar autor" /></SelectTrigger>
+                  <SelectContent>
+                    {(usersData?.users ?? []).map((u: any) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.display_name ?? u.id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Button type="submit" disabled={mCreate.isPending || mUpdate.isPending}>
+                {editingId ? "Salvar alterações" : "Salvar rascunho"}
+              </Button>
+              {editingId && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowForm(false);
+                    resetForm();
+                  }}
+                >
+                  Cancelar
+                </Button>
+              )}
+            </div>
           </form>
         )}
 
