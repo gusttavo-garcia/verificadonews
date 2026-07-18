@@ -905,7 +905,7 @@ function UsersSection({ currentUserId }: { currentUserId: string | null }) {
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="editor">Editor</SelectItem>
+                  <SelectItem value="editor">Redator</SelectItem>
                   <SelectItem value="admin">Administrador</SelectItem>
                 </SelectContent>
               </Select>
@@ -948,7 +948,7 @@ function UsersSection({ currentUserId }: { currentUserId: string | null }) {
                         {currentRole === "admin"
                           ? "Administrador"
                           : currentRole === "editor"
-                            ? "Editor"
+                            ? "Redator"
                             : "Leitor"}
                       </span>
                     </div>
@@ -1027,7 +1027,7 @@ function UsersSection({ currentUserId }: { currentUserId: string | null }) {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="reader">Leitor</SelectItem>
-                  <SelectItem value="editor">Editor</SelectItem>
+                  <SelectItem value="editor">Redator</SelectItem>
                   <SelectItem value="admin">Administrador</SelectItem>
                 </SelectContent>
               </Select>
