@@ -219,7 +219,16 @@ function PainelPage() {
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold">Meus artigos</h2>
-          <Button onClick={() => setShowForm((v) => !v)}>
+          <Button
+            onClick={() => {
+              if (showForm) {
+                setShowForm(false);
+                resetForm();
+              } else {
+                setShowForm(true);
+              }
+            }}
+          >
             {showForm ? (
               <>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
@@ -236,10 +245,14 @@ function PainelPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              mCreate.mutate();
+              if (editingId) mUpdate.mutate();
+              else mCreate.mutate();
             }}
             className="mb-10 space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
           >
+            <div className="text-sm font-medium text-muted-foreground">
+              {editingId ? "Editando artigo" : "Novo rascunho"}
+            </div>
             <div>
               <Label htmlFor="title">Título</Label>
               <Input
