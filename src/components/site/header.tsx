@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, LayoutDashboard, LogIn, LogOut, Menu, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { ThemeToggle } from "./theme-toggle";
+import { useAuth, useIsStaff } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
 
 const nav = [
   { to: "/", label: "Início" },
@@ -25,6 +27,8 @@ const institucional = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [instOpen, setInstOpen] = useState(false);
+  const { session, signOut, loading } = useAuth();
+  const isStaff = useIsStaff();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
@@ -70,6 +74,28 @@ export function SiteHeader() {
             )}
           </div>
           <ThemeToggle className="ml-1" />
+          <div className="ml-2 flex items-center gap-2">
+            {loading ? null : session ? (
+              <>
+                {isStaff && (
+                  <Link to="/painel">
+                    <Button size="sm" variant="outline">
+                      <LayoutDashboard className="mr-1.5 h-4 w-4" /> Painel
+                    </Button>
+                  </Link>
+                )}
+                <Button size="sm" variant="ghost" onClick={() => void signOut()}>
+                  <LogOut className="mr-1.5 h-4 w-4" /> Sair
+                </Button>
+              </>
+            ) : (
+              <Link to="/auth">
+                <Button size="sm">
+                  <LogIn className="mr-1.5 h-4 w-4" /> Entrar
+                </Button>
+              </Link>
+            )}
+          </div>
         </nav>
 
         <div className="flex items-center gap-2 lg:hidden">
@@ -97,6 +123,38 @@ export function SiteHeader() {
                 {i.label}
               </Link>
             ))}
+            <div className="mt-2 border-t border-border pt-3">
+              {session ? (
+                <>
+                  {isStaff && (
+                    <Link
+                      to="/painel"
+                      onClick={() => setOpen(false)}
+                      className="block rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-muted"
+                    >
+                      Painel
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      void signOut();
+                    }}
+                    className="block w-full rounded-lg px-3 py-2 text-left text-sm text-foreground/80 hover:bg-muted"
+                  >
+                    Sair
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setOpen(false)}
+                  className="block rounded-lg px-3 py-2 text-sm font-medium text-primary hover:bg-muted"
+                >
+                  Entrar
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       )}

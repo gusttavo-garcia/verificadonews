@@ -23,8 +23,11 @@ import { Route as FakeNewsRouteImport } from './routes/fake-news'
 import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as CategoriasRouteImport } from './routes/categorias'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerificacaoSlugRouteImport } from './routes/verificacao.$slug'
+import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 
 const VideosRoute = VideosRouteImport.update({
   id: '/videos',
@@ -96,6 +99,15 @@ const CategoriasRoute = CategoriasRouteImport.update({
   path: '/categorias',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -106,9 +118,15 @@ const VerificacaoSlugRoute = VerificacaoSlugRouteImport.update({
   path: '/verificacao/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/contato': typeof ContatoRoute
   '/empresas': typeof EmpresasRoute
@@ -123,10 +141,12 @@ export interface FileRoutesByFullPath {
   '/termos': typeof TermosRoute
   '/transparencia': typeof TransparenciaRoute
   '/videos': typeof VideosRoute
+  '/painel': typeof AuthenticatedPainelRoute
   '/verificacao/$slug': typeof VerificacaoSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/contato': typeof ContatoRoute
   '/empresas': typeof EmpresasRoute
@@ -141,11 +161,14 @@ export interface FileRoutesByTo {
   '/termos': typeof TermosRoute
   '/transparencia': typeof TransparenciaRoute
   '/videos': typeof VideosRoute
+  '/painel': typeof AuthenticatedPainelRoute
   '/verificacao/$slug': typeof VerificacaoSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/contato': typeof ContatoRoute
   '/empresas': typeof EmpresasRoute
@@ -160,12 +183,14 @@ export interface FileRoutesById {
   '/termos': typeof TermosRoute
   '/transparencia': typeof TransparenciaRoute
   '/videos': typeof VideosRoute
+  '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/verificacao/$slug': typeof VerificacaoSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/categorias'
     | '/contato'
     | '/empresas'
@@ -180,10 +205,12 @@ export interface FileRouteTypes {
     | '/termos'
     | '/transparencia'
     | '/videos'
+    | '/painel'
     | '/verificacao/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/categorias'
     | '/contato'
     | '/empresas'
@@ -198,10 +225,13 @@ export interface FileRouteTypes {
     | '/termos'
     | '/transparencia'
     | '/videos'
+    | '/painel'
     | '/verificacao/$slug'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
+    | '/auth'
     | '/categorias'
     | '/contato'
     | '/empresas'
@@ -216,11 +246,14 @@ export interface FileRouteTypes {
     | '/termos'
     | '/transparencia'
     | '/videos'
+    | '/_authenticated/painel'
     | '/verificacao/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   CategoriasRoute: typeof CategoriasRoute
   ContatoRoute: typeof ContatoRoute
   EmpresasRoute: typeof EmpresasRoute
@@ -338,6 +371,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -352,11 +399,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerificacaoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/painel': {
+      id: '/_authenticated/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof AuthenticatedPainelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPainelRoute: AuthenticatedPainelRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   CategoriasRoute: CategoriasRoute,
   ContatoRoute: ContatoRoute,
   EmpresasRoute: EmpresasRoute,
