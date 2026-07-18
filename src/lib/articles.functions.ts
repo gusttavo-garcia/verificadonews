@@ -39,7 +39,7 @@ export const listMyArticles = createServerFn({ method: "GET" })
     const admin = await isAdmin(context);
     let query = context.supabase
       .from("articles")
-      .select("id, slug, title, status, category, verdict, author_name, author_id, created_at, updated_at, published_at, views")
+      .select("id, slug, title, status, category, verdict, author_name, author_id, created_at, updated_at, published_at, views, image_url")
       .order("updated_at", { ascending: false });
     if (!admin) query = query.eq("author_id", context.userId);
     const { data, error } = await query;
