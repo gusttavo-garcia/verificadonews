@@ -65,10 +65,18 @@ function PainelPage() {
   const qc = useQueryClient();
   const list = useServerFn(listMyArticles);
   const createFn = useServerFn(createArticle);
+  const updateFn = useServerFn(updateArticle);
   const reviewFn = useServerFn(requestReview);
   const publishFn = useServerFn(publishArticle);
   const unpublishFn = useServerFn(unpublishArticle);
   const deleteFn = useServerFn(deleteArticle);
+  const listUsersFn = useServerFn(listUsers);
+
+  const { data: usersData } = useQuery({
+    queryKey: ["panel-users"],
+    queryFn: () => listUsersFn(),
+    enabled: isStaff && isAdmin,
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["panel-articles"],
@@ -113,6 +121,7 @@ function PainelPage() {
   });
 
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     excerpt: "",
@@ -126,22 +135,70 @@ function PainelPage() {
       | "apuracao",
     type: "noticia" as "noticia" | "golpe" | "empresa" | "site" | "video" | "fake",
     image_url: "",
+    author_id: "" as string,
   });
+
+  const resetForm = () => {
+    setForm({
+      title: "",
+      excerpt: "",
+      body: "",
+      category: categories[0],
+      verdict: "verificado",
+      type: "noticia",
+      image_url: "",
+      author_id: "",
+    });
+    setEditingId(null);
+  };
+
+  const startEdit = (a: any) => {
+    setEditingId(a.id);
+    setForm({
+      title: a.title ?? "",
+      excerpt: a.excerpt ?? "",
+      body: a.body ?? "",
+      category: a.category ?? categories[0],
+      verdict: a.verdict ?? "verificado",
+      type: a.type ?? "noticia",
+      image_url: a.image_url ?? "",
+      author_id: a.author_id ?? "",
+    });
+    setShowForm(true);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const mCreate = useMutation({
     mutationFn: () => createFn({ data: form }),
     onSuccess: () => {
       toast.success("Rascunho criado.");
       setShowForm(false);
-      setForm({
-        title: "",
-        excerpt: "",
-        body: "",
-        category: categories[0],
-        verdict: "verificado",
-        type: "noticia",
-        image_url: "",
-      });
+      resetForm();
+      invalidate();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+
+  const mUpdate = useMutation({
+    mutationFn: () => {
+      if (!editingId) throw new Error("Sem artigo em edição");
+      const payload: any = {
+        id: editingId,
+        title: form.title,
+        excerpt: form.excerpt,
+        body: form.body,
+        category: form.category,
+        verdict: form.verdict,
+        type: form.type,
+        image_url: form.image_url ? form.image_url : null,
+      };
+      if (isAdmin && form.author_id) payload.author_id = form.author_id;
+      return updateFn({ data: payload });
+    },
+    onSuccess: () => {
+      toast.success("Artigo atualizado.");
+      setShowForm(false);
+      resetForm();
       invalidate();
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
