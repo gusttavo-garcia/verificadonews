@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { SiteHeader } from "./header";
 import { SiteFooter } from "./footer";
+import { SearchBar } from "./search-bar";
 
 export function PageShell({ children }: { children: ReactNode }) {
   return (
@@ -16,10 +17,12 @@ export function PageHero({
   title,
   subtitle,
   icon,
+  showSearch = true,
 }: {
   title: ReactNode;
   subtitle?: ReactNode;
   icon?: ReactNode;
+  showSearch?: boolean;
 }) {
   return (
     <section className="border-b border-border bg-[color:var(--surface)]">
@@ -39,6 +42,11 @@ export function PageHero({
             )}
           </div>
         </div>
+        {showSearch && (
+          <div className="mt-8">
+            <SearchBar />
+          </div>
+        )}
       </div>
     </section>
   );
