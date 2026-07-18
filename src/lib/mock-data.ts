@@ -180,6 +180,10 @@ export const articles: Article[] = [
   },
 ];
 
+for (const a of articles) {
+  if (IMG[a.slug]) a.image = IMG[a.slug];
+}
+
 export const categories: Category[] = [
   "Política",
   "Saúde",
