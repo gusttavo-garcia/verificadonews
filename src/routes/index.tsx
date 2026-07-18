@@ -55,7 +55,7 @@ function Index() {
             compartilhar.
           </p>
           <form
-            className="mx-auto mt-10 flex max-w-2xl overflow-hidden rounded-full border border-border bg-background p-1.5 shadow-sm"
+            className="mx-auto mt-10 flex max-w-2xl items-center overflow-hidden rounded-full border border-border bg-background p-1.5 shadow-sm"
             onSubmit={(e) => {
               e.preventDefault();
             }}
