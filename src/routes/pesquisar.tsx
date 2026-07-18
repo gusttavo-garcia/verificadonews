@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { Search, TrendingUp } from "lucide-react";
 import { PageShell } from "@/components/site/page-shell";
 import { ArticleCard } from "@/components/site/article-card";
 import { Button } from "@/components/ui/button";
 import { articles } from "@/lib/mock-data";
+import { getTrendingSearches } from "@/lib/trends.functions";
 
 export const Route = createFileRoute("/pesquisar")({
   component: PesquisarPage,
@@ -18,6 +21,14 @@ export const Route = createFileRoute("/pesquisar")({
 
 function PesquisarPage() {
   const [q, setQ] = useState("");
+  const trendsFn = useServerFn(getTrendingSearches);
+  const { data: trendsData, isLoading: trendsLoading } = useQuery({
+    queryKey: ["google-trends-br"],
+    queryFn: () => trendsFn(),
+    staleTime: 30 * 60 * 1000,
+  });
+  const trends = trendsData?.trends ?? [];
+
   const results = useMemo(() => {
     if (!q.trim()) return [];
     const s = q.toLowerCase();
@@ -56,9 +67,38 @@ function PesquisarPage() {
 
         <div className="mt-10">
           {q.trim() === "" ? (
-            <div className="rounded-2xl border border-dashed border-border bg-[color:var(--surface)] p-10 text-sm text-muted-foreground">
-              <Search className="mx-auto mb-3 h-6 w-6" />
-              Nenhuma pesquisa recente.
+            <div className="rounded-2xl border border-dashed border-border bg-[color:var(--surface)] p-6 text-left">
+              <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
+                <TrendingUp className="h-4 w-4 text-[color:var(--brand-orange)]" />
+                Pesquisas em alta no Google (Brasil)
+              </div>
+              {trendsLoading ? (
+                <p className="text-center text-sm text-muted-foreground">Carregando tendências…</p>
+              ) : trends.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground">Nenhuma pesquisa recente.</p>
+              ) : (
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {trends.map((t, i) => (
+                    <li key={`${t.title}-${i}`}>
+                      <button
+                        type="button"
+                        onClick={() => setQ(t.title)}
+                        className="group flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-background px-4 py-3 text-left text-sm transition hover:border-[color:var(--brand-orange)] hover:bg-[color:var(--brand-orange)]/5"
+                      >
+                        <span className="flex items-center gap-3">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color:var(--brand-orange)]/10 text-xs font-semibold text-[color:var(--brand-orange)]">
+                            {i + 1}
+                          </span>
+                          <span className="line-clamp-1 font-medium text-foreground">{t.title}</span>
+                        </span>
+                        {t.traffic && (
+                          <span className="shrink-0 text-xs text-muted-foreground">{t.traffic}</span>
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           ) : results.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-[color:var(--surface)] p-10 text-sm text-muted-foreground">
