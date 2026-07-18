@@ -348,6 +348,111 @@ function PainelPage() {
           )}
         </div>
       </section>
+      {isAdmin && <UsersSection currentUserId={user?.id ?? null} />}
     </PageShell>
+  );
+}
+
+function UsersSection({ currentUserId }: { currentUserId: string | null }) {
+  const qc = useQueryClient();
+  const list = useServerFn(listUsers);
+  const setRole = useServerFn(setUserRole);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["panel-users"],
+    queryFn: () => list(),
+  });
+
+  const mSetRole = useMutation({
+    mutationFn: (input: { userId: string; role: AppRole }) =>
+      setRole({ data: input }),
+    onSuccess: () => {
+      toast.success("Função atualizada.");
+      qc.invalidateQueries({ queryKey: ["panel-users"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 pb-16">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold">Usuários</h2>
+        <p className="text-sm text-muted-foreground">
+          Promova leitores a editores ou administradores. A mudança é imediata.
+        </p>
+      </div>
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        {isLoading ? (
+          <div className="p-8 text-center text-muted-foreground">Carregando…</div>
+        ) : !data?.users.length ? (
+          <div className="p-8 text-center text-muted-foreground">
+            Nenhum usuário cadastrado.
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3">Nome</th>
+                <th className="px-4 py-3">Cadastrado em</th>
+                <th className="px-4 py-3">Função atual</th>
+                <th className="px-4 py-3 text-right">Alterar função</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.users.map((u: any) => {
+                const currentRole: AppRole = u.roles.includes("admin")
+                  ? "admin"
+                  : u.roles.includes("editor")
+                    ? "editor"
+                    : "reader";
+                const isSelf = u.id === currentUserId;
+                return (
+                  <tr key={u.id} className="border-t border-border">
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      {u.display_name ?? "—"}
+                      {isSelf && (
+                        <span className="ml-2 text-xs text-muted-foreground">(você)</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {new Date(u.created_at).toLocaleDateString("pt-BR")}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium capitalize">
+                        {currentRole === "admin"
+                          ? "Administrador"
+                          : currentRole === "editor"
+                            ? "Editor"
+                            : "Leitor"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end">
+                        <Select
+                          value={currentRole}
+                          onValueChange={(v) =>
+                            mSetRole.mutate({ userId: u.id, role: v as AppRole })
+                          }
+                          disabled={mSetRole.isPending || isSelf}
+                        >
+                          <SelectTrigger className="w-44">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="reader">Leitor</SelectItem>
+                            <SelectItem value="editor">Editor</SelectItem>
+                            <SelectItem value="admin">Administrador</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </section>
   );
 }
