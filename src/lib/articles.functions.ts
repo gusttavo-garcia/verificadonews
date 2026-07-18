@@ -1,0 +1,168 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+const verdictEnum = z.enum(["verificado", "falso", "enganoso", "parcial", "apuracao"]);
+const typeEnum = z.enum(["noticia", "golpe", "empresa", "site", "video", "fake"]);
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 80);
+}
+
+async function isAdmin(ctx: { supabase: any; userId: string }) {
+  const { data } = await ctx.supabase.rpc("has_role", {
+    _user_id: ctx.userId,
+    _role: "admin",
+  });
+  return data === true;
+}
+
+async function isEditor(ctx: { supabase: any; userId: string }) {
+  const { data } = await ctx.supabase.rpc("has_role", {
+    _user_id: ctx.userId,
+    _role: "editor",
+  });
+  return data === true;
+}
+
+// List articles the current user can see in the panel:
+// admins see all, editors see their own.
+export const listMyArticles = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const admin = await isAdmin(context);
+    let query = context.supabase
+      .from("articles")
+      .select("id, slug, title, status, category, verdict, author_name, author_id, created_at, updated_at, published_at, views")
+      .order("updated_at", { ascending: false });
+    if (!admin) query = query.eq("author_id", context.userId);
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    return { articles: data ?? [], isAdmin: admin };
+  });
+
+export const createArticle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        title: z.string().min(3),
+        excerpt: z.string().default(""),
+        body: z.string().default(""),
+        category: z.string().min(1),
+        verdict: verdictEnum,
+        type: typeEnum.default("noticia"),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const admin = await isAdmin(context);
+    const editor = await isEditor(context);
+    if (!admin && !editor) throw new Error("Forbidden");
+
+    const { data: profile } = await context.supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", context.userId)
+      .maybeSingle();
+
+    const baseSlug = slugify(data.title) || `artigo-${Date.now()}`;
+    const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
+
+    const { data: row, error } = await context.supabase
+      .from("articles")
+      .insert({
+        ...data,
+        slug,
+        author_id: context.userId,
+        author_name: profile?.display_name ?? null,
+        status: "draft",
+      })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return { article: row };
+  });
+
+export const updateArticle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        title: z.string().min(3).optional(),
+        excerpt: z.string().optional(),
+        body: z.string().optional(),
+        category: z.string().optional(),
+        verdict: verdictEnum.optional(),
+        type: typeEnum.optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { id, ...updates } = data;
+    const { error } = await context.supabase
+      .from("articles")
+      .update(updates)
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Editor requests review — moves draft -> pending_review
+export const requestReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("articles")
+      .update({ status: "pending_review" })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Admin publishes
+export const publishArticle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    if (!(await isAdmin(context))) throw new Error("Forbidden");
+    const { error } = await context.supabase
+      .from("articles")
+      .update({ status: "published", published_at: new Date().toISOString() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Admin unpublishes
+export const unpublishArticle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    if (!(await isAdmin(context))) throw new Error("Forbidden");
+    const { error } = await context.supabase
+      .from("articles")
+      .update({ status: "draft" })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Admin deletes
+export const deleteArticle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    if (!(await isAdmin(context))) throw new Error("Forbidden");
+    const { error } = await context.supabase.from("articles").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
