@@ -71,23 +71,56 @@ export type Database = {
         }
         Relationships: []
       }
+      comments: {
+        Row: {
+          article_slug: string
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          article_slug: string
+          author_name: string
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          article_slug?: string
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           display_name: string
+          email: string | null
           id: string
+          newsletter_opt_in: boolean
           updated_at: string
         }
         Insert: {
           created_at?: string
           display_name: string
+          email?: string | null
           id: string
+          newsletter_opt_in?: boolean
           updated_at?: string
         }
         Update: {
           created_at?: string
           display_name?: string
+          email?: string | null
           id?: string
+          newsletter_opt_in?: boolean
           updated_at?: string
         }
         Relationships: []
