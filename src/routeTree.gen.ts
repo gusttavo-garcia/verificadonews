@@ -24,9 +24,9 @@ import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as VerificacaoSlugRouteImport } from './routes/verificacao.$slug'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 
 const VideosRoute = VideosRouteImport.update({
@@ -104,6 +104,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SlugRoute = SlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -111,11 +116,6 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VerificacaoSlugRoute = VerificacaoSlugRouteImport.update({
-  id: '/verificacao/$slug',
-  path: '/verificacao/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
@@ -126,6 +126,7 @@ const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
   '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/contato': typeof ContatoRoute
@@ -142,10 +143,10 @@ export interface FileRoutesByFullPath {
   '/transparencia': typeof TransparenciaRoute
   '/videos': typeof VideosRoute
   '/painel': typeof AuthenticatedPainelRoute
-  '/verificacao/$slug': typeof VerificacaoSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
   '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/contato': typeof ContatoRoute
@@ -162,12 +163,12 @@ export interface FileRoutesByTo {
   '/transparencia': typeof TransparenciaRoute
   '/videos': typeof VideosRoute
   '/painel': typeof AuthenticatedPainelRoute
-  '/verificacao/$slug': typeof VerificacaoSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/$slug': typeof SlugRoute
   '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/contato': typeof ContatoRoute
@@ -184,12 +185,12 @@ export interface FileRoutesById {
   '/transparencia': typeof TransparenciaRoute
   '/videos': typeof VideosRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
-  '/verificacao/$slug': typeof VerificacaoSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$slug'
     | '/auth'
     | '/categorias'
     | '/contato'
@@ -206,10 +207,10 @@ export interface FileRouteTypes {
     | '/transparencia'
     | '/videos'
     | '/painel'
-    | '/verificacao/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$slug'
     | '/auth'
     | '/categorias'
     | '/contato'
@@ -226,11 +227,11 @@ export interface FileRouteTypes {
     | '/transparencia'
     | '/videos'
     | '/painel'
-    | '/verificacao/$slug'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/$slug'
     | '/auth'
     | '/categorias'
     | '/contato'
@@ -247,12 +248,12 @@ export interface FileRouteTypes {
     | '/transparencia'
     | '/videos'
     | '/_authenticated/painel'
-    | '/verificacao/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  SlugRoute: typeof SlugRoute
   AuthRoute: typeof AuthRoute
   CategoriasRoute: typeof CategoriasRoute
   ContatoRoute: typeof ContatoRoute
@@ -268,7 +269,6 @@ export interface RootRouteChildren {
   TermosRoute: typeof TermosRoute
   TransparenciaRoute: typeof TransparenciaRoute
   VideosRoute: typeof VideosRoute
-  VerificacaoSlugRoute: typeof VerificacaoSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -378,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$slug': {
+      id: '/$slug'
+      path: '/$slug'
+      fullPath: '/$slug'
+      preLoaderRoute: typeof SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -390,13 +397,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/verificacao/$slug': {
-      id: '/verificacao/$slug'
-      path: '/verificacao/$slug'
-      fullPath: '/verificacao/$slug'
-      preLoaderRoute: typeof VerificacaoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/painel': {
@@ -423,6 +423,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  SlugRoute: SlugRoute,
   AuthRoute: AuthRoute,
   CategoriasRoute: CategoriasRoute,
   ContatoRoute: ContatoRoute,
@@ -438,7 +439,6 @@ const rootRouteChildren: RootRouteChildren = {
   TermosRoute: TermosRoute,
   TransparenciaRoute: TransparenciaRoute,
   VideosRoute: VideosRoute,
-  VerificacaoSlugRoute: VerificacaoSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

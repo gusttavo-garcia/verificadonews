@@ -8,7 +8,7 @@ import { CommentsSection } from "@/components/site/comments-section";
 import { NewsletterOptIn } from "@/components/site/newsletter-optin";
 import { articles, formatDate } from "@/lib/mock-data";
 
-export const Route = createFileRoute("/verificacao/$slug")({
+export const Route = createFileRoute("/$slug")({
   loader: ({ params }) => {
     const article = articles.find((a) => a.slug === params.slug);
     if (!article) throw notFound();
