@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { Search, TrendingUp } from "lucide-react";
 import { PageShell } from "@/components/site/page-shell";
 import { ArticleCard } from "@/components/site/article-card";
@@ -10,6 +12,9 @@ import { articles } from "@/lib/mock-data";
 import { getTrendingSearches } from "@/lib/trends.functions";
 
 export const Route = createFileRoute("/pesquisar")({
+  validateSearch: zodValidator(
+    z.object({ q: fallback(z.string(), "").default("") }),
+  ),
   component: PesquisarPage,
   head: () => ({
     meta: [
@@ -20,7 +25,8 @@ export const Route = createFileRoute("/pesquisar")({
 });
 
 function PesquisarPage() {
-  const [q, setQ] = useState("");
+  const { q: initialQ } = Route.useSearch();
+  const [q, setQ] = useState(initialQ);
   const trendsFn = useServerFn(getTrendingSearches);
   const { data: trendsData, isLoading: trendsLoading } = useQuery({
     queryKey: ["google-trends-br"],
