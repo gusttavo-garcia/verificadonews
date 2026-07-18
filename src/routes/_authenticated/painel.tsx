@@ -27,8 +27,14 @@ import {
   unpublishArticle,
   updateArticle,
 } from "@/lib/articles.functions";
-import { listUsers, setUserRole } from "@/lib/users.functions";
-import { createUser } from "@/lib/users.functions";
+import { listUsers, setUserRole, createUser, updateUser } from "@/lib/users.functions";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { listNewsletterSubscribers } from "@/lib/comments.functions";
 import type { AppRole } from "@/hooks/use-auth";
 
