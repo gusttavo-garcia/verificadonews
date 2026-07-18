@@ -333,6 +333,15 @@ function PainelPage() {
           </div>
         </div>
       </section>
+      {isAdmin && (
+        <PendingReviewSection
+          articles={articles}
+          onPublish={(id) => mPublish.mutate(id)}
+          onUnpublish={(id) => mUnpublish.mutate(id)}
+          publishPending={mPublish.isPending}
+          unpublishPending={mUnpublish.isPending}
+        />
+      )}
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold">Meus artigos</h2>
