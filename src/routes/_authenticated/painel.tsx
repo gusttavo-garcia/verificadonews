@@ -560,22 +560,12 @@ function NewsletterSection() {
 function UsersSection({ currentUserId }: { currentUserId: string | null }) {
   const qc = useQueryClient();
   const list = useServerFn(listUsers);
-  const setRole = useServerFn(setUserRole);
   const createFn = useServerFn(createUser);
+  const updateFn = useServerFn(updateUser);
 
   const { data, isLoading } = useQuery({
     queryKey: ["panel-users"],
     queryFn: () => list(),
-  });
-
-  const mSetRole = useMutation({
-    mutationFn: (input: { userId: string; role: AppRole }) =>
-      setRole({ data: input }),
-    onSuccess: () => {
-      toast.success("Função atualizada.");
-      qc.invalidateQueries({ queryKey: ["panel-users"] });
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
   });
 
   const [showForm, setShowForm] = useState(false);
@@ -597,13 +587,61 @@ function UsersSection({ currentUserId }: { currentUserId: string | null }) {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
   });
 
+  const [editUser, setEditUser] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({
+    displayName: "",
+    email: "",
+    password: "",
+    role: "reader" as AppRole,
+  });
+
+  const openEdit = (u: any) => {
+    const currentRole: AppRole = u.roles.includes("admin")
+      ? "admin"
+      : u.roles.includes("editor")
+        ? "editor"
+        : "reader";
+    setEditForm({
+      displayName: u.display_name ?? "",
+      email: u.email ?? "",
+      password: "",
+      role: currentRole,
+    });
+    setEditUser(u);
+  };
+
+  const mUpdate = useMutation({
+    mutationFn: () => {
+      if (!editUser) throw new Error("Sem usuário");
+      const payload: any = { userId: editUser.id };
+      if (editForm.displayName && editForm.displayName !== editUser.display_name)
+        payload.displayName = editForm.displayName;
+      if (editForm.email && editForm.email !== editUser.email)
+        payload.email = editForm.email;
+      if (editForm.password) payload.password = editForm.password;
+      const currentRole: AppRole = editUser.roles.includes("admin")
+        ? "admin"
+        : editUser.roles.includes("editor")
+          ? "editor"
+          : "reader";
+      if (editForm.role !== currentRole) payload.role = editForm.role;
+      return updateFn({ data: payload });
+    },
+    onSuccess: () => {
+      toast.success("Usuário atualizado.");
+      setEditUser(null);
+      qc.invalidateQueries({ queryKey: ["panel-users"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+
   return (
     <section className="mx-auto max-w-6xl px-4 pb-16">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">Usuários</h2>
           <p className="text-sm text-muted-foreground">
-            Promova leitores a editores ou administradores. A mudança é imediata.
+            Edite nome, e-mail, senha ou função dos usuários cadastrados.
           </p>
         </div>
         <Button onClick={() => setShowForm((v) => !v)}>
@@ -687,70 +725,124 @@ function UsersSection({ currentUserId }: { currentUserId: string | null }) {
             Nenhum usuário cadastrado.
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3">Nome</th>
-                <th className="px-4 py-3">Cadastrado em</th>
-                <th className="px-4 py-3">Função atual</th>
-                <th className="px-4 py-3 text-right">Alterar função</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.users.map((u: any) => {
-                const currentRole: AppRole = u.roles.includes("admin")
-                  ? "admin"
-                  : u.roles.includes("editor")
-                    ? "editor"
-                    : "reader";
-                const isSelf = u.id === currentUserId;
-                return (
-                  <tr key={u.id} className="border-t border-border">
-                    <td className="px-4 py-3 font-medium text-foreground">
-                      {u.display_name ?? "—"}
+          <ul className="divide-y divide-border">
+            {data.users.map((u: any) => {
+              const currentRole: AppRole = u.roles.includes("admin")
+                ? "admin"
+                : u.roles.includes("editor")
+                  ? "editor"
+                  : "reader";
+              const isSelf = u.id === currentUserId;
+              const stats = u.stats ?? { published: 0, pending: 0, draft: 0 };
+              return (
+                <li key={u.id} className="flex flex-wrap items-center justify-between gap-4 p-5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-xl font-semibold text-foreground">
+                        {u.display_name ?? "—"}
+                      </h3>
                       {isSelf && (
-                        <span className="ml-2 text-xs text-muted-foreground">(você)</span>
+                        <span className="text-xs text-muted-foreground">(você)</span>
                       )}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {new Date(u.created_at).toLocaleDateString("pt-BR")}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium capitalize">
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
                         {currentRole === "admin"
                           ? "Administrador"
                           : currentRole === "editor"
                             ? "Editor"
                             : "Leitor"}
                       </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end">
-                        <Select
-                          value={currentRole}
-                          onValueChange={(v) =>
-                            mSetRole.mutate({ userId: u.id, role: v as AppRole })
-                          }
-                          disabled={mSetRole.isPending || isSelf}
-                        >
-                          <SelectTrigger className="w-44">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="reader">Leitor</SelectItem>
-                            <SelectItem value="editor">Editor</SelectItem>
-                            <SelectItem value="admin">Administrador</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
+                    {u.email && (
+                      <div className="text-sm text-muted-foreground">{u.email}</div>
+                    )}
+                    <div className="mt-2 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                      <span>
+                        <strong className="text-foreground">{stats.published}</strong> publicados
+                      </span>
+                      <span>
+                        <strong className="text-foreground">{stats.pending}</strong> pendentes
+                      </span>
+                      <span>
+                        <strong className="text-foreground">{stats.draft}</strong> em rascunho
+                      </span>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => openEdit(u)}>
+                    <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
+
+      <Dialog open={!!editUser} onOpenChange={(o) => !o && setEditUser(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar usuário</DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              mUpdate.mutate();
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <Label htmlFor="edit-name">Nome</Label>
+              <Input
+                id="edit-name"
+                value={editForm.displayName}
+                onChange={(e) => setEditForm({ ...editForm, displayName: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-email">E-mail</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-password">Nova senha</Label>
+              <Input
+                id="edit-password"
+                type="password"
+                placeholder="Deixe em branco para manter"
+                value={editForm.password}
+                onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                minLength={8}
+              />
+            </div>
+            <div>
+              <Label>Função</Label>
+              <Select
+                value={editForm.role}
+                onValueChange={(v) => setEditForm({ ...editForm, role: v as AppRole })}
+                disabled={editUser?.id === currentUserId}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="reader">Leitor</SelectItem>
+                  <SelectItem value="editor">Editor</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setEditUser(null)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={mUpdate.isPending}>
+                {mUpdate.isPending ? "Salvando…" : "Salvar"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
