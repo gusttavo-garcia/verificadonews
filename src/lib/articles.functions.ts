@@ -39,7 +39,7 @@ export const listMyArticles = createServerFn({ method: "GET" })
     const admin = await isAdmin(context);
     let query = context.supabase
       .from("articles")
-      .select("id, slug, title, status, category, verdict, author_name, author_id, created_at, updated_at, published_at, views, image_url")
+      .select("id, slug, title, excerpt, body, type, status, category, verdict, author_name, author_id, created_at, updated_at, published_at, views, image_url")
       .order("updated_at", { ascending: false });
     if (!admin) query = query.eq("author_id", context.userId);
     const { data, error } = await query;
@@ -104,14 +104,27 @@ export const updateArticle = createServerFn({ method: "POST" })
         verdict: verdictEnum.optional(),
         type: typeEnum.optional(),
         image_url: z.string().url().nullable().optional(),
+        author_id: z.string().uuid().optional(),
       })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { id, ...updates } = data;
+    const { id, author_id, ...updates } = data;
+    const admin = await isAdmin(context);
+    const finalUpdates: Record<string, unknown> = { ...updates };
+    if (author_id !== undefined) {
+      if (!admin) throw new Error("Apenas administradores podem mudar a autoria.");
+      const { data: prof } = await context.supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", author_id)
+        .maybeSingle();
+      finalUpdates.author_id = author_id;
+      finalUpdates.author_name = prof?.display_name ?? null;
+    }
     const { error } = await context.supabase
       .from("articles")
-      .update(updates)
+      .update(finalUpdates)
       .eq("id", id);
     if (error) throw new Error(error.message);
     return { ok: true };
