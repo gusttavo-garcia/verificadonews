@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon } from "lucide-react";
+import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon, Pencil } from "lucide-react";
 import { PageShell, PageHero } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ import {
   publishArticle,
   requestReview,
   unpublishArticle,
+  updateArticle,
 } from "@/lib/articles.functions";
 import { listUsers, setUserRole } from "@/lib/users.functions";
 import { createUser } from "@/lib/users.functions";
