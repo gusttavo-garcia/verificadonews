@@ -26,6 +26,8 @@ import {
   requestReview,
   unpublishArticle,
 } from "@/lib/articles.functions";
+import { listUsers, setUserRole } from "@/lib/users.functions";
+import type { AppRole } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/painel")({
   component: PainelPage,
@@ -46,7 +48,7 @@ const statusStyles: Record<string, string> = {
 
 function PainelPage() {
   const navigate = useNavigate();
-  const { roles, displayName, loading } = useAuth();
+  const { roles, displayName, loading, user } = useAuth();
   const isStaff = useIsStaff();
   const isAdmin = roles.includes("admin");
 
