@@ -3,6 +3,9 @@ import { Calendar, Eye, Share2, Link2 } from "lucide-react";
 import { useState } from "react";
 import { PageShell } from "@/components/site/page-shell";
 import { VerdictBadge } from "@/components/site/verdict-badge";
+import { RelatedArticles } from "@/components/site/related-articles";
+import { CommentsSection } from "@/components/site/comments-section";
+import { NewsletterOptIn } from "@/components/site/newsletter-optin";
 import { articles, formatDate } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/verificacao/$slug")({
@@ -158,6 +161,10 @@ function VerificacaoPage() {
             <li>Revisão por um editor sênior antes da publicação.</li>
           </ul>
         </div>
+
+        <RelatedArticles current={article} />
+        <NewsletterOptIn />
+        <CommentsSection slug={article.slug} />
       </article>
     </PageShell>
   );
