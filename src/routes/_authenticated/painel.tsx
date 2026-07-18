@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon, Pencil } from "lucide-react";
-import { PageShell, PageHero } from "@/components/site/page-shell";
+import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -212,16 +212,53 @@ function PainelPage() {
 
   if (!isStaff) return null;
 
+  const articles = data?.articles ?? [];
+  const stats = {
+    published: articles.filter((a: any) => a.status === "published").length,
+    pending: articles.filter((a: any) => a.status === "pending_review").length,
+    draft: articles.filter((a: any) => a.status === "draft").length,
+  };
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const firstName = (displayName ?? user?.email ?? "").split(" ")[0] || "";
+
   return (
     <PageShell>
-      <PageHero
-        title={`Painel — ${isAdmin ? "Administrador" : "Editor"}`}
-        subtitle={
-          isAdmin
-            ? "Publique, despublique ou remova artigos enviados pelos editores."
-            : `Olá${displayName ? `, ${displayName}` : ""}. Crie rascunhos e envie para revisão dos administradores.`
-        }
-      />
+      <section className="border-b border-border bg-[color:var(--surface)]">
+        <div className="mx-auto max-w-6xl px-4 py-10">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+            {greeting}
+            {firstName ? `, ${firstName}` : ""}
+          </h1>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-border bg-card p-4">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                Publicados
+              </div>
+              <div className="mt-1 text-2xl font-semibold text-[color:var(--brand-teal)]">
+                {stats.published}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                Pendentes
+              </div>
+              <div className="mt-1 text-2xl font-semibold text-[oklch(0.55_0.15_60)]">
+                {stats.pending}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                Rascunhos
+              </div>
+              <div className="mt-1 text-2xl font-semibold text-foreground">
+                {stats.draft}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold">Meus artigos</h2>
