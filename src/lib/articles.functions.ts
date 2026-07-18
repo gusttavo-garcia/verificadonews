@@ -41,7 +41,12 @@ export const listMyArticles = createServerFn({ method: "GET" })
       .from("articles")
       .select("id, slug, title, excerpt, body, type, status, category, verdict, author_name, author_id, created_at, updated_at, published_at, views, image_url")
       .order("updated_at", { ascending: false });
-    if (!admin) query = query.eq("author_id", context.userId);
+    if (admin) {
+      // Admins veem tudo, exceto rascunhos de outros autores
+      query = query.or(`status.neq.draft,author_id.eq.${context.userId}`);
+    } else {
+      query = query.eq("author_id", context.userId);
+    }
     const { data, error } = await query;
     if (error) throw new Error(error.message);
     return { articles: data ?? [], isAdmin: admin };
