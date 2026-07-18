@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 export function SearchBar({
   defaultValue = "",
   className = "",
+  align = "center",
 }: {
   defaultValue?: string;
   className?: string;
+  align?: "center" | "left";
 }) {
   const [q, setQ] = useState(defaultValue);
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ export function SearchBar({
         e.preventDefault();
         navigate({ to: "/pesquisar", search: { q } as never });
       }}
-      className={`mx-auto flex w-full max-w-2xl items-center overflow-hidden rounded-full border border-border bg-background p-1.5 shadow-sm ${className}`}
+      className={`${align === "center" ? "mx-auto" : ""} flex w-full max-w-2xl items-center overflow-hidden rounded-full border border-border bg-background py-1.5 pl-1.5 pr-1 shadow-sm ${className}`}
     >
       <div className="flex flex-1 items-center gap-3 px-4">
         <Search className="h-5 w-5 text-muted-foreground" />
