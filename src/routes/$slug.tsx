@@ -60,17 +60,6 @@ function VerificacaoPage() {
   return (
     <PageShell>
       <article className="mx-auto max-w-3xl px-4 py-14">
-        {article.image && (
-          <figure className="mb-6 overflow-hidden rounded-2xl border border-border bg-muted">
-            <img
-              src={article.image}
-              alt={article.title}
-              width={1024}
-              height={576}
-              className="aspect-[16/9] w-full object-cover"
-            />
-          </figure>
-        )}
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <VerdictBadge verdict={article.verdict} />
           <span className="rounded-full bg-[color:var(--brand-yellow)]/50 px-2.5 py-0.5 text-xs font-medium text-[oklch(0.35_0.08_60)]">
@@ -80,6 +69,17 @@ function VerificacaoPage() {
         <h1 className="text-3xl font-bold leading-tight tracking-tight text-foreground md:text-4xl">
           {article.title}
         </h1>
+        {article.image && (
+          <figure className="mt-6 overflow-hidden rounded-2xl border border-border bg-muted">
+            <img
+              src={article.image}
+              alt={article.title}
+              width={1024}
+              height={576}
+              className="aspect-[16/9] w-full object-cover"
+            />
+          </figure>
+        )}
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
           {article.excerpt}
         </p>
