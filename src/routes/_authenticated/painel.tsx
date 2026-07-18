@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon } from "lucide-react";
+import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon, Pencil } from "lucide-react";
 import { PageShell, PageHero } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ import {
   publishArticle,
   requestReview,
   unpublishArticle,
+  updateArticle,
 } from "@/lib/articles.functions";
 import { listUsers, setUserRole } from "@/lib/users.functions";
 import { createUser } from "@/lib/users.functions";
@@ -64,10 +65,18 @@ function PainelPage() {
   const qc = useQueryClient();
   const list = useServerFn(listMyArticles);
   const createFn = useServerFn(createArticle);
+  const updateFn = useServerFn(updateArticle);
   const reviewFn = useServerFn(requestReview);
   const publishFn = useServerFn(publishArticle);
   const unpublishFn = useServerFn(unpublishArticle);
   const deleteFn = useServerFn(deleteArticle);
+  const listUsersFn = useServerFn(listUsers);
+
+  const { data: usersData } = useQuery({
+    queryKey: ["panel-users"],
+    queryFn: () => listUsersFn(),
+    enabled: isStaff && isAdmin,
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["panel-articles"],
@@ -112,6 +121,7 @@ function PainelPage() {
   });
 
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     excerpt: "",
@@ -125,22 +135,70 @@ function PainelPage() {
       | "apuracao",
     type: "noticia" as "noticia" | "golpe" | "empresa" | "site" | "video" | "fake",
     image_url: "",
+    author_id: "" as string,
   });
+
+  const resetForm = () => {
+    setForm({
+      title: "",
+      excerpt: "",
+      body: "",
+      category: categories[0],
+      verdict: "verificado",
+      type: "noticia",
+      image_url: "",
+      author_id: "",
+    });
+    setEditingId(null);
+  };
+
+  const startEdit = (a: any) => {
+    setEditingId(a.id);
+    setForm({
+      title: a.title ?? "",
+      excerpt: a.excerpt ?? "",
+      body: a.body ?? "",
+      category: a.category ?? categories[0],
+      verdict: a.verdict ?? "verificado",
+      type: a.type ?? "noticia",
+      image_url: a.image_url ?? "",
+      author_id: a.author_id ?? "",
+    });
+    setShowForm(true);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const mCreate = useMutation({
     mutationFn: () => createFn({ data: form }),
     onSuccess: () => {
       toast.success("Rascunho criado.");
       setShowForm(false);
-      setForm({
-        title: "",
-        excerpt: "",
-        body: "",
-        category: categories[0],
-        verdict: "verificado",
-        type: "noticia",
-        image_url: "",
-      });
+      resetForm();
+      invalidate();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+
+  const mUpdate = useMutation({
+    mutationFn: () => {
+      if (!editingId) throw new Error("Sem artigo em edição");
+      const payload: any = {
+        id: editingId,
+        title: form.title,
+        excerpt: form.excerpt,
+        body: form.body,
+        category: form.category,
+        verdict: form.verdict,
+        type: form.type,
+        image_url: form.image_url ? form.image_url : null,
+      };
+      if (isAdmin && form.author_id) payload.author_id = form.author_id;
+      return updateFn({ data: payload });
+    },
+    onSuccess: () => {
+      toast.success("Artigo atualizado.");
+      setShowForm(false);
+      resetForm();
       invalidate();
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
@@ -161,7 +219,16 @@ function PainelPage() {
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold">Meus artigos</h2>
-          <Button onClick={() => setShowForm((v) => !v)}>
+          <Button
+            onClick={() => {
+              if (showForm) {
+                setShowForm(false);
+                resetForm();
+              } else {
+                setShowForm(true);
+              }
+            }}
+          >
             {showForm ? (
               <>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
@@ -178,10 +245,14 @@ function PainelPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              mCreate.mutate();
+              if (editingId) mUpdate.mutate();
+              else mCreate.mutate();
             }}
             className="mb-10 space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
           >
+            <div className="text-sm font-medium text-muted-foreground">
+              {editingId ? "Editando artigo" : "Novo rascunho"}
+            </div>
             <div>
               <Label htmlFor="title">Título</Label>
               <Input
@@ -274,9 +345,41 @@ function PainelPage() {
                 </Select>
               </div>
             </div>
-            <Button type="submit" disabled={mCreate.isPending}>
-              Salvar rascunho
-            </Button>
+            {isAdmin && editingId && (
+              <div>
+                <Label>Autor</Label>
+                <Select
+                  value={form.author_id}
+                  onValueChange={(v) => setForm({ ...form, author_id: v })}
+                >
+                  <SelectTrigger><SelectValue placeholder="Selecionar autor" /></SelectTrigger>
+                  <SelectContent>
+                    {(usersData?.users ?? []).map((u: any) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.display_name ?? u.id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Button type="submit" disabled={mCreate.isPending || mUpdate.isPending}>
+                {editingId ? "Salvar alterações" : "Salvar rascunho"}
+              </Button>
+              {editingId && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowForm(false);
+                    resetForm();
+                  }}
+                >
+                  Cancelar
+                </Button>
+              )}
+            </div>
           </form>
         )}
 
@@ -332,6 +435,15 @@ function PainelPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
+                        {isAdmin && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => startEdit(a)}
+                          >
+                            <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
+                          </Button>
+                        )}
                         {a.status === "draft" && (
                           <Button
                             size="sm"
