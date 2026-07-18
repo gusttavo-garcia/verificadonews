@@ -60,7 +60,8 @@ export function SiteHeader() {
               Institucional <ChevronDown className="h-4 w-4" />
             </button>
             {instOpen && (
-              <div className="absolute right-0 top-full mt-1 w-52 rounded-xl border border-border bg-popover p-2 shadow-lg">
+              <div className="absolute right-0 top-full w-52 pt-2">
+                <div className="rounded-xl border border-border bg-popover p-2 shadow-lg">
                 {institucional.map((i) => (
                   <Link
                     key={i.to}
@@ -70,6 +71,7 @@ export function SiteHeader() {
                     {i.label}
                   </Link>
                 ))}
+                </div>
               </div>
             )}
           </div>
