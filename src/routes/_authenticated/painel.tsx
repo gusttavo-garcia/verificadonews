@@ -124,6 +124,7 @@ function PainelPage() {
       | "parcial"
       | "apuracao",
     type: "noticia" as "noticia" | "golpe" | "empresa" | "site" | "video" | "fake",
+    image_url: "",
   });
 
   const mCreate = useMutation({
@@ -138,6 +139,7 @@ function PainelPage() {
         category: categories[0],
         verdict: "verificado",
         type: "noticia",
+        image_url: "",
       });
       invalidate();
     },
