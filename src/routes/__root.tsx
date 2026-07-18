@@ -86,14 +86,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Descubra se uma notícia, vídeo, imagem, empresa ou golpe é verdadeiro antes de compartilhar. Plataforma brasileira de checagem de fatos.",
       },
       { name: "author", content: "Verificado News" },
-      { property: "og:title", content: "Verificado News — Checagem de fatos" },
+      { property: "og:title", content: "Verificado News — Checagem de fatos e combate à desinformação" },
       {
         property: "og:description",
         content:
-          "Verifique notícias, golpes, empresas e sites antes de acreditar ou compartilhar.",
+          "Descubra se uma notícia, vídeo, imagem, empresa ou golpe é verdadeiro antes de compartilhar. Plataforma brasileira de checagem de fatos.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Verificado News — Checagem de fatos e combate à desinformação" },
+      { name: "twitter:description", content: "Descubra se uma notícia, vídeo, imagem, empresa ou golpe é verdadeiro antes de compartilhar. Plataforma brasileira de checagem de fatos." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/444aa31b-ca68-49dd-b5fa-bf081dc3da75/id-preview-06e9d33b--132186fe-df18-4a0b-9dfe-b6a26e426304.lovable.app-1784379892699.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/444aa31b-ca68-49dd-b5fa-bf081dc3da75/id-preview-06e9d33b--132186fe-df18-4a0b-9dfe-b6a26e426304.lovable.app-1784379892699.png" },
     ],
     links: [
       {
