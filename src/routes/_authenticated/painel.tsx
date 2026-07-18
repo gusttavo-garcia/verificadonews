@@ -553,7 +553,7 @@ function PainelPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
-                        {isAdmin && (
+                        {(isAdmin || a.status !== "published") && (
                           <Button
                             size="sm"
                             variant="outline"
