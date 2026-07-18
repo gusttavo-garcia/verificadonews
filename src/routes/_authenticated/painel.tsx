@@ -28,6 +28,7 @@ import {
 } from "@/lib/articles.functions";
 import { listUsers, setUserRole } from "@/lib/users.functions";
 import { createUser } from "@/lib/users.functions";
+import { listNewsletterSubscribers } from "@/lib/comments.functions";
 import type { AppRole } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/painel")({
@@ -350,7 +351,59 @@ function PainelPage() {
         </div>
       </section>
       {isAdmin && <UsersSection currentUserId={user?.id ?? null} />}
+      {isAdmin && <NewsletterSection />}
     </PageShell>
+  );
+}
+
+function NewsletterSection() {
+  const listFn = useServerFn(listNewsletterSubscribers);
+  const { data, isLoading } = useQuery({
+    queryKey: ["newsletter-subscribers"],
+    queryFn: () => listFn(),
+  });
+  const subs = data?.subscribers ?? [];
+  return (
+    <section className="mx-auto max-w-6xl px-4 pb-16">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold">Inscritos na newsletter</h2>
+        <p className="text-sm text-muted-foreground">
+          Usuários que aceitaram receber notícias por email.
+        </p>
+      </div>
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        {isLoading ? (
+          <div className="p-8 text-center text-muted-foreground">Carregando…</div>
+        ) : subs.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground">
+            Nenhum usuário inscrito ainda.
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3">Nome</th>
+                <th className="px-4 py-3">E-mail</th>
+                <th className="px-4 py-3">Inscrito em</th>
+              </tr>
+            </thead>
+            <tbody>
+              {subs.map((s: any) => (
+                <tr key={s.id} className="border-t border-border">
+                  <td className="px-4 py-3 font-medium text-foreground">
+                    {s.display_name ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{s.email ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {new Date(s.created_at).toLocaleDateString("pt-BR")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </section>
   );
 }
 
