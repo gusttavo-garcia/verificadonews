@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { ThemeToggle } from "./theme-toggle";
 
 const nav = [
   { to: "/", label: "Início" },
@@ -68,15 +69,19 @@ export function SiteHeader() {
               </div>
             )}
           </div>
+          <ThemeToggle className="ml-1" />
         </nav>
 
-        <button
-          className="rounded-md p-2 lg:hidden"
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Menu"
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <ThemeToggle />
+          <button
+            className="rounded-md p-2"
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Menu"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {open && (
