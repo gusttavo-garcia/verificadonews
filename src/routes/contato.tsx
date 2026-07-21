@@ -57,7 +57,7 @@ function ContatoPage() {
           <h2 className="text-lg font-bold">Informações de Contato</h2>
           {[
             { icon: Mail, title: "E-mail", body: (<><p>contato@verificadonews.com.br</p><p className="text-xs text-muted-foreground">Para denúncias: denuncias@verificadonews.com.br</p></>) },
-            { icon: Phone, title: "WhatsApp (apenas mensagens)", body: (<><p>+55 (11) 99999-XXXX</p><p className="text-xs text-muted-foreground">Envie links, fotos ou vídeos suspeitos.</p></>) },
+            { icon: Phone, title: "WhatsApp (apenas mensagens)", body: (<><p>+55 (14) 99752-3721</p><p className="text-xs text-muted-foreground">Envie links, fotos ou vídeos suspeitos.</p></>) },
             { icon: Clock, title: "Horário de Atendimento", body: (<><p>Segunda a Sexta: 09h às 18h</p><p className="text-xs text-muted-foreground">Monitoramento de urgências funciona 24/7.</p></>) },
           ].map((c) => (
             <div key={c.title} className="flex gap-4 rounded-xl border border-border bg-card p-4">
