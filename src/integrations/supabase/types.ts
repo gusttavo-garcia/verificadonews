@@ -151,7 +151,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      comments_public: {
+        Row: {
+          article_slug: string | null
+          author_name: string | null
+          content: string | null
+          created_at: string | null
+          id: string | null
+          is_own: boolean | null
+        }
+        Insert: {
+          article_slug?: string | null
+          author_name?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_own?: never
+        }
+        Update: {
+          article_slug?: string | null
+          author_name?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_own?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
