@@ -151,33 +151,7 @@ export type Database = {
       }
     }
     Views: {
-      comments_public: {
-        Row: {
-          article_slug: string | null
-          author_name: string | null
-          content: string | null
-          created_at: string | null
-          id: string | null
-          is_own: boolean | null
-        }
-        Insert: {
-          article_slug?: string | null
-          author_name?: string | null
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_own?: never
-        }
-        Update: {
-          article_slug?: string | null
-          author_name?: string | null
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_own?: never
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       has_role: {
@@ -186,6 +160,17 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      list_comments_public: {
+        Args: { _slug: string }
+        Returns: {
+          article_slug: string
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          is_own: boolean
+        }[]
       }
     }
     Enums: {
