@@ -23,10 +23,7 @@ export const listComments = createServerFn({ method: "GET" })
       },
     });
     const { data: rows, error } = await supa
-      .from("comments")
-      .select("id, author_name, content, created_at, user_id")
-      .eq("article_slug", data.slug)
-      .order("created_at", { ascending: false });
+      .rpc("list_comments_public", { _slug: data.slug });
     if (error) throw new Error(error.message);
     return { comments: rows ?? [] };
   });
