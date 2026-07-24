@@ -103,7 +103,7 @@ export function CommentsSection({ slug }: { slug: string }) {
           </p>
         ) : (
           comments.map((c: any) => {
-            const canDelete = isAdmin || c.user_id === session?.user?.id;
+            const canDelete = isAdmin || c.is_own === true;
             return (
               <div
                 key={c.id}
