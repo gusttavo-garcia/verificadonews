@@ -161,6 +161,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_comments_public: {
+        Args: { _slug: string }
+        Returns: {
+          article_slug: string
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          is_own: boolean
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "editor" | "reader"
