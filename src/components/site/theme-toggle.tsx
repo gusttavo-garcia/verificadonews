@@ -7,7 +7,7 @@ type Theme = "light" | "dark";
 function getInitial(): Theme {
   if (typeof window === "undefined") return "light";
   const stored = localStorage.getItem("theme") as Theme | null;
-  if (stored === "light" || stored === "dark") return stored;
+  if (stored === "dark") return "dark";
   return "light";
 }
 
@@ -19,12 +19,6 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     const initial = getInitial();
     setTheme(initial);
     setMounted(true);
-    if (!localStorage.getItem("theme")) {
-      toast("Você pode escolher o tema", {
-        description: "Clique no ícone de lua/sol no menu para alternar entre claro e escuro.",
-        duration: 5000,
-      });
-    }
   }, []);
 
   useEffect(() => {
