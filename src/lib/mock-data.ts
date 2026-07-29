@@ -43,9 +43,33 @@ const IMG: Record<string, string> = {
   "premio-atriz-brasileira": "/__l5e/assets-v1/cbbba1f3-d2b9-4595-9477-97d7a49b4f6f/premio-atriz.jpg",
   "decreto-governo-economia": "/__l5e/assets-v1/23aec2b3-b95c-4f54-b618-f1525c51d307/decreto-governo.jpg",
   "app-emprestimo-fantasma": "/__l5e/assets-v1/270916e4-8532-4d46-b5db-b79301588e58/app-emprestimo.jpg",
+  "ia-clona-voz-golpe": "/__l5e/assets-v1/270916e4-8532-4d46-b5db-b79301588e58/app-emprestimo.jpg",
+  "proibicao-energia-solar": "/__l5e/assets-v1/23aec2b3-b95c-4f54-b618-f1525c51d307/decreto-governo.jpg",
 };
 
 export const articles: Article[] = [
+  {
+    slug: "ia-clona-voz-golpe",
+    title: "Criminosos usam Inteligência Artificial para clonar voz de familiares em ligações",
+    excerpt:
+      "Novo golpe utiliza pequenas amostras de áudio retiradas de redes sociais para sintetizar a voz com perfeição e simular pedido de socorro financeiro. Saiba como se proteger.",
+    verdict: "verificado",
+    category: "Tecnologia",
+    date: getIsoDateDaysAgo(0),
+    views: 4890,
+    type: "golpe",
+  },
+  {
+    slug: "proibicao-energia-solar",
+    title: "Governo vai proibir a instalação de painéis de energia solar em residências?",
+    excerpt:
+      "Vídeo viralizado em redes sociais afirma falsamente que novo decreto proíbe a geração de energia solar própria e prevê multas pesadas. Consultamos a ANEEL e a legislação vigente.",
+    verdict: "falso",
+    category: "Meio Ambiente",
+    date: getIsoDateDaysAgo(0),
+    views: 5210,
+    type: "fake",
+  },
   {
     slug: "reforma-tributaria-2026",
     title: "Reforma Tributária 2026: análise das mudanças fiscais",
