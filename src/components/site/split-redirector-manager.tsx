@@ -90,16 +90,22 @@ export function SplitRedirectorManager() {
       gam_network_code: "9757133296554737",
       auto_ecpm_balancing: true,
       routes: [
-        { path: "/golpes", weight: 50, ecpm: 12.50, gam_ad_unit_id: "ad_golpes_top" },
-        { path: "/fake-news", weight: 50, ecpm: 8.20, gam_ad_unit_id: "ad_fake_top" },
+        { name: "Variante Golpes", slug: "golpes-a", path: "/golpes", weight: 50, ecpm: 12.50, gam_ad_unit_id: "ad_golpes_top" },
+        { name: "Variante Fake News", slug: "fake-news-b", path: "/fake-news", weight: 50, ecpm: 8.20, gam_ad_unit_id: "ad_fake_top" },
       ],
     });
   };
 
-  const handleCopyLink = (slug: string) => {
+  const handleCopyFolderLink = (slug: string) => {
     const url = `${window.location.origin}/r/${slug}`;
     navigator.clipboard.writeText(url);
-    toast.success("Link do redirecionador probabilístico copiado!");
+    toast.success("Link probabilístico da pasta copiado!");
+  };
+
+  const handleCopyRouteLink = (folderSlug: string, routeSlug: string) => {
+    const url = `${window.location.origin}/r/${folderSlug}/${routeSlug}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Link direto da rota copiado!");
   };
 
   const folders = data?.folders ?? [];
@@ -246,10 +252,42 @@ export function SplitRedirectorManager() {
                 key={idx}
                 className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-12 sm:items-center"
               >
-                <div className="sm:col-span-4">
-                  <Label className="text-xs">Caminho da Rota (URL)</Label>
+                <div className="sm:col-span-3">
+                  <Label className="text-xs">Nome da Rota</Label>
                   <Input
-                    placeholder="/golpes ou /reforma-tributaria"
+                    placeholder="Ex: Rota A - Golpes"
+                    value={route.name ?? ""}
+                    onChange={(e) => {
+                      const updated = [...(editingFolder.routes ?? [])];
+                      const name = e.target.value;
+                      const slug = name
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .replace(/[^a-z0-9]+/g, "-")
+                        .replace(/(^-|-$)/g, "");
+                      updated[idx].name = name;
+                      if (!updated[idx].slug) updated[idx].slug = slug;
+                      setEditingFolder({ ...editingFolder, routes: updated });
+                    }}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs">Slug da Rota</Label>
+                  <Input
+                    placeholder="ex: rota-a"
+                    value={route.slug ?? ""}
+                    onChange={(e) => {
+                      const updated = [...(editingFolder.routes ?? [])];
+                      updated[idx].slug = e.target.value;
+                      setEditingFolder({ ...editingFolder, routes: updated });
+                    }}
+                  />
+                </div>
+                <div className="sm:col-span-3">
+                  <Label className="text-xs">Caminho / URL de Destino</Label>
+                  <Input
+                    placeholder="/golpes ou https://..."
                     value={route.path}
                     onChange={(e) => {
                       const updated = [...(editingFolder.routes ?? [])];
@@ -259,8 +297,8 @@ export function SplitRedirectorManager() {
                     required
                   />
                 </div>
-                <div className="sm:col-span-3">
-                  <Label className="text-xs">ID Bloco do GAM (Ad Unit ID)</Label>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs">Ad Unit GAM</Label>
                   <Input
                     placeholder="ex: ad_unit_top"
                     value={route.gam_ad_unit_id ?? ""}
@@ -271,21 +309,8 @@ export function SplitRedirectorManager() {
                     }}
                   />
                 </div>
-                <div className="sm:col-span-2">
-                  <Label className="text-xs">eCPM Estimado (R$)</Label>
-                  <Input
-                    type="number"
-                    step="0.10"
-                    value={route.ecpm}
-                    onChange={(e) => {
-                      const updated = [...(editingFolder.routes ?? [])];
-                      updated[idx].ecpm = parseFloat(e.target.value) || 0;
-                      setEditingFolder({ ...editingFolder, routes: updated });
-                    }}
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <Label className="text-xs">Porcentagem (%)</Label>
+                <div className="sm:col-span-1">
+                  <Label className="text-xs">% Peso</Label>
                   <Input
                     type="number"
                     min="0"
@@ -368,9 +393,10 @@ export function SplitRedirectorManager() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleCopyLink(folder.slug)}
+                      onClick={() => handleCopyFolderLink(folder.slug)}
+                      title="Copiar link probabilístico da pasta"
                     >
-                      <Copy className="mr-1.5 h-3.5 w-3.5" /> Copiar Link
+                      <Copy className="mr-1.5 h-3.5 w-3.5" /> Copiar Link Pasta (/r/{folder.slug})
                     </Button>
                     <a
                       href={`/r/${folder.slug}`}
@@ -378,7 +404,7 @@ export function SplitRedirectorManager() {
                       rel="noopener noreferrer"
                       className="inline-flex h-8 items-center justify-center rounded-md border border-border bg-background px-3 text-xs font-medium text-foreground hover:bg-accent"
                     >
-                      <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Testar
+                      <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Testar Pasta
                     </a>
                     <Button
                       size="sm"
@@ -425,7 +451,7 @@ export function SplitRedirectorManager() {
                             key={i}
                             style={{ width: `${pct}%` }}
                             className={`${COLORS[i % COLORS.length]} transition-all`}
-                            title={`${r.path}: ${pct.toFixed(1)}%`}
+                            title={`${r.name || r.path}: ${pct.toFixed(1)}%`}
                           />
                         );
                       })}
@@ -436,10 +462,12 @@ export function SplitRedirectorManager() {
                     <table className="w-full text-left text-sm">
                       <thead>
                         <tr className="border-b border-border text-xs uppercase text-muted-foreground">
-                          <th className="py-2">Rota / Página de Destino</th>
+                          <th className="py-2">Nome & Slug da Rota</th>
+                          <th className="py-2">Destino (URL)</th>
                           <th className="py-2">ID GAM Ad Unit</th>
                           <th className="py-2">eCPM (GAM)</th>
-                          <th className="py-2">Porcentagem (Divisão)</th>
+                          <th className="py-2">Divisão (%)</th>
+                          <th className="py-2 text-right">Link Direto</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
@@ -448,13 +476,20 @@ export function SplitRedirectorManager() {
                             totalWeight > 0
                               ? ((Number(route.weight) / totalWeight) * 100).toFixed(1)
                               : "0";
+                          const routeSlug = route.slug || `rota-${i + 1}`;
                           return (
                             <tr key={i} className="hover:bg-muted/20">
                               <td className="py-2.5 font-medium text-foreground">
                                 <div className="flex items-center gap-2">
                                   <span className={`h-2.5 w-2.5 rounded-full ${COLORS[i % COLORS.length]}`} />
-                                  <span>{route.path}</span>
+                                  <div>
+                                    <div className="font-semibold">{route.name || `Rota ${i + 1}`}</div>
+                                    <div className="text-xs font-mono text-muted-foreground">/r/{folder.slug}/{routeSlug}</div>
+                                  </div>
                                 </div>
+                              </td>
+                              <td className="py-2.5 text-xs text-foreground font-mono">
+                                {route.path}
                               </td>
                               <td className="py-2.5 text-xs text-muted-foreground font-mono">
                                 {route.gam_ad_unit_id || "—"}
@@ -466,6 +501,16 @@ export function SplitRedirectorManager() {
                                 <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
                                   <Percent className="h-3 w-3" /> {pct}%
                                 </span>
+                              </td>
+                              <td className="py-2.5 text-right">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleCopyRouteLink(folder.slug, routeSlug)}
+                                  title="Copiar link direto para esta rota"
+                                >
+                                  <Copy className="h-3.5 w-3.5" />
+                                </Button>
                               </td>
                             </tr>
                           );

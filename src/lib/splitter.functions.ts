@@ -6,6 +6,8 @@ import { createClient } from "@supabase/supabase-js";
 export type SplitRoute = {
   id?: string;
   folder_id?: string;
+  name?: string;
+  slug?: string;
   path: string;
   weight: number;
   ecpm: number;
@@ -24,9 +26,16 @@ export type SplitFolder = {
   created_at?: string;
 };
 
-// Sorteio probabilístico para decidir para qual rota redirecionar o leitor
+// Redirecionamento probabilístico por pasta ou redirecionamento direto por slug de rota
 export const getRedirectTarget = createServerFn({ method: "GET" })
-  .inputValidator((input) => z.object({ folderSlug: z.string().min(1) }).parse(input))
+  .inputValidator((input) =>
+    z
+      .object({
+        folderSlug: z.string().min(1),
+        routeSlug: z.string().optional(),
+      })
+      .parse(input),
+  )
   .handler(async ({ data }) => {
     const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
     const supa = createClient(process.env.SUPABASE_URL!, key, {
@@ -44,22 +53,41 @@ export const getRedirectTarget = createServerFn({ method: "GET" })
     }
 
     const routes = folder.routes as SplitRoute[];
+
+    // Se um routeSlug específico foi solicitado, busca direto por slug/nome
+    if (data.routeSlug) {
+      const specific = routes.find(
+        (r) =>
+          (r.slug && r.slug.toLowerCase() === data.routeSlug?.toLowerCase()) ||
+          r.path === `/${data.routeSlug}` ||
+          r.path === data.routeSlug,
+      );
+      if (specific) {
+        const p = specific.path;
+        return { targetPath: p.startsWith("http") || p.startsWith("/") ? p : `/${p}` };
+      }
+    }
+
+    // Sorteio probabilístico com base nos pesos da pasta
     const totalWeight = routes.reduce((sum, r) => sum + (Number(r.weight) || 0), 0);
 
     if (totalWeight <= 0) {
-      return { targetPath: routes[0]?.path || "/" };
+      const first = routes[0]?.path || "/";
+      return { targetPath: first.startsWith("http") || first.startsWith("/") ? first : `/${first}` };
     }
 
     let rand = Math.random() * totalWeight;
     for (const route of routes) {
       const w = Number(route.weight) || 0;
       if (rand < w) {
-        return { targetPath: route.path };
+        const p = route.path;
+        return { targetPath: p.startsWith("http") || p.startsWith("/") ? p : `/${p}` };
       }
       rand -= w;
     }
 
-    return { targetPath: routes[routes.length - 1]?.path || "/" };
+    const last = routes[routes.length - 1]?.path || "/";
+    return { targetPath: last.startsWith("http") || last.startsWith("/") ? last : `/${last}` };
   });
 
 export const listSplitFolders = createServerFn({ method: "GET" })
@@ -88,6 +116,8 @@ export const upsertSplitFolder = createServerFn({ method: "POST" })
         routes: z.array(
           z.object({
             id: z.string().uuid().optional(),
+            name: z.string().optional(),
+            slug: z.string().optional(),
             path: z.string().min(1),
             weight: z.number().min(0).max(100),
             ecpm: z.number().min(0).optional().default(0),
@@ -134,13 +164,26 @@ export const upsertSplitFolder = createServerFn({ method: "POST" })
     await context.supabase.from("split_routes").delete().eq("folder_id", folderId);
 
     if (routes.length > 0) {
-      const routesToInsert = routes.map((r) => ({
-        folder_id: folderId!,
-        path: r.path.startsWith("/") ? r.path : `/${r.path}`,
-        weight: r.weight,
-        ecpm: r.ecpm ?? 0,
-        gam_ad_unit_id: r.gam_ad_unit_id ?? null,
-      }));
+      const routesToInsert = routes.map((r, idx) => {
+        const rName = r.name?.trim() || `Rota ${idx + 1}`;
+        const defaultSlug = rName
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "") || `rota-${idx + 1}`;
+        const rSlug = r.slug?.trim() || defaultSlug;
+
+        return {
+          folder_id: folderId!,
+          name: rName,
+          slug: rSlug,
+          path: r.path.startsWith("http") || r.path.startsWith("/") ? r.path : `/${r.path}`,
+          weight: r.weight,
+          ecpm: r.ecpm ?? 0,
+          gam_ad_unit_id: r.gam_ad_unit_id ?? null,
+        };
+      });
 
       const { error: routeErr } = await context.supabase
         .from("split_routes")
@@ -179,7 +222,6 @@ export const syncGamEcpm = createServerFn({ method: "POST" })
     const routes = (folder.routes ?? []) as SplitRoute[];
     if (routes.length === 0) return { ok: true, routes: [] };
 
-    // Consulta do eCPM do GAM baseada no Network Code e Ad Unit ID da página/rota
     const updatedRoutes = routes.map((route) => {
       const adUnitSeed = (route.gam_ad_unit_id || route.path)
         .split("")
@@ -201,6 +243,8 @@ export const syncGamEcpm = createServerFn({ method: "POST" })
       return {
         id: route.id,
         folder_id: folder.id,
+        name: route.name,
+        slug: route.slug,
         path: route.path,
         ecpm: route.ecpm,
         weight: folder.auto_ecpm_balancing ? calculatedWeight : route.weight,
