@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Search,
   TrendingUp,
@@ -38,8 +38,12 @@ const shortcuts: Shortcut[] = [
 
 function Index() {
   const [q, setQ] = useState("");
-  const recent = articles.slice(0, 3);
-  const feed = articles.slice(0, 8);
+  const sortedArticles = useMemo(
+    () => [...articles].sort((a, b) => b.date.localeCompare(a.date)),
+    [],
+  );
+  const recent = sortedArticles.slice(0, 3);
+  const feed = sortedArticles.slice(0, 8);
   return (
     <PageShell>
       {/* Hero */}

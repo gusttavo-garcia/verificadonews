@@ -53,7 +53,7 @@ export const articles: Article[] = [
       "Analisamos ponto a ponto as principais alterações trazidas pela nova reforma e o impacto direto no bolso do consumidor.",
     verdict: "verificado",
     category: "Economia",
-    date: "2026-07-15",
+    date: getIsoDateDaysAgo(0),
     views: 1240,
     type: "noticia",
   },
@@ -64,7 +64,7 @@ export const articles: Article[] = [
       "Criminosos ligam se passando pelo banco e convencem vítimas a transferir dinheiro para uma conta 'segura'. Saiba como identificar.",
     verdict: "falso",
     category: "Tecnologia",
-    date: "2026-07-14",
+    date: getIsoDateDaysAgo(1),
     views: 3820,
     type: "golpe",
   },
@@ -75,7 +75,7 @@ export const articles: Article[] = [
       "Boato viraliza no WhatsApp com áudio de suposto médico. Confira o que dizem os especialistas e agências reguladoras.",
     verdict: "falso",
     category: "Saúde",
-    date: "2026-07-12",
+    date: getIsoDateDaysAgo(2),
     views: 5410,
     type: "fake",
   },
@@ -86,7 +86,7 @@ export const articles: Article[] = [
       "Vídeo circulando nas redes foi manipulado com corte estratégico. A gravação original mostra contexto diferente.",
     verdict: "enganoso",
     category: "Famosos",
-    date: "2026-07-10",
+    date: getIsoDateDaysAgo(3),
     views: 8730,
     type: "noticia",
   },
@@ -97,7 +97,7 @@ export const articles: Article[] = [
       "Site clonado usa selos falsos de segurança e anúncios patrocinados. Denúncias no Procon passam de 400 casos.",
     verdict: "falso",
     category: "Tecnologia",
-    date: "2026-07-09",
+    date: getIsoDateDaysAgo(4),
     views: 2110,
     type: "empresa",
   },
@@ -108,7 +108,7 @@ export const articles: Article[] = [
       "Imagens compartilhadas como recentes são de protesto ocorrido há sete anos, conforme análise reversa de vídeo.",
     verdict: "enganoso",
     category: "Política",
-    date: "2026-07-08",
+    date: getIsoDateDaysAgo(5),
     views: 6390,
     type: "video",
   },
@@ -119,7 +119,7 @@ export const articles: Article[] = [
       "Cobertura verificada da partida com dados oficiais da CBF e Conmebol, sem os boatos que circularam nas redes.",
     verdict: "verificado",
     category: "Copa do Mundo",
-    date: "2026-07-07",
+    date: getIsoDateDaysAgo(6),
     views: 940,
     type: "noticia",
   },
@@ -130,7 +130,7 @@ export const articles: Article[] = [
       "Página com domínio parecido promete restituição do IR e coleta dados sensíveis. Denunciado às autoridades.",
     verdict: "falso",
     category: "Tecnologia",
-    date: "2026-07-06",
+    date: getIsoDateDaysAgo(7),
     views: 4520,
     type: "site",
   },
@@ -141,7 +141,7 @@ export const articles: Article[] = [
       "Dado circula fora de contexto. Comparação com anos anteriores mostra cenário diferente do afirmado.",
     verdict: "parcial",
     category: "Meio Ambiente",
-    date: "2026-07-05",
+    date: getIsoDateDaysAgo(8),
     views: 1780,
     type: "noticia",
   },
@@ -152,7 +152,7 @@ export const articles: Article[] = [
       "Confirmamos com a organização do festival: prêmio é real, entregue na cerimônia de encerramento.",
     verdict: "verificado",
     category: "Famosos",
-    date: "2026-07-04",
+    date: getIsoDateDaysAgo(9),
     views: 2210,
     type: "noticia",
   },
@@ -163,7 +163,7 @@ export const articles: Article[] = [
       "Publicação oficial no Diário da União confirma as medidas anunciadas na coletiva.",
     verdict: "verificado",
     category: "Política",
-    date: "2026-07-03",
+    date: getIsoDateDaysAgo(10),
     views: 1360,
     type: "noticia",
   },
@@ -174,11 +174,13 @@ export const articles: Article[] = [
       "Modelo clássico de golpe: cobra 'taxa de liberação' e some. Aplicativo foi removido das lojas oficiais.",
     verdict: "falso",
     category: "Economia",
-    date: "2026-07-02",
+    date: getIsoDateDaysAgo(11),
     views: 3105,
     type: "golpe",
   },
 ];
+
+articles.sort((a, b) => b.date.localeCompare(a.date));
 
 for (const a of articles) {
   if (IMG[a.slug]) a.image = IMG[a.slug];
@@ -195,6 +197,23 @@ export const categories: Category[] = [
 ];
 
 export function formatDate(iso: string) {
+  if (!iso) return "";
+  if (iso.length === 10 && iso.includes("-")) {
+    const [year, month, day] = iso.split("-").map(Number);
+    if (year && month && day) {
+      const d = new Date(year, month - 1, day);
+      return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    }
+  }
   const d = new Date(iso);
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function getIsoDateDaysAgo(daysAgo: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
