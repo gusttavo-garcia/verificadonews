@@ -37,6 +37,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { listNewsletterSubscribers } from "@/lib/comments.functions";
+import { SplitRedirectorManager } from "@/components/site/split-redirector-manager";
 import type { AppRole } from "@/hooks/use-auth";
 
 function ImageUploader({
@@ -612,6 +613,7 @@ function PainelPage() {
           )}
         </div>
       </section>
+      {isAdmin && <SplitRedirectorManager />}
       {isAdmin && <UsersSection currentUserId={user?.id ?? null} />}
       {isAdmin && <NewsletterSection />}
     </PageShell>
