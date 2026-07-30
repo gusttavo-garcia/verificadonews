@@ -27,7 +27,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RFolderRouteImport } from './routes/r/$folder'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
+import { Route as RFolderRouteRouteImport } from './routes/r/$folder/$route'
 
 const VideosRoute = VideosRouteImport.update({
   id: '/videos',
@@ -118,10 +120,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RFolderRoute = RFolderRouteImport.update({
+  id: '/r/$folder',
+  path: '/r/$folder',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const RFolderRouteRoute = RFolderRouteRouteImport.update({
+  id: '/$route',
+  path: '/$route',
+  getParentRoute: () => RFolderRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -143,6 +155,8 @@ export interface FileRoutesByFullPath {
   '/transparencia': typeof TransparenciaRoute
   '/videos': typeof VideosRoute
   '/painel': typeof AuthenticatedPainelRoute
+  '/r/$folder': typeof RFolderRouteWithChildren
+  '/r/$folder/$route': typeof RFolderRouteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -163,6 +177,8 @@ export interface FileRoutesByTo {
   '/transparencia': typeof TransparenciaRoute
   '/videos': typeof VideosRoute
   '/painel': typeof AuthenticatedPainelRoute
+  '/r/$folder': typeof RFolderRouteWithChildren
+  '/r/$folder/$route': typeof RFolderRouteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -185,6 +201,8 @@ export interface FileRoutesById {
   '/transparencia': typeof TransparenciaRoute
   '/videos': typeof VideosRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
+  '/r/$folder': typeof RFolderRouteWithChildren
+  '/r/$folder/$route': typeof RFolderRouteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -207,6 +225,8 @@ export interface FileRouteTypes {
     | '/transparencia'
     | '/videos'
     | '/painel'
+    | '/r/$folder'
+    | '/r/$folder/$route'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -227,6 +247,8 @@ export interface FileRouteTypes {
     | '/transparencia'
     | '/videos'
     | '/painel'
+    | '/r/$folder'
+    | '/r/$folder/$route'
   id:
     | '__root__'
     | '/'
@@ -248,6 +270,8 @@ export interface FileRouteTypes {
     | '/transparencia'
     | '/videos'
     | '/_authenticated/painel'
+    | '/r/$folder'
+    | '/r/$folder/$route'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -269,6 +293,7 @@ export interface RootRouteChildren {
   TermosRoute: typeof TermosRoute
   TransparenciaRoute: typeof TransparenciaRoute
   VideosRoute: typeof VideosRoute
+  RFolderRoute: typeof RFolderRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -399,12 +424,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/r/$folder': {
+      id: '/r/$folder'
+      path: '/r/$folder'
+      fullPath: '/r/$folder'
+      preLoaderRoute: typeof RFolderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/painel': {
       id: '/_authenticated/painel'
       path: '/painel'
       fullPath: '/painel'
       preLoaderRoute: typeof AuthenticatedPainelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/r/$folder/$route': {
+      id: '/r/$folder/$route'
+      path: '/$route'
+      fullPath: '/r/$folder/$route'
+      preLoaderRoute: typeof RFolderRouteRouteImport
+      parentRoute: typeof RFolderRoute
     }
   }
 }
@@ -419,6 +458,17 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+interface RFolderRouteChildren {
+  RFolderRouteRoute: typeof RFolderRouteRoute
+}
+
+const RFolderRouteChildren: RFolderRouteChildren = {
+  RFolderRouteRoute: RFolderRouteRoute,
+}
+
+const RFolderRouteWithChildren =
+  RFolderRoute._addFileChildren(RFolderRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -439,7 +489,18 @@ const rootRouteChildren: RootRouteChildren = {
   TermosRoute: TermosRoute,
   TransparenciaRoute: TransparenciaRoute,
   VideosRoute: VideosRoute,
+  RFolderRoute: RFolderRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
