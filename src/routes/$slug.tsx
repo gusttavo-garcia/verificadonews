@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Calendar, Eye, Share2, Link2 } from "lucide-react";
+import { Calendar, Eye, Share2, Link2, User } from "lucide-react";
 import { useState } from "react";
 import { PageShell } from "@/components/site/page-shell";
 import { VerdictBadge } from "@/components/site/verdict-badge";
@@ -207,6 +207,18 @@ function VerificacaoPage() {
             <li>Entrevista com especialistas na área do assunto abordado.</li>
             <li>Revisão por um editor sênior antes da publicação.</li>
           </ul>
+        </div>
+
+        <div className="mt-10 flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-sm">
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar className="h-4 w-4 text-primary" />
+            Publicado em {formatDate(article.date)}
+          </span>
+          <span className="hidden h-4 w-px bg-border sm:block" />
+          <span className="inline-flex items-center gap-1.5">
+            <User className="h-4 w-4 text-primary" />
+            Por {article.author}
+          </span>
         </div>
 
         <RelatedArticles current={article} />
