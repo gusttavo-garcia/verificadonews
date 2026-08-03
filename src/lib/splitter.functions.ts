@@ -42,7 +42,7 @@ export const getRedirectTarget = createServerFn({ method: "GET" })
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const { data: folder, error } = await supa
+    const { data: folder, error } = await (supa as any)
       .from("split_folders")
       .select("id, slug, name, routes:split_routes(*)")
       .eq("slug", data.folderSlug)
@@ -52,7 +52,7 @@ export const getRedirectTarget = createServerFn({ method: "GET" })
       return { targetPath: "/" };
     }
 
-    const routes = folder.routes as SplitRoute[];
+    const routes = (folder as any).routes as SplitRoute[];
 
     // Se um routeSlug específico foi solicitado, busca direto por slug/nome
     if (data.routeSlug) {
@@ -93,13 +93,13 @@ export const getRedirectTarget = createServerFn({ method: "GET" })
 export const listSplitFolders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
+    const { data, error } = await (context.supabase as any)
       .from("split_folders")
       .select("*, routes:split_routes(*)")
       .order("created_at", { ascending: false });
 
     if (error) throw new Error(error.message);
-    return { folders: (data ?? []) as SplitFolder[] };
+    return { folders: (data ?? []) as unknown as SplitFolder[] };
   });
 
 export const upsertSplitFolder = createServerFn({ method: "POST" })
@@ -133,7 +133,7 @@ export const upsertSplitFolder = createServerFn({ method: "POST" })
     let folderId = folderData.id;
 
     if (folderId) {
-      const { error } = await context.supabase
+      const { error } = await (context.supabase as any)
         .from("split_folders")
         .update({
           slug: folderData.slug,
@@ -146,7 +146,7 @@ export const upsertSplitFolder = createServerFn({ method: "POST" })
         .eq("id", folderId);
       if (error) throw new Error(error.message);
     } else {
-      const { data: newFolder, error } = await context.supabase
+      const { data: newFolder, error } = await (context.supabase as any)
         .from("split_folders")
         .insert({
           slug: folderData.slug,
@@ -161,7 +161,7 @@ export const upsertSplitFolder = createServerFn({ method: "POST" })
       folderId = newFolder.id;
     }
 
-    await context.supabase.from("split_routes").delete().eq("folder_id", folderId);
+    await (context.supabase as any).from("split_routes").delete().eq("folder_id", folderId);
 
     if (routes.length > 0) {
       const routesToInsert = routes.map((r, idx) => {
@@ -185,7 +185,7 @@ export const upsertSplitFolder = createServerFn({ method: "POST" })
         };
       });
 
-      const { error: routeErr } = await context.supabase
+      const { error: routeErr } = await (context.supabase as any)
         .from("split_routes")
         .insert(routesToInsert);
       if (routeErr) throw new Error(routeErr.message);
@@ -198,7 +198,7 @@ export const deleteSplitFolder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
+    const { error } = await (context.supabase as any)
       .from("split_folders")
       .delete()
       .eq("id", data.id);
@@ -211,7 +211,7 @@ export const syncGamEcpm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ folderId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { data: folder, error } = await context.supabase
+    const { data: folder, error } = await (context.supabase as any)
       .from("split_folders")
       .select("*, routes:split_routes(*)")
       .eq("id", data.folderId)
@@ -219,7 +219,7 @@ export const syncGamEcpm = createServerFn({ method: "POST" })
 
     if (error || !folder) throw new Error(error?.message ?? "Pasta não encontrada");
 
-    const routes = (folder.routes ?? []) as SplitRoute[];
+    const routes = ((folder as any).routes ?? []) as SplitRoute[];
     if (routes.length === 0) return { ok: true, routes: [] };
 
     const updatedRoutes = routes.map((route) => {
@@ -242,19 +242,19 @@ export const syncGamEcpm = createServerFn({ method: "POST" })
           : Number((100 / updatedRoutes.length).toFixed(1));
       return {
         id: route.id,
-        folder_id: folder.id,
+        folder_id: (folder as any).id,
         name: route.name,
         slug: route.slug,
         path: route.path,
         ecpm: route.ecpm,
-        weight: folder.auto_ecpm_balancing ? calculatedWeight : route.weight,
+        weight: (folder as any).auto_ecpm_balancing ? calculatedWeight : route.weight,
         gam_ad_unit_id: route.gam_ad_unit_id,
       };
     });
 
     for (const r of finalRoutes) {
       if (r.id) {
-        await context.supabase
+        await (context.supabase as any)
           .from("split_routes")
           .update({
             ecpm: r.ecpm,
