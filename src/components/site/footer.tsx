@@ -2,13 +2,21 @@ import { Link } from "@tanstack/react-router";
 import { Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
 import logo from "@/assets/logo.png";
 
+const socials = [
+  { icon: Facebook, label: "Facebook" },
+  { icon: Twitter, label: "X (Twitter)" },
+  { icon: Instagram, label: "Instagram" },
+  { icon: Linkedin, label: "LinkedIn" },
+  { icon: Youtube, label: "YouTube" },
+];
+
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-[color:var(--surface)]">
       <div className="mx-auto max-w-7xl px-4 py-14">
         <div className="grid gap-10 md:grid-cols-4">
           <div>
-            <img src={logo} alt="Verificado News" className="h-10 w-auto" />
+            <img src={logo} alt="Logotipo Verificado News" className="h-10 w-auto" />
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
               Plataforma brasileira de checagem de fatos. Verificamos notícias, golpes, empresas
               e sites para combater a desinformação.
@@ -36,10 +44,12 @@ export function SiteFooter() {
           <div>
             <h4 className="text-sm font-semibold text-foreground">Redes sociais</h4>
             <div className="mt-4 flex gap-2">
-              {[Facebook, Twitter, Instagram, Linkedin, Youtube].map((Icon, i) => (
+              {socials.map(({ icon: Icon, label }) => (
                 <a
-                  key={i}
+                  key={label}
                   href="#"
+                  aria-label={`Verificado News no ${label}`}
+                  title={`Verificado News no ${label}`}
                   className="grid h-9 w-9 place-items-center rounded-full border border-border text-muted-foreground transition hover:border-primary hover:text-primary"
                 >
                   <Icon className="h-4 w-4" />
