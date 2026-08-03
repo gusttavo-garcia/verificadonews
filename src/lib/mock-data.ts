@@ -51,6 +51,22 @@ const IMG: Record<string, string> = {
 
 export const articles: Article[] = [
   {
+    slug: "michelle-bolsonaro-internacao-fake-news-avc",
+    title: "É falso que Michelle Bolsonaro tenha sido internada com AVC ou infarto",
+    excerpt:
+      "Ex-primeira-dama foi hospitalizada em Brasília para tratar cefaleia refratária, segundo boletim médico do DF Star. Recebeu alta no dia 2 de agosto após resposta satisfatória a procedimento de bloqueio anestésico.",
+    verdict: "falso",
+    category: "Política",
+    date: getIsoDateDaysAgo(0),
+    views: 1840,
+    type: "fake",
+    sources: [
+      { label: "G1 DF", url: "https://g1.globo.com/df/distrito-federal/noticia/2026/08/02/michelle-bolsonaro-recebe-alta-apos-internacao-para-tratar-cefaleia-convencao-do-pl-oficializa-candidatura-ao-senado-neste-domingo.ghtml" },
+      { label: "Estadão", url: "https://www.estadao.com.br/politica/michelle-bolsonaro-diz-que-esta-internada-em-hospital-e-e-duvida-na-convencao-do-pl/" },
+      { label: "UOL", url: "https://noticias.uol.com.br/eleicoes/2026/08/02/michelle-recebe-alta-de-internacao-pouco-antes-de-convencao-do-pl.ghtm" },
+    ],
+  },
+  {
     slug: "vermes-comem-plastico",
     title: "Cientistas descobrem 'supervermes' capazes de comer e digerir plástico?",
     excerpt:
