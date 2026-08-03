@@ -1,13 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
+import { Instagram } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const socials = [
-  { icon: Facebook, label: "Facebook" },
-  { icon: Twitter, label: "X (Twitter)" },
-  { icon: Instagram, label: "Instagram" },
-  { icon: Linkedin, label: "LinkedIn" },
-  { icon: Youtube, label: "YouTube" },
+  { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/verificadonews.com.br/?hl=pt-br" },
 ];
 
 export function SiteFooter() {
