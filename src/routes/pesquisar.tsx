@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -16,11 +17,10 @@ export const Route = createFileRoute("/pesquisar")({
     z.object({ q: fallback(z.string(), "").default("") }),
   ),
   component: PesquisarPage,
-  head: () => ({
-    meta: [
-      { title: "Pesquisar — Verificado News" },
-      { name: "description", content: "Pesquise notícias, empresas, sites, vídeos e golpes verificados." },
-    ],
+  head: () => pageHead({
+    title: "Pesquisar verificações — Verificado News",
+    description: "Pesquise notícias, empresas, sites, vídeos e golpes já verificados pelo Verificado News e descubra o que é verdade antes de compartilhar.",
+    path: "/pesquisar",
   }),
 });
 

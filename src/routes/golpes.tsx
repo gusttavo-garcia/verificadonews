@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle } from "lucide-react";
 import { ListingPage } from "@/components/site/listing-page";
@@ -11,10 +12,9 @@ export const Route = createFileRoute("/golpes")({
       filter={(a) => a.type === "golpe" || (a.type === "empresa" && a.verdict === "falso")}
     />
   ),
-  head: () => ({
-    meta: [
-      { title: "Golpes verificados — Verificado News" },
-      { name: "description", content: "Golpes e fraudes identificados pela equipe do Verificado News." },
-    ],
+  head: () => pageHead({
+    title: "Golpes verificados — Verificado News",
+    description: "Golpes e fraudes identificados pela equipe do Verificado News: PIX, WhatsApp, falsos prêmios, lojas fantasma e outras armadilhas online.",
+    path: "/golpes",
   }),
 });

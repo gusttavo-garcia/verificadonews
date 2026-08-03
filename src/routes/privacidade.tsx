@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, PageHero } from "@/components/site/page-shell";
 import { ShieldCheck } from "lucide-react";
@@ -110,5 +111,9 @@ export const Route = createFileRoute("/privacidade")({
       </div>
     </PageShell>
   ),
-  head: () => ({ meta: [{ title: "Política de Privacidade — Verificado News" }] }),
+  head: () => pageHead({
+    title: "Política de Privacidade — Verificado News",
+    description: "Saiba como o Verificado News coleta, usa, armazena e protege seus dados pessoais, em conformidade com a LGPD, e quais são os seus direitos.",
+    path: "/privacidade",
+  }),
 });

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { Newspaper } from "lucide-react";
 import { ListingPage } from "@/components/site/listing-page";
@@ -11,10 +12,9 @@ export const Route = createFileRoute("/fake-news")({
       filter={(a) => a.verdict === "falso" || a.verdict === "enganoso"}
     />
   ),
-  head: () => ({
-    meta: [
-      { title: "Fake News — Verificado News" },
-      { name: "description", content: "Fake news e boatos checados pela equipe do Verificado News." },
-    ],
+  head: () => pageHead({
+    title: "Fake News desmentidas — Verificado News",
+    description: "Boatos, imagens manipuladas e notícias falsas checadas pelo Verificado News com evidências, fontes oficiais e explicação do que é verdade.",
+    path: "/fake-news",
   }),
 });

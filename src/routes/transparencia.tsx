@@ -1,10 +1,15 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, PageHero } from "@/components/site/page-shell";
 import { DollarSign, Users, AlertTriangle, BarChart3, Handshake } from "lucide-react";
 
 export const Route = createFileRoute("/transparencia")({
   component: TransparenciaPage,
-  head: () => ({ meta: [{ title: "Transparência — Verificado News" }] }),
+  head: () => pageHead({
+    title: "Portal de Transparência — Verificado News",
+    description: "Veja como o Verificado News se financia, quem faz parte da equipe e quais políticas garantem a independência editorial das nossas checagens.",
+    path: "/transparencia",
+  }),
 });
 
 function TransparenciaPage() {

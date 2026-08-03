@@ -1,14 +1,14 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, PageHero } from "@/components/site/page-shell";
 import { ShieldCheck, Eye, CheckCircle2, Users, Scale, MessageSquare } from "lucide-react";
 
 export const Route = createFileRoute("/sobre")({
   component: SobrePage,
-  head: () => ({
-    meta: [
-      { title: "Sobre — Verificado News" },
-      { name: "description", content: "Combatendo desinformação com fatos verificados." },
-    ],
+  head: () => pageHead({
+    title: "Sobre o Verificado News — Verificado News",
+    description: "Conheça o Verificado News: quem somos, nossa equipe de checagem e como combatemos a desinformação no Brasil com fatos e fontes verificáveis.",
+    path: "/sobre",
   }),
 });
 
