@@ -31,6 +31,7 @@ export interface Article {
 }
 
 const IMG: Record<string, string> = {
+  "michelle-bolsonaro-internacao-fake-news-avc": "/uploads/michelle-bolsonaro-internacao-fact-check.jpg",
   "vermes-comem-plastico": "/__l5e/assets-v1/0d477dc2-8dfb-4d09-91ea-75a129d417ef/queimadas-amazonia.jpg",
   "reforma-tributaria-2026": "/__l5e/assets-v1/864f663c-0cb0-481a-b111-e1ebb68cd1dd/reforma-tributaria.jpg",
   "golpe-pix-falso-banco": "/__l5e/assets-v1/7f8eff35-7547-4eac-abab-d0c23c2a5cb5/golpe-pix.jpg",
