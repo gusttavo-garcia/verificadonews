@@ -79,22 +79,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Verificado News — Checagem de fatos e combate à desinformação" },
+      { title: "Verificado News — Checagem de fatos no Brasil" },
       {
         name: "description",
         content:
           "Descubra se uma notícia, vídeo, imagem, empresa ou golpe é verdadeiro antes de compartilhar. Plataforma brasileira de checagem de fatos.",
       },
       { name: "author", content: "Verificado News" },
-      { property: "og:title", content: "Verificado News — Checagem de fatos e combate à desinformação" },
+      { property: "og:title", content: "Verificado News — Checagem de fatos no Brasil" },
       {
         property: "og:description",
         content:
           "Descubra se uma notícia, vídeo, imagem, empresa ou golpe é verdadeiro antes de compartilhar. Plataforma brasileira de checagem de fatos.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Verificado News" },
+      { property: "og:locale", content: "pt_BR" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Verificado News — Checagem de fatos e combate à desinformação" },
+      { name: "twitter:title", content: "Verificado News — Checagem de fatos no Brasil" },
       { name: "twitter:description", content: "Descubra se uma notícia, vídeo, imagem, empresa ou golpe é verdadeiro antes de compartilhar. Plataforma brasileira de checagem de fatos." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/444aa31b-ca68-49dd-b5fa-bf081dc3da75/id-preview-06e9d33b--132186fe-df18-4a0b-9dfe-b6a26e426304.lovable.app-1784379892699.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/444aa31b-ca68-49dd-b5fa-bf081dc3da75/id-preview-06e9d33b--132186fe-df18-4a0b-9dfe-b6a26e426304.lovable.app-1784379892699.png" },
@@ -103,6 +105,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: appCss,
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Verificado News",
+          url: "https://verificadonews.com.br",
+          description:
+            "Plataforma brasileira de checagem de fatos que verifica notícias, vídeos, imagens, empresas e golpes.",
+          email: "contato@verificadonews.com.br",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Verificado News",
+          url: "https://verificadonews.com.br",
+          inLanguage: "pt-BR",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://verificadonews.com.br/pesquisar?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }),
       },
     ],
   }),
