@@ -31,6 +31,7 @@ export interface Article {
 }
 
 const IMG: Record<string, string> = {
+  "michelle-bolsonaro-internacao-fake-news-avc": "/uploads/michelle-bolsonaro-internacao-fact-check.jpg",
   "vermes-comem-plastico": "/__l5e/assets-v1/0d477dc2-8dfb-4d09-91ea-75a129d417ef/queimadas-amazonia.jpg",
   "reforma-tributaria-2026": "/__l5e/assets-v1/864f663c-0cb0-481a-b111-e1ebb68cd1dd/reforma-tributaria.jpg",
   "golpe-pix-falso-banco": "/__l5e/assets-v1/7f8eff35-7547-4eac-abab-d0c23c2a5cb5/golpe-pix.jpg",
@@ -49,6 +50,22 @@ const IMG: Record<string, string> = {
 };
 
 export const articles: Article[] = [
+  {
+    slug: "michelle-bolsonaro-internacao-fake-news-avc",
+    title: "É falso que Michelle Bolsonaro tenha sido internada com AVC ou infarto",
+    excerpt:
+      "Ex-primeira-dama foi hospitalizada em Brasília para tratar cefaleia refratária, segundo boletim médico do DF Star. Recebeu alta no dia 2 de agosto após resposta satisfatória a procedimento de bloqueio anestésico.",
+    verdict: "falso",
+    category: "Política",
+    date: getIsoDateDaysAgo(0),
+    views: 1840,
+    type: "fake",
+    sources: [
+      { label: "G1 DF", url: "https://g1.globo.com/df/distrito-federal/noticia/2026/08/02/michelle-bolsonaro-recebe-alta-apos-internacao-para-tratar-cefaleia-convencao-do-pl-oficializa-candidatura-ao-senado-neste-domingo.ghtml" },
+      { label: "Estadão", url: "https://www.estadao.com.br/politica/michelle-bolsonaro-diz-que-esta-internada-em-hospital-e-e-duvida-na-convencao-do-pl/" },
+      { label: "UOL", url: "https://noticias.uol.com.br/eleicoes/2026/08/02/michelle-recebe-alta-de-internacao-pouco-antes-de-convencao-do-pl.ghtm" },
+    ],
+  },
   {
     slug: "vermes-comem-plastico",
     title: "Cientistas descobrem 'supervermes' capazes de comer e digerir plástico?",
