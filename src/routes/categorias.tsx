@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell, PageHero } from "@/components/site/page-shell";
 import { ArticleCard } from "@/components/site/article-card";
@@ -6,7 +7,11 @@ import { Tag } from "lucide-react";
 
 export const Route = createFileRoute("/categorias")({
   component: CategoriasPage,
-  head: () => ({ meta: [{ title: "Categorias — Verificado News" }] }),
+  head: () => pageHead({
+    title: "Categorias de verificações — Verificado News",
+    description: "Explore todas as verificações do Verificado News organizadas por tema: política, saúde, economia, golpes, fake news, empresas, sites e vídeos.",
+    path: "/categorias",
+  }),
 });
 
 function CategoriasPage() {

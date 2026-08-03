@@ -7,6 +7,7 @@ import { RelatedArticles } from "@/components/site/related-articles";
 import { CommentsSection } from "@/components/site/comments-section";
 import { NewsletterOptIn } from "@/components/site/newsletter-optin";
 import { articles, formatDate } from "@/lib/mock-data";
+import { SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/$slug")({
   loader: ({ params }) => {
@@ -14,16 +15,51 @@ export const Route = createFileRoute("/$slug")({
     if (!article) throw notFound();
     return { article };
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.article.title} — Verificado News` },
-          { name: "description", content: loaderData.article.excerpt },
-          { property: "og:title", content: loaderData.article.title },
-          { property: "og:description", content: loaderData.article.excerpt },
-        ]
-      : [],
-  }),
+  head: ({ loaderData, params }) => {
+    if (!loaderData) return { meta: [] };
+    const { article } = loaderData;
+    const url = `${SITE_URL}/${params.slug}`;
+    const image = article.image?.startsWith("http") ? article.image : undefined;
+    return {
+      meta: [
+        { title: `${article.title} — Verificado News` },
+        { name: "description", content: article.excerpt },
+        { property: "og:title", content: article.title },
+        { property: "og:description", content: article.excerpt },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        { name: "twitter:title", content: article.title },
+        { name: "twitter:description", content: article.excerpt },
+        ...(image
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: article.title,
+            description: article.excerpt,
+            datePublished: article.date,
+            mainEntityOfPage: url,
+            ...(image ? { image: [image] } : {}),
+            author: { "@type": "Organization", name: "Verificado News" },
+            publisher: {
+              "@type": "Organization",
+              name: "Verificado News",
+              url: SITE_URL,
+            },
+          }),
+        },
+      ],
+    };
+  },
   component: VerificacaoPage,
   notFoundComponent: () => (
     <PageShell>

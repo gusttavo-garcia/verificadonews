@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Mail, Phone, Clock, Send } from "lucide-react";
@@ -7,7 +8,11 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/contato")({
   component: ContatoPage,
-  head: () => ({ meta: [{ title: "Contato — Verificado News" }] }),
+  head: () => pageHead({
+    title: "Fale conosco — Verificado News",
+    description: "Envie uma denúncia, sugira uma checagem, relate um erro ou proponha uma parceria com a equipe do Verificado News por e-mail ou WhatsApp.",
+    path: "/contato",
+  }),
 });
 
 function ContatoPage() {

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, PageHero } from "@/components/site/page-shell";
 import { FileText } from "lucide-react";
@@ -92,5 +93,9 @@ export const Route = createFileRoute("/termos")({
       </div>
     </PageShell>
   ),
-  head: () => ({ meta: [{ title: "Termos de Uso — Verificado News" }] }),
+  head: () => pageHead({
+    title: "Termos de Uso — Verificado News",
+    description: "Leia os termos de uso do Verificado News: regras de acesso, licença de uso do conteúdo, isenções de garantia e limitações de responsabilidade.",
+    path: "/termos",
+  }),
 });

@@ -15,9 +15,17 @@ import { PageShell } from "@/components/site/page-shell";
 import { ArticleCard } from "@/components/site/article-card";
 import { Button } from "@/components/ui/button";
 import { articles } from "@/lib/mock-data";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () =>
+    pageHead({
+      title: "Verificado News — Pesquise e verifique qualquer informação",
+      description:
+        "Pesquise e descubra se uma notícia, vídeo, imagem, empresa ou golpe é verdadeiro antes de compartilhar. Checagem de fatos brasileira, com fontes.",
+      path: "/",
+    }),
 });
 
 type Shortcut = {
@@ -52,7 +60,8 @@ function Index() {
         <div className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[color:var(--brand-teal)]/15 blur-3xl" />
         <div className="relative mx-auto max-w-5xl px-4 py-20 text-center md:py-28">
           <h1 className="text-4xl font-bold leading-tight tracking-tight text-foreground md:text-6xl">
-            Pesquise <span className="text-primary">qualquer</span> informação.
+            Verificado News — Pesquise e verifique{" "}
+            <span className="text-primary">qualquer</span> informação.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground md:text-lg">
             Descubra se uma notícia, vídeo, imagem, empresa ou golpe é verdadeiro antes de
@@ -69,6 +78,7 @@ function Index() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
+                aria-label="Pesquisar uma notícia, empresa, site ou golpe"
                 placeholder="Essa notícia é verdadeira?"
                 className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
               />
@@ -121,7 +131,7 @@ function Index() {
               to="/categorias"
               className="rounded-full border border-border bg-background px-4 py-2 text-sm hover:border-primary hover:text-primary"
             >
-              Ver todas
+              Ver todas as verificações
             </Link>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

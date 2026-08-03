@@ -34,7 +34,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Verificado News" className="h-9 w-auto" />
+          <img src={logo} alt="Logotipo Verificado News" className="h-9 w-auto" />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
@@ -55,6 +55,8 @@ export function SiteHeader() {
           >
             <button
               className="flex items-center gap-1 rounded-full px-3 py-1.5 text-sm text-foreground/70 hover:bg-muted"
+              aria-expanded={instOpen}
+              aria-label="Abrir menu institucional"
               onClick={() => setInstOpen((v) => !v)}
             >
               Institucional <ChevronDown className="h-4 w-4" />
@@ -105,7 +107,8 @@ export function SiteHeader() {
           <button
             className="rounded-md p-2"
             onClick={() => setOpen((v) => !v)}
-            aria-label="Menu"
+            aria-expanded={open}
+            aria-label={open ? "Fechar menu de navegação" : "Abrir menu de navegação"}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>

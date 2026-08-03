@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { Building2 } from "lucide-react";
 import { ListingPage } from "@/components/site/listing-page";
@@ -11,5 +12,9 @@ export const Route = createFileRoute("/empresas")({
       filter={(a) => a.type === "empresa"}
     />
   ),
-  head: () => ({ meta: [{ title: "Empresas verificadas — Verificado News" }] }),
+  head: () => pageHead({
+    title: "Empresas verificadas — Verificado News",
+    description: "Consulte se uma empresa é confiável antes de comprar ou fechar negócio: análises de reputação, denúncias e alertas de fraude do Verificado News.",
+    path: "/empresas",
+  }),
 });

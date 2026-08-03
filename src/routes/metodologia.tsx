@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, PageHero } from "@/components/site/page-shell";
 import { VerdictBadge } from "@/components/site/verdict-badge";
@@ -5,7 +6,11 @@ import { Search, FileSearch, CheckCircle2, Tag, UploadCloud, RefreshCw } from "l
 
 export const Route = createFileRoute("/metodologia")({
   component: MetodologiaPage,
-  head: () => ({ meta: [{ title: "Metodologia — Verificado News" }] }),
+  head: () => pageHead({
+    title: "Metodologia de checagem — Verificado News",
+    description: "Veja passo a passo como o Verificado News apura, cruza dados, consulta fontes oficiais e classifica cada conteúdo com nosso sistema de selos.",
+    path: "/metodologia",
+  }),
 });
 
 const steps = [

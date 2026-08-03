@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://verificadonews.com.br/sitemap.xml
