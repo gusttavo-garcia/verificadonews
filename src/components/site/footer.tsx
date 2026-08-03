@@ -40,10 +40,12 @@ export function SiteFooter() {
           <div>
             <h4 className="text-sm font-semibold text-foreground">Redes sociais</h4>
             <div className="mt-4 flex gap-2">
-              {socials.map(({ icon: Icon, label }) => (
+              {socials.map(({ icon: Icon, label, href }) => (
                 <a
                   key={label}
-                  href="#"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={`Verificado News no ${label}`}
                   title={`Verificado News no ${label}`}
                   className="grid h-9 w-9 place-items-center rounded-full border border-border text-muted-foreground transition hover:border-primary hover:text-primary"
