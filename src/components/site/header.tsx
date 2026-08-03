@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronDown, LayoutDashboard, LogIn, LogOut, Menu, X } from "lucide-react";
+import { ChevronDown, LayoutDashboard, LogIn, LogOut, Menu, Search, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { ThemeToggle } from "./theme-toggle";
 import { useAuth, useIsStaff } from "@/hooks/use-auth";
@@ -8,12 +8,8 @@ import { Button } from "@/components/ui/button";
 
 const nav = [
   { to: "/", label: "Início" },
-  { to: "/pesquisar", label: "Pesquisar" },
   { to: "/golpes", label: "Golpes" },
   { to: "/fake-news", label: "Fake News" },
-  { to: "/empresas", label: "Empresas" },
-  { to: "/sites", label: "Sites" },
-  { to: "/videos", label: "Vídeos" },
   { to: "/categorias", label: "Categorias" },
 ] as const;
 
@@ -23,6 +19,31 @@ const institucional = [
   { to: "/transparencia", label: "Transparência" },
   { to: "/contato", label: "Contato" },
 ] as const;
+
+function HeaderSearch({ onSubmitted }: { onSubmitted?: () => void }) {
+  const [q, setQ] = useState("");
+  const navigate = useNavigate();
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmitted?.();
+        navigate({ to: "/pesquisar", search: { q } as never });
+      }}
+      className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5"
+      role="search"
+    >
+      <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Pesquisar..."
+        aria-label="Pesquisar verificações"
+        className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground lg:w-40"
+      />
+    </form>
+  );
+}
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -77,6 +98,9 @@ export function SiteHeader() {
               </div>
             )}
           </div>
+          <div className="ml-2">
+            <HeaderSearch />
+          </div>
           <ThemeToggle className="ml-1" />
           <div className="ml-2 flex items-center gap-2">
             {loading ? null : session ? (
@@ -118,6 +142,9 @@ export function SiteHeader() {
       {open && (
         <div className="border-t border-border bg-background lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3">
+            <div className="pb-2">
+              <HeaderSearch onSubmitted={() => setOpen(false)} />
+            </div>
             {[...nav, ...institucional].map((i) => (
               <Link
                 key={i.to}

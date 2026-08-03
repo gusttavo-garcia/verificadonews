@@ -9,18 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VideosRouteImport } from './routes/videos'
 import { Route as TransparenciaRouteImport } from './routes/transparencia'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreRouteImport } from './routes/sobre'
-import { Route as SitesRouteImport } from './routes/sites'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PesquisarRouteImport } from './routes/pesquisar'
 import { Route as MetodologiaRouteImport } from './routes/metodologia'
 import { Route as GolpesRouteImport } from './routes/golpes'
 import { Route as FakeNewsRouteImport } from './routes/fake-news'
-import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -31,11 +28,6 @@ import { Route as RFolderRouteImport } from './routes/r/$folder'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as RFolderRouteRouteImport } from './routes/r/$folder/$route'
 
-const VideosRoute = VideosRouteImport.update({
-  id: '/videos',
-  path: '/videos',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TransparenciaRoute = TransparenciaRouteImport.update({
   id: '/transparencia',
   path: '/transparencia',
@@ -49,11 +41,6 @@ const TermosRoute = TermosRouteImport.update({
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitesRoute = SitesRouteImport.update({
-  id: '/sites',
-  path: '/sites',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -84,11 +71,6 @@ const GolpesRoute = GolpesRouteImport.update({
 const FakeNewsRoute = FakeNewsRouteImport.update({
   id: '/fake-news',
   path: '/fake-news',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EmpresasRoute = EmpresasRouteImport.update({
-  id: '/empresas',
-  path: '/empresas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContatoRoute = ContatoRouteImport.update({
@@ -142,18 +124,15 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/contato': typeof ContatoRoute
-  '/empresas': typeof EmpresasRoute
   '/fake-news': typeof FakeNewsRoute
   '/golpes': typeof GolpesRoute
   '/metodologia': typeof MetodologiaRoute
   '/pesquisar': typeof PesquisarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/sites': typeof SitesRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/transparencia': typeof TransparenciaRoute
-  '/videos': typeof VideosRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/r/$folder': typeof RFolderRouteWithChildren
   '/r/$folder/$route': typeof RFolderRouteRoute
@@ -164,18 +143,15 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/contato': typeof ContatoRoute
-  '/empresas': typeof EmpresasRoute
   '/fake-news': typeof FakeNewsRoute
   '/golpes': typeof GolpesRoute
   '/metodologia': typeof MetodologiaRoute
   '/pesquisar': typeof PesquisarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/sites': typeof SitesRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/transparencia': typeof TransparenciaRoute
-  '/videos': typeof VideosRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/r/$folder': typeof RFolderRouteWithChildren
   '/r/$folder/$route': typeof RFolderRouteRoute
@@ -188,18 +164,15 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/contato': typeof ContatoRoute
-  '/empresas': typeof EmpresasRoute
   '/fake-news': typeof FakeNewsRoute
   '/golpes': typeof GolpesRoute
   '/metodologia': typeof MetodologiaRoute
   '/pesquisar': typeof PesquisarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/sites': typeof SitesRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/transparencia': typeof TransparenciaRoute
-  '/videos': typeof VideosRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/r/$folder': typeof RFolderRouteWithChildren
   '/r/$folder/$route': typeof RFolderRouteRoute
@@ -212,18 +185,15 @@ export interface FileRouteTypes {
     | '/auth'
     | '/categorias'
     | '/contato'
-    | '/empresas'
     | '/fake-news'
     | '/golpes'
     | '/metodologia'
     | '/pesquisar'
     | '/privacidade'
     | '/sitemap.xml'
-    | '/sites'
     | '/sobre'
     | '/termos'
     | '/transparencia'
-    | '/videos'
     | '/painel'
     | '/r/$folder'
     | '/r/$folder/$route'
@@ -234,18 +204,15 @@ export interface FileRouteTypes {
     | '/auth'
     | '/categorias'
     | '/contato'
-    | '/empresas'
     | '/fake-news'
     | '/golpes'
     | '/metodologia'
     | '/pesquisar'
     | '/privacidade'
     | '/sitemap.xml'
-    | '/sites'
     | '/sobre'
     | '/termos'
     | '/transparencia'
-    | '/videos'
     | '/painel'
     | '/r/$folder'
     | '/r/$folder/$route'
@@ -257,18 +224,15 @@ export interface FileRouteTypes {
     | '/auth'
     | '/categorias'
     | '/contato'
-    | '/empresas'
     | '/fake-news'
     | '/golpes'
     | '/metodologia'
     | '/pesquisar'
     | '/privacidade'
     | '/sitemap.xml'
-    | '/sites'
     | '/sobre'
     | '/termos'
     | '/transparencia'
-    | '/videos'
     | '/_authenticated/painel'
     | '/r/$folder'
     | '/r/$folder/$route'
@@ -281,30 +245,20 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CategoriasRoute: typeof CategoriasRoute
   ContatoRoute: typeof ContatoRoute
-  EmpresasRoute: typeof EmpresasRoute
   FakeNewsRoute: typeof FakeNewsRoute
   GolpesRoute: typeof GolpesRoute
   MetodologiaRoute: typeof MetodologiaRoute
   PesquisarRoute: typeof PesquisarRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  SitesRoute: typeof SitesRoute
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   TransparenciaRoute: typeof TransparenciaRoute
-  VideosRoute: typeof VideosRoute
   RFolderRoute: typeof RFolderRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/videos': {
-      id: '/videos'
-      path: '/videos'
-      fullPath: '/videos'
-      preLoaderRoute: typeof VideosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/transparencia': {
       id: '/transparencia'
       path: '/transparencia'
@@ -324,13 +278,6 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sites': {
-      id: '/sites'
-      path: '/sites'
-      fullPath: '/sites'
-      preLoaderRoute: typeof SitesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -373,13 +320,6 @@ declare module '@tanstack/react-router' {
       path: '/fake-news'
       fullPath: '/fake-news'
       preLoaderRoute: typeof FakeNewsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/empresas': {
-      id: '/empresas'
-      path: '/empresas'
-      fullPath: '/empresas'
-      preLoaderRoute: typeof EmpresasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contato': {
@@ -477,18 +417,15 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CategoriasRoute: CategoriasRoute,
   ContatoRoute: ContatoRoute,
-  EmpresasRoute: EmpresasRoute,
   FakeNewsRoute: FakeNewsRoute,
   GolpesRoute: GolpesRoute,
   MetodologiaRoute: MetodologiaRoute,
   PesquisarRoute: PesquisarRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  SitesRoute: SitesRoute,
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   TransparenciaRoute: TransparenciaRoute,
-  VideosRoute: VideosRoute,
   RFolderRoute: RFolderRouteWithChildren,
 }
 export const routeTree = rootRouteImport
