@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { articles } from "@/lib/mock-data";
 
-const BASE_URL = "";
+const BASE_URL = "https://verificadonews.com.br";
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
