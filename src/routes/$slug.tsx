@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Calendar, Eye, Share2, Link2 } from "lucide-react";
+import { Calendar, Eye, Share2, Link2, User } from "lucide-react";
 import { useState } from "react";
 import { PageShell } from "@/components/site/page-shell";
 import { VerdictBadge } from "@/components/site/verdict-badge";

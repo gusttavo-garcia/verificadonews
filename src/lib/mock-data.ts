@@ -24,6 +24,7 @@ export interface Article {
   verdict: Verdict;
   category: Category;
   date: string;
+  author: string;
   views: number;
   type: "noticia" | "golpe" | "empresa" | "site" | "video" | "fake";
   image?: string;
