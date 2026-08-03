@@ -6,10 +6,8 @@ import {
   TrendingUp,
   Clock,
   AlertTriangle,
-  Building2,
-  Globe,
-  Video,
   Newspaper,
+  LayoutGrid,
 } from "lucide-react";
 import { PageShell } from "@/components/site/page-shell";
 import { ArticleCard } from "@/components/site/article-card";
@@ -38,10 +36,8 @@ const shortcuts: Shortcut[] = [
   { to: "/pesquisar", label: "Pesquisas em alta", icon: TrendingUp },
   { to: "/", label: "Verificações recentes", icon: Clock, showRecent: true },
   { to: "/golpes", label: "Golpes recentes", icon: AlertTriangle },
-  { to: "/empresas", label: "Empresas verificadas", icon: Building2 },
-  { to: "/sites", label: "Sites verificados", icon: Globe },
-  { to: "/videos", label: "Vídeos analisados", icon: Video },
   { to: "/fake-news", label: "Fake News", icon: Newspaper },
+  { to: "/categorias", label: "Categorias", icon: LayoutGrid },
 ];
 
 function Index() {
