@@ -6,7 +6,7 @@ import { ShieldCheck, Eye, CheckCircle2, Users, Scale, MessageSquare } from "luc
 export const Route = createFileRoute("/sobre")({
   component: SobrePage,
   head: () => pageHead({
-    title: "Sobre o Verificado News — Verificado News",
+    title: "Sobre o Verificado News — Quem somos",
     description: "Conheça o Verificado News: quem somos, nossa equipe de checagem e como combatemos a desinformação no Brasil com fatos e fontes verificáveis.",
     path: "/sobre",
   }),
