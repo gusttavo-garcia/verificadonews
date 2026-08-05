@@ -99,7 +99,10 @@ export const Route = createFileRoute("/$slug")({
 });
 
 function VerificacaoPage() {
-  const { article } = Route.useLoaderData();
+  const { article, body } = Route.useLoaderData();
+  const bodyHtml = body
+    ? (marked.parse(body, { async: false }) as string)
+    : "";
   const confidence = 99;
   const [copied, setCopied] = useState(false);
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
