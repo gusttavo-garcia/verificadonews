@@ -34,3 +34,15 @@ export const getPublicArticle = createServerFn({ method: "GET" })
       .maybeSingle();
     return { article: row ?? null };
   });
+
+export const listPublicArticles = createServerFn({ method: "GET" }).handler(async () => {
+  const { data } = await serverClient()
+    .from("articles")
+    .select(
+      "slug, title, excerpt, category, verdict, type, author_name, views, image_url, published_at, created_at",
+    )
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+    .limit(60);
+  return { articles: data ?? [] };
+});
