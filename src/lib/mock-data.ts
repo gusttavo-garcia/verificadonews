@@ -268,15 +268,17 @@ export const categories: Category[] = [
 
 export function formatDate(iso: string) {
   if (!iso) return "";
-  if (iso.length === 10 && iso.includes("-")) {
-    const [year, month, day] = iso.split("-").map(Number);
-    if (year && month && day) {
-      const d = new Date(year, month - 1, day);
-      return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
-    }
+  // Deterministic (SSR-safe) dd/mm/yyyy formatting — no locale/timezone dependency.
+  const match = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) {
+    const [, year, month, day] = match;
+    return `${day}/${month}/${year}`;
   }
   const d = new Date(iso);
-  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  if (Number.isNaN(d.getTime())) return "";
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+  return `${day}/${month}/${d.getUTCFullYear()}`;
 }
 
 function getIsoDateDaysAgo(daysAgo: number): string {
