@@ -161,3 +161,29 @@ a[href*="lovable.dev"][target="_blank"],
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+/* Conteúdo de artigos renderizado a partir do editor (markdown/HTML) */
+.prose-verificado h2 {
+  @apply mt-8 text-xl font-bold text-foreground;
+}
+.prose-verificado h3 {
+  @apply mt-6 text-lg font-semibold text-foreground;
+}
+.prose-verificado p {
+  @apply mt-4;
+}
+.prose-verificado ul {
+  @apply mt-4 list-disc space-y-2 pl-6;
+}
+.prose-verificado ol {
+  @apply mt-4 list-decimal space-y-2 pl-6;
+}
+.prose-verificado a {
+  @apply text-primary underline underline-offset-2;
+}
+.prose-verificado blockquote {
+  @apply mt-4 border-l-4 border-border pl-4 italic text-muted-foreground;
+}
+.prose-verificado img {
+  @apply mt-6 rounded-xl;
+}
