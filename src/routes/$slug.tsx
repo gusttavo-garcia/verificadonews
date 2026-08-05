@@ -1,19 +1,37 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Calendar, Eye, Share2, Link2, User } from "lucide-react";
 import { useState } from "react";
+import { marked } from "marked";
 import { PageShell } from "@/components/site/page-shell";
 import { VerdictBadge } from "@/components/site/verdict-badge";
 import { RelatedArticles } from "@/components/site/related-articles";
 import { CommentsSection } from "@/components/site/comments-section";
 import { NewsletterOptIn } from "@/components/site/newsletter-optin";
-import { articles, formatDate } from "@/lib/mock-data";
+import { articles, formatDate, type Article } from "@/lib/mock-data";
+import { getPublicArticle } from "@/lib/public-articles.functions";
 import { SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/$slug")({
-  loader: ({ params }) => {
-    const article = articles.find((a) => a.slug === params.slug);
-    if (!article) throw notFound();
-    return { article };
+  loader: async ({ params }) => {
+    const fallback = articles.find((a) => a.slug === params.slug);
+    const { article: row } = await getPublicArticle({ data: { slug: params.slug } });
+    if (!row) {
+      if (!fallback) throw notFound();
+      return { article: fallback, body: "" };
+    }
+    const article: Article = {
+      slug: row.slug,
+      title: row.title,
+      excerpt: row.excerpt,
+      verdict: row.verdict as Article["verdict"],
+      category: row.category as Article["category"],
+      date: (row.published_at ?? row.created_at ?? "").slice(0, 10),
+      author: row.author_name ?? fallback?.author ?? "Equipe Verificado News",
+      views: row.views ?? 0,
+      type: row.type as Article["type"],
+      image: row.image_url ?? fallback?.image,
+    };
+    return { article, body: row.body ?? "" };
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) return { meta: [] };
@@ -81,7 +99,10 @@ export const Route = createFileRoute("/$slug")({
 });
 
 function VerificacaoPage() {
-  const { article } = Route.useLoaderData();
+  const { article, body } = Route.useLoaderData();
+  const bodyHtml = body
+    ? (marked.parse(body, { async: false }) as string)
+    : "";
   const confidence = 99;
   const [copied, setCopied] = useState(false);
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -189,6 +210,12 @@ function VerificacaoPage() {
           </p>
         </div>
 
+        {bodyHtml ? (
+          <div
+            className="prose-verificado mt-10 space-y-5 text-base leading-relaxed text-foreground/90"
+            dangerouslySetInnerHTML={{ __html: bodyHtml }}
+          />
+        ) : (
         <div className="mt-10 space-y-5 text-base leading-relaxed text-foreground/90">
           <p>
             Nossa equipe realizou a checagem seguindo o protocolo padrão de investigação:
@@ -208,6 +235,7 @@ function VerificacaoPage() {
             <li>Revisão por um editor sênior antes da publicação.</li>
           </ul>
         </div>
+        )}
 
         <div className="mt-10 flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-sm">
           <span className="inline-flex items-center gap-1.5">
