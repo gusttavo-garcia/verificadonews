@@ -345,7 +345,14 @@ function PainelPage() {
       )}
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold">Meus artigos</h2>
+          <div>
+            <h2 className="text-xl font-semibold">Meus artigos</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Total: <strong className="text-foreground">{articles.length}</strong> ·{" "}
+              <strong className="text-foreground">{stats.published}</strong> publicados ·{" "}
+              <strong className="text-foreground">{stats.pending}</strong> pendentes
+            </p>
+          </div>
           <Button
             onClick={() => {
               if (showForm) {
