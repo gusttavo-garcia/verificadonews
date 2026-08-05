@@ -559,12 +559,13 @@ function PainelPage() {
                         {statusLabel[a.status] ?? a.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
                         {(isAdmin || a.status !== "published") && (
                           <Button
                             size="sm"
                             variant="outline"
+                            className="shrink-0"
                             onClick={() => startEdit(a)}
                           >
                             <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
@@ -574,6 +575,7 @@ function PainelPage() {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="shrink-0"
                             onClick={() => mReview.mutate(a.id)}
                             disabled={mReview.isPending}
                           >
@@ -583,6 +585,7 @@ function PainelPage() {
                         {isAdmin && a.status !== "published" && (
                           <Button
                             size="sm"
+                            className="shrink-0"
                             onClick={() => mPublish.mutate(a.id)}
                             disabled={mPublish.isPending}
                           >
@@ -593,6 +596,7 @@ function PainelPage() {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="shrink-0"
                             onClick={() => mUnpublish.mutate(a.id)}
                             disabled={mUnpublish.isPending}
                           >
@@ -603,6 +607,7 @@ function PainelPage() {
                           <Button
                             size="sm"
                             variant="destructive"
+                            className="shrink-0"
                             onClick={() => {
                               if (confirm(`Excluir "${a.title}"?`)) mDelete.mutate(a.id);
                             }}
