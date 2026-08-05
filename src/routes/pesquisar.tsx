@@ -55,7 +55,7 @@ function PesquisarPage() {
 
         <form
           onSubmit={(e) => e.preventDefault()}
-          className="mx-auto mt-10 flex max-w-2xl overflow-hidden rounded-full border border-border bg-background p-1.5 shadow-sm"
+          className="mx-auto mt-10 flex max-w-2xl items-center overflow-hidden rounded-full border border-border bg-background p-1.5 shadow-sm"
         >
           <div className="flex flex-1 items-center gap-3 px-4">
             <Search className="h-5 w-5 text-muted-foreground" />
@@ -66,7 +66,7 @@ function PesquisarPage() {
               className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
             />
           </div>
-          <Button type="submit" className="rounded-full px-6">
+          <Button type="submit" className="shrink-0 self-center rounded-full px-6">
             Verificar
           </Button>
         </form>
