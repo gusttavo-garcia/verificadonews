@@ -210,6 +210,12 @@ function VerificacaoPage() {
           </p>
         </div>
 
+        {bodyHtml ? (
+          <div
+            className="prose-verificado mt-10 space-y-5 text-base leading-relaxed text-foreground/90"
+            dangerouslySetInnerHTML={{ __html: bodyHtml }}
+          />
+        ) : (
         <div className="mt-10 space-y-5 text-base leading-relaxed text-foreground/90">
           <p>
             Nossa equipe realizou a checagem seguindo o protocolo padrão de investigação:
@@ -229,6 +235,7 @@ function VerificacaoPage() {
             <li>Revisão por um editor sênior antes da publicação.</li>
           </ul>
         </div>
+        )}
 
         <div className="mt-10 flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-sm">
           <span className="inline-flex items-center gap-1.5">
