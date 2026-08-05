@@ -1,9 +1,16 @@
 import { ArticleCard } from "./article-card";
-import { articles, type Article } from "@/lib/mock-data";
+import { articles as fallbackArticles, type Article } from "@/lib/mock-data";
 
-export function RelatedArticles({ current }: { current: Article }) {
+export function RelatedArticles({
+  current,
+  pool,
+}: {
+  current: Article;
+  pool?: Article[];
+}) {
+  const source = pool && pool.length > 0 ? pool : fallbackArticles;
   // Prefer same category, then same type, filling up to 4 items.
-  const others = articles.filter((a) => a.slug !== current.slug);
+  const others = source.filter((a) => a.slug !== current.slug);
   const sameCategory = others.filter((a) => a.category === current.category);
   const sameType = others.filter(
     (a) => a.type === current.type && a.category !== current.category,
