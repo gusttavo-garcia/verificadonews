@@ -8,16 +8,34 @@ import { RelatedArticles } from "@/components/site/related-articles";
 import { CommentsSection } from "@/components/site/comments-section";
 import { NewsletterOptIn } from "@/components/site/newsletter-optin";
 import { articles, formatDate, type Article } from "@/lib/mock-data";
-import { getPublicArticle } from "@/lib/public-articles.functions";
+import { getPublicArticle, listPublicArticles } from "@/lib/public-articles.functions";
 import { SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/$slug")({
   loader: async ({ params }) => {
     const fallback = articles.find((a) => a.slug === params.slug);
-    const { article: row } = await getPublicArticle({ data: { slug: params.slug } });
+    const [{ article: row }, { articles: rows }] = await Promise.all([
+      getPublicArticle({ data: { slug: params.slug } }),
+      listPublicArticles(),
+    ]);
+    const related: Article[] = (rows ?? []).map((r) => {
+      const fb = articles.find((a) => a.slug === r.slug);
+      return {
+        slug: r.slug,
+        title: r.title,
+        excerpt: r.excerpt,
+        verdict: r.verdict as Article["verdict"],
+        category: r.category as Article["category"],
+        date: (r.published_at ?? r.created_at ?? "").slice(0, 10),
+        author: r.author_name ?? "Equipe Verificado News",
+        views: r.views ?? 0,
+        type: r.type as Article["type"],
+        image: r.image_url ?? fb?.image,
+      };
+    });
     if (!row) {
       if (!fallback) throw notFound();
-      return { article: fallback, body: "" };
+      return { article: fallback, body: "", related };
     }
     const article: Article = {
       slug: row.slug,
@@ -31,7 +49,7 @@ export const Route = createFileRoute("/$slug")({
       type: row.type as Article["type"],
       image: row.image_url ?? fallback?.image,
     };
-    return { article, body: row.body ?? "" };
+    return { article, body: row.body ?? "", related };
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) return { meta: [] };
@@ -99,7 +117,7 @@ export const Route = createFileRoute("/$slug")({
 });
 
 function VerificacaoPage() {
-  const { article, body } = Route.useLoaderData();
+  const { article, body, related } = Route.useLoaderData();
   const bodyHtml = body
     ? (marked.parse(body, { async: false }) as string)
     : "";
@@ -249,7 +267,7 @@ function VerificacaoPage() {
           </span>
         </div>
 
-        <RelatedArticles current={article} />
+        <RelatedArticles current={article} pool={related} />
         <NewsletterOptIn />
         <CommentsSection slug={article.slug} />
       </article>
