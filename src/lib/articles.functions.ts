@@ -42,8 +42,10 @@ export const listMyArticles = createServerFn({ method: "GET" })
       .select("id, slug, title, excerpt, body, type, status, category, verdict, author_name, author_id, created_at, updated_at, published_at, views, image_url")
       .order("updated_at", { ascending: false });
     if (admin) {
-      // Admins veem tudo, exceto rascunhos de outros autores
-      query = query.or(`status.neq.draft,author_id.eq.${context.userId}`);
+      // Admins veem tudo, exceto rascunhos nunca enviados/publicados de outros autores
+      query = query.or(
+        `status.neq.draft,author_id.eq.${context.userId},published_at.not.is.null`,
+      );
     } else {
       query = query.eq("author_id", context.userId);
     }
