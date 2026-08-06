@@ -140,59 +140,81 @@ function Index() {
 
       {/* Shortcuts */}
       <section className="mx-auto max-w-7xl px-4 py-14">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {shortcuts.map((s) => {
-            const items = listFor(s.list);
-            return (
-              <div
-                key={s.label}
-                className="group rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40 hover:shadow-sm"
-              >
-                <Link to={s.to as "/"} className="block">
-                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
-                    <s.icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="mt-4 text-base font-semibold text-foreground group-hover:text-primary">
-                    {s.label}
-                  </h3>
-                </Link>
-                {s.list === "categorias" ? (
-                  topCategories.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {shortcuts
+            .filter((s) => s.list !== "categorias")
+            .map((s) => {
+              const items = listFor(s.list);
+              return (
+                <div
+                  key={s.label}
+                  className="group rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40 hover:shadow-sm"
+                >
+                  <Link to={s.to as "/"} className="block">
+                    <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
+                      <s.icon className="h-5 w-5" />
+                    </div>
+                    <h3 className="mt-4 text-base font-semibold text-foreground group-hover:text-primary">
+                      {s.label}
+                    </h3>
+                  </Link>
+                  {items.length > 0 && (
                     <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
-                      {topCategories.map(([c, n]) => (
-                        <li key={c} className="flex gap-2">
+                      {items.map((r) => (
+                        <li key={r.slug} className="flex gap-2">
                           <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
                           <Link
-                            to="/categorias"
-                            hash={c}
+                            to="/$slug"
+                            params={{ slug: r.slug }}
                             className="line-clamp-1 hover:text-primary hover:underline"
                           >
-                            {c} <span className="text-muted-foreground/70">({n})</span>
+                            {r.title}
                           </Link>
                         </li>
                       ))}
                     </ul>
-                  )
-                ) : items.length > 0 ? (
-                  <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
-                    {items.map((r) => (
-                      <li key={r.slug} className="flex gap-2">
-                        <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                        <Link
-                          to="/$slug"
-                          params={{ slug: r.slug }}
-                          className="line-clamp-1 hover:text-primary hover:underline"
-                        >
-                          {r.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-            );
-          })}
+                  )}
+                </div>
+              );
+            })}
         </div>
+
+        {/* Categories — full-width, styled differently */}
+        {topCategories.length > 0 && (
+          <div className="mt-4 rounded-2xl border border-border/60 bg-gradient-to-br from-primary/[0.08] via-secondary/[0.12] to-accent/[0.08] p-6 transition hover:shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <Link
+                to="/categorias"
+                className="group flex items-center gap-3"
+              >
+                <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+                  <LayoutGrid className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-foreground group-hover:text-primary">
+                    Categorias
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Explore verificações por tema
+                  </p>
+                </div>
+              </Link>
+              <div className="flex flex-wrap gap-2">
+                {topCategories.map(([c, n]) => (
+                  <Link
+                    key={c}
+                    to="/categorias"
+                    hash={c}
+                    className="rounded-full border border-border bg-background/80 px-3 py-1.5 text-sm text-foreground backdrop-blur-sm transition hover:border-primary hover:bg-background hover:text-primary"
+                  >
+                    {c}{" "}
+                    <span className="text-muted-foreground/80">({n})</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Recent verifications */}
