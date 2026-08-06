@@ -207,6 +207,11 @@ function RootShell({ children }: { children: ReactNode }) {
   gtag('config', 'AW-18036477514');
 </script>
 
+<!-- Event snippet for Visualização de página conversion page -->
+<script>
+  gtag('event', 'conversion', {'send_to': 'AW-18036477514/lkLQCPHaot0cEMqcu5hD'});
+</script>
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
