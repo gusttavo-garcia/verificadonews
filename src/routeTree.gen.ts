@@ -15,6 +15,7 @@ import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PesquisarRouteImport } from './routes/pesquisar'
+import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as MetodologiaRouteImport } from './routes/metodologia'
 import { Route as GolpesRouteImport } from './routes/golpes'
 import { Route as FakeNewsRouteImport } from './routes/fake-news'
@@ -56,6 +57,11 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
 const PesquisarRoute = PesquisarRouteImport.update({
   id: '/pesquisar',
   path: '/pesquisar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NoticiasRoute = NoticiasRouteImport.update({
+  id: '/noticias',
+  path: '/noticias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MetodologiaRoute = MetodologiaRouteImport.update({
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/fake-news': typeof FakeNewsRoute
   '/golpes': typeof GolpesRoute
   '/metodologia': typeof MetodologiaRoute
+  '/noticias': typeof NoticiasRoute
   '/pesquisar': typeof PesquisarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/fake-news': typeof FakeNewsRoute
   '/golpes': typeof GolpesRoute
   '/metodologia': typeof MetodologiaRoute
+  '/noticias': typeof NoticiasRoute
   '/pesquisar': typeof PesquisarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/fake-news': typeof FakeNewsRoute
   '/golpes': typeof GolpesRoute
   '/metodologia': typeof MetodologiaRoute
+  '/noticias': typeof NoticiasRoute
   '/pesquisar': typeof PesquisarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/fake-news'
     | '/golpes'
     | '/metodologia'
+    | '/noticias'
     | '/pesquisar'
     | '/privacidade'
     | '/sitemap.xml'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/fake-news'
     | '/golpes'
     | '/metodologia'
+    | '/noticias'
     | '/pesquisar'
     | '/privacidade'
     | '/sitemap.xml'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/fake-news'
     | '/golpes'
     | '/metodologia'
+    | '/noticias'
     | '/pesquisar'
     | '/privacidade'
     | '/sitemap.xml'
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   FakeNewsRoute: typeof FakeNewsRoute
   GolpesRoute: typeof GolpesRoute
   MetodologiaRoute: typeof MetodologiaRoute
+  NoticiasRoute: typeof NoticiasRoute
   PesquisarRoute: typeof PesquisarRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -299,6 +312,13 @@ declare module '@tanstack/react-router' {
       path: '/pesquisar'
       fullPath: '/pesquisar'
       preLoaderRoute: typeof PesquisarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/noticias': {
+      id: '/noticias'
+      path: '/noticias'
+      fullPath: '/noticias'
+      preLoaderRoute: typeof NoticiasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/metodologia': {
@@ -420,6 +440,7 @@ const rootRouteChildren: RootRouteChildren = {
   FakeNewsRoute: FakeNewsRoute,
   GolpesRoute: GolpesRoute,
   MetodologiaRoute: MetodologiaRoute,
+  NoticiasRoute: NoticiasRoute,
   PesquisarRoute: PesquisarRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
