@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import type { ReactNode } from "react";
 import { PageShell, PageHero } from "./page-shell";
 import { ArticleCard } from "./article-card";
 import { articles as ALL, categories, type Article } from "@/lib/mock-data";
+import { listPublicArticles } from "@/lib/public-articles.functions";
 
 export function ListingPage({
   title,
@@ -18,8 +21,34 @@ export function ListingPage({
   const [cat, setCat] = useState<string>("all");
   const [sort, setSort] = useState<"recent" | "views">("recent");
 
+  const fetchArticles = useServerFn(listPublicArticles);
+  const { data } = useQuery({
+    queryKey: ["public-articles"],
+    queryFn: () => fetchArticles(),
+  });
+
+  const source = useMemo<Article[]>(() => {
+    const rows = data?.articles ?? [];
+    if (rows.length === 0) return ALL;
+    return rows.map((r) => {
+      const fb = ALL.find((a) => a.slug === r.slug);
+      return {
+        slug: r.slug,
+        title: r.title,
+        excerpt: r.excerpt,
+        verdict: r.verdict as Article["verdict"],
+        category: r.category as Article["category"],
+        date: (r.published_at ?? r.created_at ?? "").slice(0, 10),
+        author: r.author_name ?? "Equipe Verificado News",
+        views: r.views ?? 0,
+        type: r.type as Article["type"],
+        image: r.image_url ?? fb?.image,
+      };
+    });
+  }, [data]);
+
   const items = useMemo(() => {
-    let list = ALL.filter(filter);
+    let list = source.filter(filter);
     if (cat !== "all") list = list.filter((a) => a.category === cat);
     list = [...list].sort((a, b) =>
       sort === "recent"
@@ -27,7 +56,7 @@ export function ListingPage({
         : b.views - a.views,
     );
     return list;
-  }, [cat, sort, filter]);
+  }, [cat, sort, filter, source]);
 
   return (
     <PageShell>
