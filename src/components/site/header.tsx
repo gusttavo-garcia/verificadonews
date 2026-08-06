@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 
 const nav = [
   { to: "/", label: "Início" },
+  { to: "/noticias", label: "Notícias" },
   { to: "/golpes", label: "Golpes" },
   { to: "/fake-news", label: "Fake News" },
   { to: "/categorias", label: "Categorias" },
