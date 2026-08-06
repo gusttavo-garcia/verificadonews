@@ -12,11 +12,41 @@ import {
 import { PageShell } from "@/components/site/page-shell";
 import { ArticleCard } from "@/components/site/article-card";
 import { Button } from "@/components/ui/button";
-import { articles } from "@/lib/mock-data";
+import { articles, type Article } from "@/lib/mock-data";
+import { listPublicArticles } from "@/lib/public-articles.functions";
 import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  loader: async () => {
+    const { articles: rows } = await listPublicArticles();
+    const live: Article[] = (rows ?? []).map((r) => {
+      const fb = articles.find((a) => a.slug === r.slug);
+      return {
+        slug: r.slug,
+        title: r.title,
+        excerpt: r.excerpt,
+        verdict: r.verdict as Article["verdict"],
+        category: r.category as Article["category"],
+        date: (r.published_at ?? r.created_at ?? "").slice(0, 10),
+        author: r.author_name ?? "Equipe Verificado News",
+        views: r.views ?? 0,
+        type: r.type as Article["type"],
+        image: r.image_url ?? fb?.image,
+      };
+    });
+    return { live };
+  },
+  errorComponent: ({ error }) => (
+    <div role="alert" className="p-10 text-center text-sm text-muted-foreground">
+      {error.message}
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="p-10 text-center text-sm text-muted-foreground">
+      Nada encontrado.
+    </div>
+  ),
   head: () =>
     pageHead({
       title: "Verificado News — Pesquise e verifique qualquer informação",
@@ -30,24 +60,41 @@ type Shortcut = {
   to: string;
   label: string;
   icon: typeof TrendingUp;
-  showRecent?: boolean;
+  list?: "recent" | "golpes" | "fake";
 };
 const shortcuts: Shortcut[] = [
   { to: "/pesquisar", label: "Pesquisas em alta", icon: TrendingUp },
-  { to: "/", label: "Verificações recentes", icon: Clock, showRecent: true },
-  { to: "/golpes", label: "Golpes recentes", icon: AlertTriangle },
-  { to: "/fake-news", label: "Fake News", icon: Newspaper },
+  { to: "/", label: "Verificações recentes", icon: Clock, list: "recent" },
+  { to: "/golpes", label: "Golpes recentes", icon: AlertTriangle, list: "golpes" },
+  { to: "/fake-news", label: "Fake News", icon: Newspaper, list: "fake" },
   { to: "/categorias", label: "Categorias", icon: LayoutGrid },
 ];
 
 function Index() {
+  const { live } = Route.useLoaderData();
   const [q, setQ] = useState("");
   const sortedArticles = useMemo(
-    () => [...articles].sort((a, b) => b.date.localeCompare(a.date)),
-    [],
+    () => [...(live.length > 0 ? live : articles)].sort((a, b) => b.date.localeCompare(a.date)),
+    [live],
   );
   const recent = sortedArticles.slice(0, 3);
   const feed = sortedArticles.slice(0, 8);
+  const golpes = useMemo(
+    () =>
+      sortedArticles
+        .filter((a) => a.type === "golpe" || (a.type === "empresa" && a.verdict === "falso"))
+        .slice(0, 3),
+    [sortedArticles],
+  );
+  const fakes = useMemo(
+    () =>
+      sortedArticles
+        .filter((a) => a.verdict === "falso" || a.verdict === "enganoso")
+        .slice(0, 3),
+    [sortedArticles],
+  );
+  const listFor = (kind?: Shortcut["list"]) =>
+    kind === "recent" ? recent : kind === "golpes" ? golpes : kind === "fake" ? fakes : [];
   return (
     <PageShell>
       {/* Hero */}
