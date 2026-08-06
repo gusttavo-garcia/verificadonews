@@ -1,8 +1,12 @@
 import { pageHead } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { PageShell, PageHero } from "@/components/site/page-shell";
 import { ArticleCard } from "@/components/site/article-card";
-import { articles, categories } from "@/lib/mock-data";
+import { articles as ALL, categories, type Article } from "@/lib/mock-data";
+import { listPublicArticles } from "@/lib/public-articles.functions";
 import { Tag } from "lucide-react";
 
 export const Route = createFileRoute("/categorias")({
@@ -15,6 +19,32 @@ export const Route = createFileRoute("/categorias")({
 });
 
 function CategoriasPage() {
+  const fetchArticles = useServerFn(listPublicArticles);
+  const { data } = useQuery({
+    queryKey: ["public-articles"],
+    queryFn: () => fetchArticles(),
+  });
+
+  const articles = useMemo<Article[]>(() => {
+    const rows = data?.articles ?? [];
+    if (rows.length === 0) return ALL;
+    return rows.map((r) => {
+      const fb = ALL.find((a) => a.slug === r.slug);
+      return {
+        slug: r.slug,
+        title: r.title,
+        excerpt: r.excerpt,
+        verdict: r.verdict as Article["verdict"],
+        category: r.category as Article["category"],
+        date: (r.published_at ?? r.created_at ?? "").slice(0, 10),
+        author: r.author_name ?? "Equipe Verificado News",
+        views: r.views ?? 0,
+        type: r.type as Article["type"],
+        image: r.image_url ?? fb?.image,
+      };
+    });
+  }, [data]);
+
   return (
     <PageShell>
       <PageHero
@@ -26,6 +56,7 @@ function CategoriasPage() {
         <div className="mb-10 flex flex-wrap gap-2">
           {categories.map((c) => {
             const count = articles.filter((a) => a.category === c).length;
+            if (count === 0) return null;
             return (
               <Link
                 key={c}
@@ -40,7 +71,9 @@ function CategoriasPage() {
         </div>
 
         {categories.map((c) => {
-          const items = articles.filter((a) => a.category === c);
+          const items = articles
+            .filter((a) => a.category === c)
+            .sort((a, b) => b.date.localeCompare(a.date));
           if (items.length === 0) return null;
           return (
             <div key={c} id={c} className="mb-14">
