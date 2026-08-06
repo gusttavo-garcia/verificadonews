@@ -136,30 +136,40 @@ function Index() {
       {/* Shortcuts */}
       <section className="mx-auto max-w-7xl px-4 py-14">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {shortcuts.map((s) => (
-            <Link
-              key={s.label}
-              to={s.to as "/"}
-              className="group rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40 hover:shadow-sm"
-            >
-              <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
-                <s.icon className="h-5 w-5" />
+          {shortcuts.map((s) => {
+            const items = listFor(s.list);
+            return (
+              <div
+                key={s.label}
+                className="group rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40 hover:shadow-sm"
+              >
+                <Link to={s.to as "/"} className="block">
+                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
+                    <s.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold text-foreground group-hover:text-primary">
+                    {s.label}
+                  </h3>
+                </Link>
+                {items.length > 0 && (
+                  <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+                    {items.map((r) => (
+                      <li key={r.slug} className="flex gap-2">
+                        <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
+                        <Link
+                          to="/$slug"
+                          params={{ slug: r.slug }}
+                          className="line-clamp-1 hover:text-primary hover:underline"
+                        >
+                          {r.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <h3 className="mt-4 text-base font-semibold text-foreground group-hover:text-primary">
-                {s.label}
-              </h3>
-              {s.showRecent && (
-                <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
-                  {recent.map((r) => (
-                    <li key={r.slug} className="flex gap-2">
-                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                      <span className="line-clamp-1">{r.title}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Link>
-          ))}
+            );
+          })}
         </div>
       </section>
 
