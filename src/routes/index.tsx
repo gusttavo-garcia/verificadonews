@@ -60,14 +60,14 @@ type Shortcut = {
   to: string;
   label: string;
   icon: typeof TrendingUp;
-  list?: "recent" | "golpes" | "fake";
+  list?: "recent" | "golpes" | "fake" | "categorias";
 };
 const shortcuts: Shortcut[] = [
   { to: "/pesquisar", label: "Pesquisas em alta", icon: TrendingUp },
   { to: "/", label: "Verificações recentes", icon: Clock, list: "recent" },
   { to: "/golpes", label: "Golpes recentes", icon: AlertTriangle, list: "golpes" },
   { to: "/fake-news", label: "Fake News", icon: Newspaper, list: "fake" },
-  { to: "/categorias", label: "Categorias", icon: LayoutGrid },
+  { to: "/categorias", label: "Categorias", icon: LayoutGrid, list: "categorias" },
 ];
 
 function Index() {
@@ -95,6 +95,11 @@ function Index() {
   );
   const listFor = (kind?: Shortcut["list"]) =>
     kind === "recent" ? recent : kind === "golpes" ? golpes : kind === "fake" ? fakes : [];
+  const topCategories = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const a of sortedArticles) counts.set(a.category, (counts.get(a.category) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, [sortedArticles]);
   return (
     <PageShell>
       {/* Hero */}
@@ -135,7 +140,7 @@ function Index() {
 
       {/* Shortcuts */}
       <section className="mx-auto max-w-7xl px-4 py-14">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {shortcuts.map((s) => {
             const items = listFor(s.list);
             return (
@@ -151,7 +156,24 @@ function Index() {
                     {s.label}
                   </h3>
                 </Link>
-                {items.length > 0 && (
+                {s.list === "categorias" ? (
+                  topCategories.length > 0 && (
+                    <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+                      {topCategories.map(([c, n]) => (
+                        <li key={c} className="flex gap-2">
+                          <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
+                          <Link
+                            to="/categorias"
+                            hash={c}
+                            className="line-clamp-1 hover:text-primary hover:underline"
+                          >
+                            {c} <span className="text-muted-foreground/70">({n})</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )
+                ) : items.length > 0 ? (
                   <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
                     {items.map((r) => (
                       <li key={r.slug} className="flex gap-2">
@@ -166,7 +188,7 @@ function Index() {
                       </li>
                     ))}
                   </ul>
-                )}
+                ) : null}
               </div>
             );
           })}
