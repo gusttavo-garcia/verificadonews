@@ -196,6 +196,7 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18036477514">
 </script>
 <script>
