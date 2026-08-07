@@ -22,6 +22,7 @@ export type Database = {
           category: string
           cover_url: string | null
           created_at: string
+          deleted_at: string | null
           excerpt: string
           id: string
           image_url: string | null
@@ -41,6 +42,7 @@ export type Database = {
           category: string
           cover_url?: string | null
           created_at?: string
+          deleted_at?: string | null
           excerpt?: string
           id?: string
           image_url?: string | null
@@ -60,6 +62,7 @@ export type Database = {
           category?: string
           cover_url?: string | null
           created_at?: string
+          deleted_at?: string | null
           excerpt?: string
           id?: string
           image_url?: string | null
