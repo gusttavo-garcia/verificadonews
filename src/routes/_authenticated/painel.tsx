@@ -694,7 +694,14 @@ function PainelPage() {
                           <Button
                             size="sm"
                             className="shrink-0"
-                            onClick={() => mPublish.mutate(a.id)}
+                            onClick={() =>
+                              setConfirmAction({
+                                title: "Publicar artigo?",
+                                description: `"${a.title}" ficará visível publicamente no site.`,
+                                confirmLabel: "Publicar",
+                                run: () => mPublish.mutate(a.id),
+                              })
+                            }
                             disabled={mPublish.isPending}
                           >
                             <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Publicar
@@ -705,7 +712,14 @@ function PainelPage() {
                             size="sm"
                             variant="outline"
                             className="shrink-0"
-                            onClick={() => mUnpublish.mutate(a.id)}
+                            onClick={() =>
+                              setConfirmAction({
+                                title: "Voltar para rascunho?",
+                                description: `"${a.title}" deixará de aparecer no site e voltará como rascunho.`,
+                                confirmLabel: "Despublicar",
+                                run: () => mUnpublish.mutate(a.id),
+                              })
+                            }
                             disabled={mUnpublish.isPending}
                           >
                             <EyeOff className="mr-1 h-3.5 w-3.5" /> Despublicar
@@ -716,9 +730,15 @@ function PainelPage() {
                             size="sm"
                             variant="destructive"
                             className="shrink-0"
-                            onClick={() => {
-                              if (confirm(`Excluir "${a.title}"?`)) mDelete.mutate(a.id);
-                            }}
+                            onClick={() =>
+                              setConfirmAction({
+                                title: "Mover para a lixeira?",
+                                description: `"${a.title}" será movido para a lixeira e poderá ser restaurado depois.`,
+                                confirmLabel: "Mover para lixeira",
+                                destructive: true,
+                                run: () => mDelete.mutate(a.id),
+                              })
+                            }
                             disabled={mDelete.isPending}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
