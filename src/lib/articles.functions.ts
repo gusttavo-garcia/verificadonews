@@ -40,6 +40,7 @@ export const listMyArticles = createServerFn({ method: "GET" })
     let query = context.supabase
       .from("articles")
       .select("id, slug, title, excerpt, body, type, status, category, verdict, author_name, author_id, created_at, updated_at, published_at, views, image_url")
+      .is("deleted_at", null)
       .order("updated_at", { ascending: false });
     if (admin) {
       // Admins veem tudo, exceto rascunhos nunca enviados/publicados de outros autores
@@ -183,8 +184,50 @@ export const unpublishArticle = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// Admin deletes
+// Admin deletes (soft delete -> lixeira)
 export const deleteArticle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    if (!(await isAdmin(context))) throw new Error("Forbidden");
+    const { error } = await context.supabase
+      .from("articles")
+      .update({ deleted_at: new Date().toISOString(), status: "draft" })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Lixeira: lista artigos excluídos (somente admin)
+export const listTrashedArticles = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    if (!(await isAdmin(context))) return { articles: [] };
+    const { data, error } = await context.supabase
+      .from("articles")
+      .select("id, slug, title, category, verdict, author_name, deleted_at")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return { articles: data ?? [] };
+  });
+
+// Restaura da lixeira
+export const restoreArticle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    if (!(await isAdmin(context))) throw new Error("Forbidden");
+    const { error } = await context.supabase
+      .from("articles")
+      .update({ deleted_at: null })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Exclusão definitiva
+export const purgeArticle = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {

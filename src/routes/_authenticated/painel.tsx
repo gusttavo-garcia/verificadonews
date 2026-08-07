@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon, Pencil, Upload, X } from "lucide-react";
+import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon, Pencil, Upload, X, RotateCcw, Filter } from "lucide-react";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,9 @@ import {
   requestReview,
   unpublishArticle,
   updateArticle,
+  listTrashedArticles,
+  restoreArticle,
+  purgeArticle,
 } from "@/lib/articles.functions";
 import { listUsers, setUserRole, createUser, updateUser } from "@/lib/users.functions";
 import {
@@ -37,6 +40,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { listNewsletterSubscribers } from "@/lib/comments.functions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { SplitRedirectorManager } from "@/components/site/split-redirector-manager";
 import type { AppRole } from "@/hooks/use-auth";
 
@@ -130,6 +143,22 @@ const statusStyles: Record<string, string> = {
   published: "bg-[color:var(--brand-teal)]/20 text-[color:var(--brand-teal)]",
 };
 
+const verdictLabel: Record<string, string> = {
+  verificado: "Verificado",
+  falso: "Falso",
+  enganoso: "Enganoso",
+  parcial: "Parcialmente Verdade",
+  apuracao: "Em Apuração",
+};
+
+type PendingAction = {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  destructive?: boolean;
+  run: () => void;
+};
+
 function PainelPage() {
   const navigate = useNavigate();
   const { roles, displayName, loading, user } = useAuth();
@@ -152,6 +181,11 @@ function PainelPage() {
   const unpublishFn = useServerFn(unpublishArticle);
   const deleteFn = useServerFn(deleteArticle);
   const listUsersFn = useServerFn(listUsers);
+
+  const [confirmAction, setConfirmAction] = useState<PendingAction | null>(null);
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterVerdict, setFilterVerdict] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   const { data: usersData } = useQuery({
     queryKey: ["panel-users"],
@@ -288,6 +322,17 @@ function PainelPage() {
   if (!isStaff) return null;
 
   const articles = data?.articles ?? [];
+  const filteredArticles = articles.filter(
+    (a: any) =>
+      (filterCategory === "all" || a.category === filterCategory) &&
+      (filterVerdict === "all" || a.verdict === filterVerdict) &&
+      (filterStatus === "all" || a.status === filterStatus),
+  );
+  const hasFilters =
+    filterCategory !== "all" || filterVerdict !== "all" || filterStatus !== "all";
+  const articleCategories = Array.from(
+    new Set(articles.map((a: any) => a.category).filter(Boolean)),
+  ).sort() as string[];
   const stats = {
     published: articles.filter((a: any) => a.status === "published").length,
     pending: articles.filter((a: any) => a.status === "pending_review").length,
@@ -337,8 +382,24 @@ function PainelPage() {
       {isAdmin && (
         <PendingReviewSection
           articles={articles}
-          onPublish={(id) => mPublish.mutate(id)}
-          onUnpublish={(id) => mUnpublish.mutate(id)}
+          onPublish={(id) => {
+            const a = articles.find((x: any) => x.id === id);
+            setConfirmAction({
+              title: "Publicar artigo?",
+              description: `"${a?.title ?? "Este artigo"}" ficará visível publicamente no site.`,
+              confirmLabel: "Publicar",
+              run: () => mPublish.mutate(id),
+            });
+          }}
+          onUnpublish={(id) => {
+            const a = articles.find((x: any) => x.id === id);
+            setConfirmAction({
+              title: "Voltar para rascunho?",
+              description: `"${a?.title ?? "Este artigo"}" voltará para rascunho.`,
+              confirmLabel: "Voltar para rascunho",
+              run: () => mUnpublish.mutate(id),
+            });
+          }}
           publishPending={mPublish.isPending}
           unpublishPending={mUnpublish.isPending}
         />
@@ -509,12 +570,71 @@ function PainelPage() {
           </form>
         )}
 
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Filter className="h-4 w-4" /> Filtros
+          </div>
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-[190px]">
+              <SelectValue placeholder="Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as categorias</SelectItem>
+              {articleCategories.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterVerdict} onValueChange={setFilterVerdict}>
+            <SelectTrigger className="w-[190px]">
+              <SelectValue placeholder="Veredito" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os vereditos</SelectItem>
+              {Object.entries(verdictLabel).map(([v, label]) => (
+                <SelectItem key={v} value={v}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="published">Publicado</SelectItem>
+              <SelectItem value="pending_review">Em revisão</SelectItem>
+              <SelectItem value="draft">Rascunho</SelectItem>
+            </SelectContent>
+          </Select>
+          {hasFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setFilterCategory("all");
+                setFilterVerdict("all");
+                setFilterStatus("all");
+              }}
+            >
+              <X className="mr-1 h-3.5 w-3.5" /> Limpar
+            </Button>
+          )}
+          <span className="ml-auto text-sm text-muted-foreground">
+            {filteredArticles.length} de {articles.length}
+          </span>
+        </div>
+
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
           {isLoading ? (
             <div className="p-8 text-center text-muted-foreground">Carregando…</div>
-          ) : !data?.articles.length ? (
+          ) : !articles.length ? (
             <div className="p-8 text-center text-muted-foreground">
               Nenhum artigo ainda. Crie um novo rascunho.
+            </div>
+          ) : !filteredArticles.length ? (
+            <div className="p-8 text-center text-muted-foreground">
+              Nenhum artigo corresponde aos filtros selecionados.
             </div>
           ) : (
             <table className="w-full text-sm">
@@ -523,12 +643,13 @@ function PainelPage() {
                   <th className="px-4 py-3">Título</th>
                   {isAdmin && <th className="px-4 py-3">Autor</th>}
                   <th className="px-4 py-3">Categoria</th>
+                  <th className="px-4 py-3">Veredito</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {data.articles.map((a: any) => (
+                {filteredArticles.map((a: any) => (
                   <tr key={a.id} className="border-t border-border">
                     <td className="px-4 py-3 font-medium text-foreground">
                       <div>{a.title}</div>
@@ -552,6 +673,9 @@ function PainelPage() {
                       </td>
                     )}
                     <td className="px-4 py-3 text-muted-foreground">{a.category}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {verdictLabel[a.verdict] ?? a.verdict}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[a.status] ?? ""}`}
@@ -586,7 +710,14 @@ function PainelPage() {
                           <Button
                             size="sm"
                             className="shrink-0"
-                            onClick={() => mPublish.mutate(a.id)}
+                            onClick={() =>
+                              setConfirmAction({
+                                title: "Publicar artigo?",
+                                description: `"${a.title}" ficará visível publicamente no site.`,
+                                confirmLabel: "Publicar",
+                                run: () => mPublish.mutate(a.id),
+                              })
+                            }
                             disabled={mPublish.isPending}
                           >
                             <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Publicar
@@ -597,7 +728,14 @@ function PainelPage() {
                             size="sm"
                             variant="outline"
                             className="shrink-0"
-                            onClick={() => mUnpublish.mutate(a.id)}
+                            onClick={() =>
+                              setConfirmAction({
+                                title: "Voltar para rascunho?",
+                                description: `"${a.title}" deixará de aparecer no site e voltará como rascunho.`,
+                                confirmLabel: "Despublicar",
+                                run: () => mUnpublish.mutate(a.id),
+                              })
+                            }
                             disabled={mUnpublish.isPending}
                           >
                             <EyeOff className="mr-1 h-3.5 w-3.5" /> Despublicar
@@ -608,9 +746,15 @@ function PainelPage() {
                             size="sm"
                             variant="destructive"
                             className="shrink-0"
-                            onClick={() => {
-                              if (confirm(`Excluir "${a.title}"?`)) mDelete.mutate(a.id);
-                            }}
+                            onClick={() =>
+                              setConfirmAction({
+                                title: "Mover para a lixeira?",
+                                description: `"${a.title}" será movido para a lixeira e poderá ser restaurado depois.`,
+                                confirmLabel: "Mover para lixeira",
+                                destructive: true,
+                                run: () => mDelete.mutate(a.id),
+                              })
+                            }
                             disabled={mDelete.isPending}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -628,7 +772,147 @@ function PainelPage() {
       {isAdmin && <SplitRedirectorManager />}
       {isAdmin && <UsersSection currentUserId={user?.id ?? null} />}
       {isAdmin && <NewsletterSection />}
+      {isAdmin && <TrashSection onConfirm={setConfirmAction} />}
+      <AlertDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmAction(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmAction?.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmAction?.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className={
+                confirmAction?.destructive
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : ""
+              }
+              onClick={() => {
+                confirmAction?.run();
+                setConfirmAction(null);
+              }}
+            >
+              {confirmAction?.confirmLabel ?? "Confirmar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageShell>
+  );
+}
+
+function TrashSection({
+  onConfirm,
+}: {
+  onConfirm: (action: PendingAction) => void;
+}) {
+  const qc = useQueryClient();
+  const listTrashFn = useServerFn(listTrashedArticles);
+  const restoreFn = useServerFn(restoreArticle);
+  const purgeFn = useServerFn(purgeArticle);
+
+  const { data } = useQuery({
+    queryKey: ["panel-trash"],
+    queryFn: () => listTrashFn(),
+  });
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["panel-trash"] });
+    qc.invalidateQueries({ queryKey: ["panel-articles"] });
+  };
+
+  const mRestore = useMutation({
+    mutationFn: (id: string) => restoreFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Artigo restaurado.");
+      invalidate();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+  const mPurge = useMutation({
+    mutationFn: (id: string) => purgeFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Artigo excluído definitivamente.");
+      invalidate();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+
+  const items = data?.articles ?? [];
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 pb-14">
+      <div className="mb-4 flex items-center gap-3">
+        <h2 className="text-xl font-semibold">Lixeira</h2>
+        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+          {items.length}
+        </span>
+      </div>
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        {items.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground">
+            A lixeira está vazia.
+          </div>
+        ) : (
+          <ul className="divide-y divide-border">
+            {items.map((a: any) => (
+              <li
+                key={a.id}
+                className="flex flex-wrap items-center justify-between gap-3 p-4"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-foreground">{a.title}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {a.category} · {a.author_name ?? "Sem autor"} · excluído em{" "}
+                    {new Date(a.deleted_at).toLocaleDateString("pt-BR")}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="whitespace-nowrap"
+                    onClick={() =>
+                      onConfirm({
+                        title: "Restaurar artigo?",
+                        description: `"${a.title}" voltará para a lista de artigos como rascunho.`,
+                        confirmLabel: "Restaurar",
+                        run: () => mRestore.mutate(a.id),
+                      })
+                    }
+                    disabled={mRestore.isPending}
+                  >
+                    <RotateCcw className="mr-1 h-3.5 w-3.5" /> Restaurar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="whitespace-nowrap"
+                    onClick={() =>
+                      onConfirm({
+                        title: "Excluir definitivamente?",
+                        description: `"${a.title}" será apagado para sempre. Esta ação não pode ser desfeita.`,
+                        confirmLabel: "Excluir para sempre",
+                        destructive: true,
+                        run: () => mPurge.mutate(a.id),
+                      })
+                    }
+                    disabled={mPurge.isPending}
+                  >
+                    <Trash2 className="mr-1 h-3.5 w-3.5" /> Excluir
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   );
 }
 
