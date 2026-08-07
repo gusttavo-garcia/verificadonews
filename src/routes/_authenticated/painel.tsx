@@ -756,7 +756,147 @@ function PainelPage() {
       {isAdmin && <SplitRedirectorManager />}
       {isAdmin && <UsersSection currentUserId={user?.id ?? null} />}
       {isAdmin && <NewsletterSection />}
+      {isAdmin && <TrashSection onConfirm={setConfirmAction} />}
+      <AlertDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmAction(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmAction?.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmAction?.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className={
+                confirmAction?.destructive
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : ""
+              }
+              onClick={() => {
+                confirmAction?.run();
+                setConfirmAction(null);
+              }}
+            >
+              {confirmAction?.confirmLabel ?? "Confirmar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageShell>
+  );
+}
+
+function TrashSection({
+  onConfirm,
+}: {
+  onConfirm: (action: PendingAction) => void;
+}) {
+  const qc = useQueryClient();
+  const listTrashFn = useServerFn(listTrashedArticles);
+  const restoreFn = useServerFn(restoreArticle);
+  const purgeFn = useServerFn(purgeArticle);
+
+  const { data } = useQuery({
+    queryKey: ["panel-trash"],
+    queryFn: () => listTrashFn(),
+  });
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["panel-trash"] });
+    qc.invalidateQueries({ queryKey: ["panel-articles"] });
+  };
+
+  const mRestore = useMutation({
+    mutationFn: (id: string) => restoreFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Artigo restaurado.");
+      invalidate();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+  const mPurge = useMutation({
+    mutationFn: (id: string) => purgeFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Artigo excluído definitivamente.");
+      invalidate();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+
+  const items = data?.articles ?? [];
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 pb-14">
+      <div className="mb-4 flex items-center gap-3">
+        <h2 className="text-xl font-semibold">Lixeira</h2>
+        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+          {items.length}
+        </span>
+      </div>
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        {items.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground">
+            A lixeira está vazia.
+          </div>
+        ) : (
+          <ul className="divide-y divide-border">
+            {items.map((a: any) => (
+              <li
+                key={a.id}
+                className="flex flex-wrap items-center justify-between gap-3 p-4"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-foreground">{a.title}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {a.category} · {a.author_name ?? "Sem autor"} · excluído em{" "}
+                    {new Date(a.deleted_at).toLocaleDateString("pt-BR")}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="whitespace-nowrap"
+                    onClick={() =>
+                      onConfirm({
+                        title: "Restaurar artigo?",
+                        description: `"${a.title}" voltará para a lista de artigos como rascunho.`,
+                        confirmLabel: "Restaurar",
+                        run: () => mRestore.mutate(a.id),
+                      })
+                    }
+                    disabled={mRestore.isPending}
+                  >
+                    <RotateCcw className="mr-1 h-3.5 w-3.5" /> Restaurar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="whitespace-nowrap"
+                    onClick={() =>
+                      onConfirm({
+                        title: "Excluir definitivamente?",
+                        description: `"${a.title}" será apagado para sempre. Esta ação não pode ser desfeita.`,
+                        confirmLabel: "Excluir para sempre",
+                        destructive: true,
+                        run: () => mPurge.mutate(a.id),
+                      })
+                    }
+                    disabled={mPurge.isPending}
+                  >
+                    <Trash2 className="mr-1 h-3.5 w-3.5" /> Excluir
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   );
 }
 
