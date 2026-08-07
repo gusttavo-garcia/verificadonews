@@ -382,8 +382,24 @@ function PainelPage() {
       {isAdmin && (
         <PendingReviewSection
           articles={articles}
-          onPublish={(id) => mPublish.mutate(id)}
-          onUnpublish={(id) => mUnpublish.mutate(id)}
+          onPublish={(id) => {
+            const a = articles.find((x: any) => x.id === id);
+            setConfirmAction({
+              title: "Publicar artigo?",
+              description: `"${a?.title ?? "Este artigo"}" ficará visível publicamente no site.`,
+              confirmLabel: "Publicar",
+              run: () => mPublish.mutate(id),
+            });
+          }}
+          onUnpublish={(id) => {
+            const a = articles.find((x: any) => x.id === id);
+            setConfirmAction({
+              title: "Voltar para rascunho?",
+              description: `"${a?.title ?? "Este artigo"}" voltará para rascunho.`,
+              confirmLabel: "Voltar para rascunho",
+              run: () => mUnpublish.mutate(id),
+            });
+          }}
           publishPending={mPublish.isPending}
           unpublishPending={mUnpublish.isPending}
         />
