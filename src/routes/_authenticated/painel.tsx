@@ -143,6 +143,22 @@ const statusStyles: Record<string, string> = {
   published: "bg-[color:var(--brand-teal)]/20 text-[color:var(--brand-teal)]",
 };
 
+const verdictLabel: Record<string, string> = {
+  verificado: "Verificado",
+  falso: "Falso",
+  enganoso: "Enganoso",
+  parcial: "Parcialmente Verdade",
+  apuracao: "Em Apuração",
+};
+
+type PendingAction = {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  destructive?: boolean;
+  run: () => void;
+};
+
 function PainelPage() {
   const navigate = useNavigate();
   const { roles, displayName, loading, user } = useAuth();
