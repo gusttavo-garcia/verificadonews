@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Calendar, Eye, Share2, Link2, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { marked } from "marked";
 import { PageShell } from "@/components/site/page-shell";
 import { VerdictBadge } from "@/components/site/verdict-badge";
@@ -8,7 +8,11 @@ import { RelatedArticles } from "@/components/site/related-articles";
 import { CommentsSection } from "@/components/site/comments-section";
 import { NewsletterOptIn } from "@/components/site/newsletter-optin";
 import { articles, formatDate, type Article } from "@/lib/mock-data";
-import { getPublicArticle, listPublicArticles } from "@/lib/public-articles.functions";
+import {
+  getPublicArticle,
+  listPublicArticles,
+  registerArticleView,
+} from "@/lib/public-articles.functions";
 import { SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/$slug")({
@@ -118,6 +122,12 @@ export const Route = createFileRoute("/$slug")({
 
 function VerificacaoPage() {
   const { article, body, related } = Route.useLoaderData();
+  useEffect(() => {
+    const key = `viewed:${article.slug}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    void registerArticleView({ data: { slug: article.slug } }).catch(() => {});
+  }, [article.slug]);
   const bodyHtml = body
     ? (marked.parse(body, { async: false }) as string)
     : "";

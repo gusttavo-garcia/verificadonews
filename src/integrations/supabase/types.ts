@@ -161,6 +161,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_article_views: { Args: { _slug: string }; Returns: undefined }
       list_comments_public: {
         Args: { _slug: string }
         Returns: {

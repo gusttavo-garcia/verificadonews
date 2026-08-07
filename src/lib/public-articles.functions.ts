@@ -46,3 +46,10 @@ export const listPublicArticles = createServerFn({ method: "GET" }).handler(asyn
     .limit(60);
   return { articles: data ?? [] };
 });
+
+export const registerArticleView = createServerFn({ method: "POST" })
+  .inputValidator((input) => z.object({ slug: z.string().min(1) }).parse(input))
+  .handler(async ({ data }) => {
+    await serverClient().rpc("increment_article_views", { _slug: data.slug });
+    return { ok: true };
+  });
