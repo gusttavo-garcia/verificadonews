@@ -554,12 +554,71 @@ function PainelPage() {
           </form>
         )}
 
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Filter className="h-4 w-4" /> Filtros
+          </div>
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-[190px]">
+              <SelectValue placeholder="Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as categorias</SelectItem>
+              {articleCategories.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterVerdict} onValueChange={setFilterVerdict}>
+            <SelectTrigger className="w-[190px]">
+              <SelectValue placeholder="Veredito" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os vereditos</SelectItem>
+              {Object.entries(verdictLabel).map(([v, label]) => (
+                <SelectItem key={v} value={v}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="published">Publicado</SelectItem>
+              <SelectItem value="pending_review">Em revisão</SelectItem>
+              <SelectItem value="draft">Rascunho</SelectItem>
+            </SelectContent>
+          </Select>
+          {hasFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setFilterCategory("all");
+                setFilterVerdict("all");
+                setFilterStatus("all");
+              }}
+            >
+              <X className="mr-1 h-3.5 w-3.5" /> Limpar
+            </Button>
+          )}
+          <span className="ml-auto text-sm text-muted-foreground">
+            {filteredArticles.length} de {articles.length}
+          </span>
+        </div>
+
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
           {isLoading ? (
             <div className="p-8 text-center text-muted-foreground">Carregando…</div>
-          ) : !data?.articles.length ? (
+          ) : !articles.length ? (
             <div className="p-8 text-center text-muted-foreground">
               Nenhum artigo ainda. Crie um novo rascunho.
+            </div>
+          ) : !filteredArticles.length ? (
+            <div className="p-8 text-center text-muted-foreground">
+              Nenhum artigo corresponde aos filtros selecionados.
             </div>
           ) : (
             <table className="w-full text-sm">
@@ -568,12 +627,13 @@ function PainelPage() {
                   <th className="px-4 py-3">Título</th>
                   {isAdmin && <th className="px-4 py-3">Autor</th>}
                   <th className="px-4 py-3">Categoria</th>
+                  <th className="px-4 py-3">Veredito</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {data.articles.map((a: any) => (
+                {filteredArticles.map((a: any) => (
                   <tr key={a.id} className="border-t border-border">
                     <td className="px-4 py-3 font-medium text-foreground">
                       <div>{a.title}</div>
@@ -597,6 +657,9 @@ function PainelPage() {
                       </td>
                     )}
                     <td className="px-4 py-3 text-muted-foreground">{a.category}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {verdictLabel[a.verdict] ?? a.verdict}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[a.status] ?? ""}`}
