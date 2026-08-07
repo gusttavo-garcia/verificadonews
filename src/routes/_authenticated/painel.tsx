@@ -182,6 +182,11 @@ function PainelPage() {
   const deleteFn = useServerFn(deleteArticle);
   const listUsersFn = useServerFn(listUsers);
 
+  const [confirmAction, setConfirmAction] = useState<PendingAction | null>(null);
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterVerdict, setFilterVerdict] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+
   const { data: usersData } = useQuery({
     queryKey: ["panel-users"],
     queryFn: () => listUsersFn(),
@@ -317,6 +322,17 @@ function PainelPage() {
   if (!isStaff) return null;
 
   const articles = data?.articles ?? [];
+  const filteredArticles = articles.filter(
+    (a: any) =>
+      (filterCategory === "all" || a.category === filterCategory) &&
+      (filterVerdict === "all" || a.verdict === filterVerdict) &&
+      (filterStatus === "all" || a.status === filterStatus),
+  );
+  const hasFilters =
+    filterCategory !== "all" || filterVerdict !== "all" || filterStatus !== "all";
+  const articleCategories = Array.from(
+    new Set(articles.map((a: any) => a.category).filter(Boolean)),
+  ).sort() as string[];
   const stats = {
     published: articles.filter((a: any) => a.status === "published").length,
     pending: articles.filter((a: any) => a.status === "pending_review").length,
