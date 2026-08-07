@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon, Pencil, Upload, X } from "lucide-react";
+import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon, Pencil, Upload, X, RotateCcw, Filter } from "lucide-react";
 import { PageShell } from "@/components/site/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,9 @@ import {
   requestReview,
   unpublishArticle,
   updateArticle,
+  listTrashedArticles,
+  restoreArticle,
+  purgeArticle,
 } from "@/lib/articles.functions";
 import { listUsers, setUserRole, createUser, updateUser } from "@/lib/users.functions";
 import {
@@ -37,6 +40,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { listNewsletterSubscribers } from "@/lib/comments.functions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { SplitRedirectorManager } from "@/components/site/split-redirector-manager";
 import type { AppRole } from "@/hooks/use-auth";
 
