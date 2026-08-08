@@ -97,8 +97,11 @@ function Index() {
     kind === "recent" ? recent : kind === "golpes" ? golpes : kind === "fake" ? fakes : [];
   const topCategories = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const a of sortedArticles) counts.set(a.category, (counts.get(a.category) ?? 0) + 1);
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+    for (const a of sortedArticles) {
+      if (!a.category) continue;
+      counts.set(a.category, (counts.get(a.category) ?? 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]);
   }, [sortedArticles]);
   return (
     <PageShell>
