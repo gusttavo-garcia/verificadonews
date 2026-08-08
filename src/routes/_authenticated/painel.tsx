@@ -782,6 +782,7 @@ function PainelPage() {
         </div>
       </section>
       {isAdmin && <SplitRedirectorManager />}
+      {isAdmin && <CategoriesSection onConfirm={setConfirmAction} />}
       {isAdmin && <UsersSection currentUserId={user?.id ?? null} />}
       {isAdmin && <NewsletterSection />}
       {isAdmin && <TrashSection onConfirm={setConfirmAction} />}
