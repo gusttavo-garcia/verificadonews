@@ -824,6 +824,123 @@ function TrashSection({
 }: {
   onConfirm: (action: PendingAction) => void;
 }) {
+  return <TrashSectionInner onConfirm={onConfirm} />;
+}
+
+function CategoriesSection({
+  onConfirm,
+}: {
+  onConfirm: (action: PendingAction) => void;
+}) {
+  const qc = useQueryClient();
+  const listFn = useServerFn(listCategories);
+  const createFn = useServerFn(createCategory);
+  const deleteFn = useServerFn(deleteCategory);
+  const [name, setName] = useState("");
+
+  const { data } = useQuery({ queryKey: ["categories"], queryFn: () => listFn() });
+  const items = data?.categories ?? [];
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["categories"] });
+    qc.invalidateQueries({ queryKey: ["panel-articles"] });
+    qc.invalidateQueries({ queryKey: ["public-articles"] });
+  };
+
+  const mCreate = useMutation({
+    mutationFn: () => createFn({ data: { name: name.trim() } }),
+    onSuccess: () => {
+      toast.success("Categoria adicionada.");
+      setName("");
+      invalidate();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+
+  const mDelete = useMutation({
+    mutationFn: (id: string) => deleteFn({ data: { id } }),
+    onSuccess: (res: any) => {
+      toast.success(
+        res?.affected
+          ? `Categoria removida. ${res.affected} artigo(s) voltaram para rascunho sem categoria definida.`
+          : "Categoria removida.",
+      );
+      invalidate();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 pb-14">
+      <div className="mb-4 flex items-center gap-3">
+        <h2 className="text-xl font-semibold">Categorias</h2>
+        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+          {items.length}
+        </span>
+      </div>
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (name.trim().length < 2) return;
+            mCreate.mutate();
+          }}
+          className="mb-5 flex flex-wrap items-end gap-3"
+        >
+          <div className="min-w-[220px] flex-1">
+            <Label htmlFor="new-category">Nova categoria</Label>
+            <Input
+              id="new-category"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ex.: Educação"
+            />
+          </div>
+          <Button type="submit" disabled={mCreate.isPending}>
+            <Plus className="mr-2 h-4 w-4" /> Adicionar
+          </Button>
+        </form>
+        {items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhuma categoria cadastrada.</p>
+        ) : (
+          <ul className="flex flex-wrap gap-2">
+            {items.map((c) => (
+              <li
+                key={c.id}
+                className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm"
+              >
+                {c.name}
+                <button
+                  type="button"
+                  aria-label={`Remover categoria ${c.name}`}
+                  className="text-muted-foreground transition hover:text-destructive"
+                  onClick={() =>
+                    onConfirm({
+                      title: `Remover a categoria "${c.name}"?`,
+                      description:
+                        "Todos os artigos dessa categoria voltarão para rascunho e ficarão marcados como \u201cSem categoria definida\u201d.",
+                      confirmLabel: "Remover",
+                      destructive: true,
+                      run: () => mDelete.mutate(c.id),
+                    })
+                  }
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function TrashSectionInner({
+  onConfirm,
+}: {
+  onConfirm: (action: PendingAction) => void;
+}) {
   const qc = useQueryClient();
   const listTrashFn = useServerFn(listTrashedArticles);
   const restoreFn = useServerFn(restoreArticle);
