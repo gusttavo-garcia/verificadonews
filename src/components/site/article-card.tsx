@@ -27,7 +27,7 @@ export function ArticleCard({ article }: { article: Article }) {
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <VerdictBadge verdict={article.verdict} />
           <span className="rounded-full bg-[color:var(--brand-yellow)]/50 px-2.5 py-0.5 text-xs font-medium text-[oklch(0.35_0.08_60)]">
-            {article.category}
+            {article.category || "Sem categoria definida"}
           </span>
         </div>
         <h3 className="text-lg font-semibold leading-snug text-foreground group-hover:text-primary">

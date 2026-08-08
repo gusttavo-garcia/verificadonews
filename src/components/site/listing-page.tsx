@@ -4,8 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import type { ReactNode } from "react";
 import { PageShell, PageHero } from "./page-shell";
 import { ArticleCard } from "./article-card";
-import { articles as ALL, categories, type Article } from "@/lib/mock-data";
+import { articles as ALL, type Article } from "@/lib/mock-data";
 import { listPublicArticles } from "@/lib/public-articles.functions";
+import { listCategories } from "@/lib/categories.functions";
 
 export function ListingPage({
   title,
@@ -25,6 +26,11 @@ export function ListingPage({
   const { data } = useQuery({
     queryKey: ["public-articles"],
     queryFn: () => fetchArticles(),
+  });
+  const fetchCategories = useServerFn(listCategories);
+  const { data: catData } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => fetchCategories(),
   });
 
   const source = useMemo<Article[]>(() => {
@@ -58,6 +64,12 @@ export function ListingPage({
     return list;
   }, [cat, sort, filter, source]);
 
+  const categoryOptions = useMemo(() => {
+    const names = new Set<string>((catData?.categories ?? []).map((c) => c.name));
+    for (const a of source) if (a.category) names.add(a.category);
+    return [...names].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [catData, source]);
+
   return (
     <PageShell>
       <PageHero title={title} subtitle={subtitle} icon={icon} />
@@ -69,7 +81,7 @@ export function ListingPage({
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
           >
             <option value="all">Todas as categorias</option>
-            {categories.map((c) => (
+            {categoryOptions.map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
