@@ -502,7 +502,7 @@ function PainelPage() {
                   value={form.category}
                   onValueChange={(v) => setForm({ ...form, category: v as typeof form.category })}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     {categories.map((c) => (
                       <SelectItem key={c} value={c}>{c}</SelectItem>
