@@ -5,8 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PageShell, PageHero } from "@/components/site/page-shell";
 import { ArticleCard } from "@/components/site/article-card";
-import { articles as ALL, categories, type Article } from "@/lib/mock-data";
+import { articles as ALL, type Article } from "@/lib/mock-data";
 import { listPublicArticles } from "@/lib/public-articles.functions";
+import { listCategories } from "@/lib/categories.functions";
 import { Tag } from "lucide-react";
 
 export const Route = createFileRoute("/categorias")({
@@ -23,6 +24,11 @@ function CategoriasPage() {
   const { data } = useQuery({
     queryKey: ["public-articles"],
     queryFn: () => fetchArticles(),
+  });
+  const fetchCategories = useServerFn(listCategories);
+  const { data: catData } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => fetchCategories(),
   });
 
   const articles = useMemo<Article[]>(() => {
@@ -44,6 +50,12 @@ function CategoriasPage() {
       };
     });
   }, [data]);
+
+  const categories = useMemo(() => {
+    const names = new Set<string>((catData?.categories ?? []).map((c) => c.name));
+    for (const a of articles) if (a.category) names.add(a.category);
+    return [...names].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [catData, articles]);
 
   return (
     <PageShell>
