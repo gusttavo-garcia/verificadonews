@@ -684,7 +684,15 @@ function PainelPage() {
                         {a.author_name ?? "—"}
                       </td>
                     )}
-                    <td className="px-4 py-3 text-muted-foreground">{a.category}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {a.category ? (
+                        a.category
+                      ) : (
+                        <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                          Sem categoria definida
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {verdictLabel[a.verdict] ?? a.verdict}
                     </td>
