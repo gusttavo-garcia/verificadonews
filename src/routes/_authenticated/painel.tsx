@@ -18,7 +18,11 @@ import {
 } from "@/components/ui/select";
 import { useAuth, useIsStaff } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { categories } from "@/lib/mock-data";
+import {
+  listCategories,
+  createCategory,
+  deleteCategory,
+} from "@/lib/categories.functions";
 import {
   createArticle,
   deleteArticle,
