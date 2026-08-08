@@ -185,6 +185,14 @@ function PainelPage() {
   const unpublishFn = useServerFn(unpublishArticle);
   const deleteFn = useServerFn(deleteArticle);
   const listUsersFn = useServerFn(listUsers);
+  const listCategoriesFn = useServerFn(listCategories);
+
+  const { data: catData } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => listCategoriesFn(),
+    enabled: isStaff,
+  });
+  const categories = (catData?.categories ?? []).map((c) => c.name);
 
   const [confirmAction, setConfirmAction] = useState<PendingAction | null>(null);
   const [filterCategory, setFilterCategory] = useState("all");
@@ -245,7 +253,7 @@ function PainelPage() {
     title: "",
     excerpt: "",
     body: "",
-    category: categories[0],
+    category: "",
     verdict: "verificado" as
       | "verificado"
       | "falso"
@@ -262,7 +270,7 @@ function PainelPage() {
       title: "",
       excerpt: "",
       body: "",
-      category: categories[0],
+      category: "",
       verdict: "verificado",
       type: "noticia",
       image_url: "",
@@ -277,7 +285,7 @@ function PainelPage() {
       title: a.title ?? "",
       excerpt: a.excerpt ?? "",
       body: a.body ?? "",
-      category: a.category ?? categories[0],
+      category: a.category ?? "",
       verdict: a.verdict ?? "verificado",
       type: a.type ?? "noticia",
       image_url: a.image_url ?? "",
