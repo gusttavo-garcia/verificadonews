@@ -22,6 +22,7 @@ import {
   listCategories,
   createCategory,
   deleteCategory,
+  updateCategoryDescription,
 } from "@/lib/categories.functions";
 import {
   createArticle,
