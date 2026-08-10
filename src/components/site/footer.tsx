@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { Instagram } from "lucide-react";
+import { Facebook, Instagram } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const socials = [
   { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/verificadonews.com.br/?hl=pt-br" },
+  { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/verificadonews/" },
 ];
 
 export function SiteFooter() {
