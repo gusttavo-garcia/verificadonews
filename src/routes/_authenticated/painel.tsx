@@ -844,6 +844,7 @@ function CategoriesSection({
   const listFn = useServerFn(listCategories);
   const createFn = useServerFn(createCategory);
   const deleteFn = useServerFn(deleteCategory);
+  const updateFn = useServerFn(updateCategoryDescription);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [editing, setEditing] = useState<{ id: string; value: string } | null>(null);
