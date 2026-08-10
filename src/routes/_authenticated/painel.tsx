@@ -845,6 +845,8 @@ function CategoriesSection({
   const createFn = useServerFn(createCategory);
   const deleteFn = useServerFn(deleteCategory);
   const [name, setName] = useState("");
+  const [desc, setDesc] = useState("");
+  const [editing, setEditing] = useState<{ id: string; value: string } | null>(null);
 
   const { data } = useQuery({ queryKey: ["categories"], queryFn: () => listFn() });
   const items = data?.categories ?? [];
@@ -856,10 +858,21 @@ function CategoriesSection({
   };
 
   const mCreate = useMutation({
-    mutationFn: () => createFn({ data: { name: name.trim() } }),
+    mutationFn: () => createFn({ data: { name: name.trim(), description: desc.trim() } }),
     onSuccess: () => {
       toast.success("Categoria adicionada.");
       setName("");
+      setDesc("");
+      invalidate();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+
+  const mUpdate = useMutation({
+    mutationFn: (v: { id: string; description: string }) => updateFn({ data: v }),
+    onSuccess: () => {
+      toast.success("Descrição atualizada.");
+      setEditing(null);
       invalidate();
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
@@ -904,6 +917,15 @@ function CategoriesSection({
               placeholder="Ex.: Educação"
             />
           </div>
+          <div className="min-w-[260px] flex-[2]">
+            <Label htmlFor="new-category-desc">Descrição (opcional)</Label>
+            <Input
+              id="new-category-desc"
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              placeholder="Breve descrição exibida na página de categorias"
+            />
+          </div>
           <Button type="submit" disabled={mCreate.isPending}>
             <Plus className="mr-2 h-4 w-4" /> Adicionar
           </Button>
@@ -911,30 +933,72 @@ function CategoriesSection({
         {items.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhuma categoria cadastrada.</p>
         ) : (
-          <ul className="flex flex-wrap gap-2">
+          <ul className="space-y-2">
             {items.map((c) => (
               <li
                 key={c.id}
-                className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm"
+                className="rounded-xl border border-border bg-background px-4 py-3 text-sm"
               >
-                {c.name}
-                <button
-                  type="button"
-                  aria-label={`Remover categoria ${c.name}`}
-                  className="text-muted-foreground transition hover:text-destructive"
-                  onClick={() =>
-                    onConfirm({
-                      title: `Remover a categoria "${c.name}"?`,
-                      description:
-                        "Todos os artigos dessa categoria voltarão para rascunho e ficarão marcados como \u201cSem categoria definida\u201d.",
-                      confirmLabel: "Remover",
-                      destructive: true,
-                      run: () => mDelete.mutate(c.id),
-                    })
-                  }
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-medium">{c.name}</span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setEditing(
+                          editing?.id === c.id
+                            ? null
+                            : { id: c.id, value: (c as any).description ?? "" },
+                        )
+                      }
+                    >
+                      {editing?.id === c.id ? "Cancelar" : "Editar descrição"}
+                    </Button>
+                    <button
+                      type="button"
+                      aria-label={`Remover categoria ${c.name}`}
+                      className="text-muted-foreground transition hover:text-destructive"
+                      onClick={() =>
+                        onConfirm({
+                          title: `Remover a categoria "${c.name}"?`,
+                          description:
+                            "Todos os artigos dessa categoria voltarão para rascunho e ficarão marcados como \u201cSem categoria definida\u201d.",
+                          confirmLabel: "Remover",
+                          destructive: true,
+                          run: () => mDelete.mutate(c.id),
+                        })
+                      }
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+                {editing?.id === c.id ? (
+                  <div className="mt-3 flex flex-wrap items-end gap-2">
+                    <Input
+                      value={editing.value}
+                      onChange={(e) => setEditing({ id: c.id, value: e.target.value })}
+                      placeholder="Descrição da categoria"
+                      className="min-w-[240px] flex-1"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={mUpdate.isPending}
+                      onClick={() =>
+                        mUpdate.mutate({ id: c.id, description: editing.value })
+                      }
+                    >
+                      Salvar
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {(c as any).description || "Sem descrição."}
+                  </p>
+                )}
               </li>
             ))}
           </ul>
