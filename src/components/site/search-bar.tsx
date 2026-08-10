@@ -31,7 +31,7 @@ export function SearchBar({
           className="w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
         />
       </div>
-      <Button type="submit" className="shrink-0 rounded-full px-6 py-2.5">
+      <Button type="submit" className="mr-1 shrink-0 rounded-full px-6 py-2.5">
         Verificar
       </Button>
     </form>
