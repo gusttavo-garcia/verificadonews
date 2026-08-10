@@ -57,6 +57,15 @@ function CategoriasPage() {
     return [...names].sort((a, b) => a.localeCompare(b, "pt-BR"));
   }, [catData, articles]);
 
+  const descriptions = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const c of catData?.categories ?? []) {
+      const d = (c as { description?: string }).description;
+      if (d) map[c.name] = d;
+    }
+    return map;
+  }, [catData]);
+
   return (
     <PageShell>
       <PageHero
@@ -90,6 +99,11 @@ function CategoriasPage() {
           return (
             <div key={c} id={c} className="mb-14">
               <h2 className="mb-5 text-xl font-bold text-foreground">{c}</h2>
+              {descriptions[c] ? (
+                <p className="-mt-4 mb-5 max-w-3xl text-sm text-muted-foreground">
+                  {descriptions[c]}
+                </p>
+              ) : null}
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((a) => (
                   <ArticleCard key={a.slug} article={a} />
