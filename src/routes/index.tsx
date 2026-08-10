@@ -134,7 +134,7 @@ function Index() {
                 className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
               />
             </div>
-            <Button type="submit" className="shrink-0 self-center rounded-full px-6">
+            <Button type="submit" className="mr-1 shrink-0 self-center rounded-full px-6">
               Verificar
             </Button>
           </form>
