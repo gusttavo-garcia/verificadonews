@@ -35,23 +35,47 @@ async function ensureAdmin(ctx: { supabase: any; userId: string }) {
 export const listCategories = createServerFn({ method: "GET" }).handler(async () => {
   const { data } = await serverClient()
     .from("categories")
-    .select("id, name")
+    .select("id, name, description")
     .order("name", { ascending: true });
   return { categories: data ?? [] };
 });
 
 export const createCategory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ name: z.string().min(2).max(40) }).parse(input))
+  .inputValidator((input) =>
+    z
+      .object({
+        name: z.string().min(2).max(40),
+        description: z.string().max(300).optional(),
+      })
+      .parse(input),
+  )
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     const name = data.name.trim();
-    const { error } = await context.supabase.from("categories").insert({ name });
+    const { error } = await context.supabase
+      .from("categories")
+      .insert({ name, description: (data.description ?? "").trim() });
     if (error) {
       throw new Error(
         error.code === "23505" ? "Essa categoria já existe." : error.message,
       );
     }
+    return { ok: true };
+  });
+
+export const updateCategoryDescription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ id: z.string().uuid(), description: z.string().max(300) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const { error } = await context.supabase
+      .from("categories")
+      .update({ description: data.description.trim() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
     return { ok: true };
   });
 
