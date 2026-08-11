@@ -1848,7 +1848,10 @@ function AuthorPerformance({
   const groups = new Map<string, { name: string; items: any[] }>();
   for (const a of published) {
     const key = a.author_id ?? "sem-autor";
-    const g = groups.get(key) ?? { name: a.author_name ?? "Sem autor", items: [] };
+    const g = groups.get(key) ?? {
+      name: (a.author_name ?? "Sem autor") as string,
+      items: [] as any[],
+    };
     g.items.push(a);
     groups.set(key, g);
   }
