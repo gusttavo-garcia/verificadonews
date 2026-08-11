@@ -242,6 +242,12 @@ function PainelPage() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterVerdict, setFilterVerdict] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [section, setSection] = useState<PanelSection>("dashboard");
+  const [mobileNav, setMobileNav] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "oldest" | "views" | "title">("recent");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
   const { data: usersData } = useQuery({
     queryKey: ["panel-users"],
