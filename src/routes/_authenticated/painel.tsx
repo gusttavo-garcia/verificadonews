@@ -1,10 +1,44 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon, Pencil, Upload, X, RotateCcw, Filter } from "lucide-react";
-import { PageShell } from "@/components/site/page-shell";
+import {
+  Plus,
+  Send,
+  CheckCircle2,
+  Trash2,
+  ArrowLeft,
+  EyeOff,
+  Link as LinkIcon,
+  Pencil,
+  Upload,
+  X,
+  RotateCcw,
+  Filter,
+  LayoutDashboard,
+  FileText,
+  FolderTree,
+  Mail,
+  Users,
+  UserCircle,
+  Menu,
+  Search,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+} from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip as RTooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
