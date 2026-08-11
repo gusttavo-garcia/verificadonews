@@ -1813,3 +1813,217 @@ function UsersSection({ currentUserId }: { currentUserId: string | null }) {
     </section>
   );
 }
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  icon: any;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:shadow-md">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {label}
+        </span>
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <div className="mt-2 text-3xl font-bold tracking-tight text-foreground">
+        {value.toLocaleString("pt-BR")}
+      </div>
+    </div>
+  );
+}
+
+function AuthorPerformance({
+  articles,
+  isAdmin,
+}: {
+  articles: any[];
+  isAdmin: boolean;
+}) {
+  const published = articles.filter((a) => a.status === "published");
+  const groups = new Map<string, { name: string; items: any[] }>();
+  for (const a of published) {
+    const key = a.author_id ?? "sem-autor";
+    const g = groups.get(key) ?? { name: a.author_name ?? "Sem autor", items: [] };
+    g.items.push(a);
+    groups.set(key, g);
+  }
+  const blocks = Array.from(groups.values())
+    .map((g) => ({
+      name: g.name,
+      data: [...g.items]
+        .sort((a, b) => (b.views ?? 0) - (a.views ?? 0))
+        .slice(0, 5)
+        .map((a) => ({
+          name: a.title.length > 34 ? `${a.title.slice(0, 34)}…` : a.title,
+          views: a.views ?? 0,
+        })),
+    }))
+    .filter((b) => b.data.length > 0)
+    .sort(
+      (a, b) =>
+        b.data.reduce((s, d) => s + d.views, 0) -
+        a.data.reduce((s, d) => s + d.views, 0),
+    );
+
+  if (blocks.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground shadow-sm">
+        Ainda não há visualizações registradas para gerar o gráfico.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-lg font-semibold">
+          {isAdmin ? "Top 5 matérias por redator" : "Suas 5 matérias mais acessadas"}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Baseado nas visualizações reais registradas no site.
+        </p>
+      </div>
+      <div className={isAdmin ? "grid gap-4 xl:grid-cols-2" : ""}>
+        {blocks.map((b) => (
+          <div
+            key={b.name}
+            className="rounded-2xl border border-border bg-card p-5 shadow-sm"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <span className="font-semibold text-foreground">{b.name}</span>
+              <span className="text-xs text-muted-foreground">
+                {b.data.reduce((s, d) => s + d.views, 0).toLocaleString("pt-BR")} views
+              </span>
+            </div>
+            <div style={{ width: "100%", height: 40 + b.data.length * 44 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={b.data} layout="vertical" margin={{ left: 8, right: 16 }}>
+                  <CartesianGrid horizontal={false} strokeOpacity={0.15} />
+                  <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    width={170}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <RTooltip
+                    cursor={{ fillOpacity: 0.08 }}
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid var(--border)",
+                      background: "var(--card)",
+                      color: "var(--foreground)",
+                      fontSize: 12,
+                    }}
+                  />
+                  <Bar dataKey="views" name="Visualizações" radius={[0, 6, 6, 0]}>
+                    {b.data.map((_, i) => (
+                      <Cell key={i} fill="var(--primary)" fillOpacity={1 - i * 0.14} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProfileSection() {
+  const { user, displayName, roles, refreshRoles } = useAuth();
+  const [name, setName] = useState(displayName ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [password, setPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      if (name && name !== displayName) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ display_name: name })
+          .eq("id", user.id);
+        if (error) throw error;
+      }
+      const authPayload: { email?: string; password?: string } = {};
+      if (email && email !== user.email) authPayload.email = email;
+      if (password) authPayload.password = password;
+      if (Object.keys(authPayload).length > 0) {
+        const { error } = await supabase.auth.updateUser(authPayload);
+        if (error) throw error;
+      }
+      setPassword("");
+      await refreshRoles();
+      toast.success("Perfil atualizado.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao salvar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const roleLabel = roles.includes("admin")
+    ? "Administrador"
+    : roles.includes("editor")
+      ? "Redator"
+      : "Leitor";
+
+  return (
+    <div className="max-w-xl space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold">Perfil</h2>
+        <p className="text-sm text-muted-foreground">
+          Atualize seus dados de acesso. Função atual: <strong>{roleLabel}</strong>.
+        </p>
+      </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void save();
+        }}
+        className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
+      >
+        <div>
+          <Label htmlFor="profile-name">Nome</Label>
+          <Input
+            id="profile-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="profile-email">E-mail</Label>
+          <Input
+            id="profile-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="profile-password">Nova senha</Label>
+          <Input
+            id="profile-password"
+            type="password"
+            placeholder="Deixe em branco para manter"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            minLength={8}
+          />
+        </div>
+        <Button type="submit" disabled={saving}>
+          {saving ? "Salvando…" : "Salvar alterações"}
+        </Button>
+      </form>
+    </div>
+  );
+}
