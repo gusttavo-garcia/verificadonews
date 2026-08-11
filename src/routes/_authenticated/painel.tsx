@@ -1,10 +1,44 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Send, CheckCircle2, Trash2, ArrowLeft, EyeOff, Link as LinkIcon, Pencil, Upload, X, RotateCcw, Filter } from "lucide-react";
-import { PageShell } from "@/components/site/page-shell";
+import {
+  Plus,
+  Send,
+  CheckCircle2,
+  Trash2,
+  ArrowLeft,
+  EyeOff,
+  Link as LinkIcon,
+  Pencil,
+  Upload,
+  X,
+  RotateCcw,
+  Filter,
+  LayoutDashboard,
+  FileText,
+  FolderTree,
+  Mail,
+  Users,
+  UserCircle,
+  Menu,
+  Search,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+} from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip as RTooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -164,6 +198,15 @@ type PendingAction = {
   run: () => void;
 };
 
+type PanelSection =
+  | "dashboard"
+  | "artigos"
+  | "categorias"
+  | "newsletter"
+  | "usuarios"
+  | "lixeira"
+  | "perfil";
+
 function PainelPage() {
   const navigate = useNavigate();
   const { roles, displayName, loading, user } = useAuth();
@@ -199,6 +242,12 @@ function PainelPage() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterVerdict, setFilterVerdict] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [section, setSection] = useState<PanelSection>("dashboard");
+  const [mobileNav, setMobileNav] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "oldest" | "views" | "title">("recent");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
   const { data: usersData } = useQuery({
     queryKey: ["panel-users"],
@@ -356,445 +405,661 @@ function PainelPage() {
     hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
   const firstName = (displayName ?? user?.email ?? "").split(" ")[0] || "";
 
-  return (
-    <PageShell>
-      <section className="border-b border-border bg-[color:var(--surface)]">
-        <div className="mx-auto max-w-6xl px-4 py-10">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            {greeting}
-            {firstName ? `, ${firstName}` : ""}
-          </h1>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-border bg-card p-4">
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                Publicados
-              </div>
-              <div className="mt-1 text-2xl font-semibold text-[color:var(--brand-teal)]">
-                {stats.published}
-              </div>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4">
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                Pendentes
-              </div>
-              <div className="mt-1 text-2xl font-semibold text-[oklch(0.55_0.15_60)]">
-                {stats.pending}
-              </div>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4">
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                Rascunhos
-              </div>
-              <div className="mt-1 text-2xl font-semibold text-foreground">
-                {stats.draft}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      {isAdmin && (
-        <PendingReviewSection
-          articles={articles}
-          onPublish={(id) => {
-            const a = articles.find((x: any) => x.id === id);
-            setConfirmAction({
-              title: "Publicar artigo?",
-              description: `"${a?.title ?? "Este artigo"}" ficará visível publicamente no site.`,
-              confirmLabel: "Publicar",
-              run: () => mPublish.mutate(id),
-            });
-          }}
-          onUnpublish={(id) => {
-            const a = articles.find((x: any) => x.id === id);
-            setConfirmAction({
-              title: "Voltar para rascunho?",
-              description: `"${a?.title ?? "Este artigo"}" voltará para rascunho.`,
-              confirmLabel: "Voltar para rascunho",
-              run: () => mUnpublish.mutate(id),
-            });
-          }}
-          publishPending={mPublish.isPending}
-          unpublishPending={mUnpublish.isPending}
-        />
-      )}
-      <section className="mx-auto max-w-6xl px-4 py-10">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-semibold">Meus artigos</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Total: <strong className="text-foreground">{articles.length}</strong> ·{" "}
-              <strong className="text-foreground">{stats.published}</strong> publicados ·{" "}
-              <strong className="text-foreground">{stats.pending}</strong> pendentes
-            </p>
-          </div>
-          <Button
-            onClick={() => {
-              if (showForm) {
-                setShowForm(false);
-                resetForm();
-              } else {
-                setShowForm(true);
-              }
-            }}
-          >
-            {showForm ? (
-              <>
-                <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-              </>
-            ) : (
-              <>
-                <Plus className="mr-2 h-4 w-4" /> Novo rascunho
-              </>
-            )}
-          </Button>
-        </div>
+  const totalViews = articles.reduce((s: number, a: any) => s + (a.views ?? 0), 0);
+  const totalUsers = usersData?.users?.length ?? 0;
 
-        {showForm && (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (editingId) mUpdate.mutate();
-              else mCreate.mutate();
-            }}
-            className="mb-10 space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
+  const searched = filteredArticles.filter((a: any) =>
+    search.trim()
+      ? `${a.title} ${a.slug} ${a.author_name ?? ""}`
+          .toLowerCase()
+          .includes(search.trim().toLowerCase())
+      : true,
+  );
+  const sorted = [...searched].sort((a: any, b: any) => {
+    if (sortBy === "views") return (b.views ?? 0) - (a.views ?? 0);
+    if (sortBy === "title") return String(a.title).localeCompare(String(b.title));
+    if (sortBy === "oldest")
+      return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+  });
+  const totalPages = Math.max(1, Math.ceil(sorted.length / perPage));
+  const currentPage = Math.min(page, totalPages);
+  const pageItems = sorted.slice((currentPage - 1) * perPage, currentPage * perPage);
+
+  const navItems = (
+    isAdmin
+      ? [
+          { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+          { key: "artigos", label: "Artigos", icon: FileText },
+          { key: "categorias", label: "Categorias", icon: FolderTree },
+          { key: "newsletter", label: "Inscritos na Newsletter", icon: Mail },
+          { key: "usuarios", label: "Usuários", icon: Users },
+          { key: "lixeira", label: "Lixeira", icon: Trash2 },
+          { key: "perfil", label: "Perfil", icon: UserCircle },
+        ]
+      : [
+          { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+          { key: "artigos", label: "Artigos", icon: FileText },
+          { key: "lixeira", label: "Lixeira", icon: Trash2 },
+          { key: "perfil", label: "Perfil", icon: UserCircle },
+        ]
+  ) as { key: PanelSection; label: string; icon: any }[];
+
+  const openNewDraft = () => {
+    resetForm();
+    setShowForm(true);
+    setSection("artigos");
+  };
+
+  const sidebar = (
+    <div className="flex h-full flex-col gap-6 p-4">
+      <Link to="/" className="flex items-center gap-2 px-2 text-sm font-semibold">
+        <ShieldCheck className="h-5 w-5 text-primary" />
+        Verificado News
+      </Link>
+      <Button className="w-full justify-start" onClick={openNewDraft}>
+        <Plus className="mr-2 h-4 w-4" /> Novo rascunho
+      </Button>
+      <nav className="flex flex-1 flex-col gap-1">
+        <div className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Menu
+        </div>
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = section === item.key;
+          return (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => {
+                setSection(item.key);
+                setMobileNav(false);
+              }}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                active
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              }`}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+      <div className="border-t border-border pt-3 text-xs text-muted-foreground">
+        <div className="truncate font-medium text-foreground">{displayName ?? user?.email}</div>
+        {isAdmin ? "Administrador" : "Redator"}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex min-h-screen bg-[color:var(--surface)]">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-border bg-card md:block">
+        {sidebar}
+      </aside>
+      {mobileNav && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div
+            className="absolute inset-0 bg-foreground/40"
+            onClick={() => setMobileNav(false)}
+          />
+          <div className="absolute inset-y-0 left-0 w-64 border-r border-border bg-card shadow-xl">
+            {sidebar}
+          </div>
+        </div>
+      )}
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-card/90 px-4 py-3 backdrop-blur md:px-8">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileNav(true)}
+            aria-label="Abrir menu"
           >
-            <div className="text-sm font-medium text-muted-foreground">
-              {editingId ? "Editando artigo" : "Novo rascunho"}
-            </div>
-            <div>
-              <Label htmlFor="title">Título</Label>
-              <Input
-                id="title"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                required
-                minLength={3}
-              />
-            </div>
-            <div>
-              <Label htmlFor="excerpt">Resumo</Label>
-              <Textarea
-                id="excerpt"
-                rows={2}
-                value={form.excerpt}
-                onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>Imagem de destaque</Label>
-              <ImageUploader
-                value={form.image_url}
-                onChange={(url) => setForm({ ...form, image_url: url })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="body">Conteúdo</Label>
-              <Textarea
-                id="body"
-                rows={8}
-                value={form.body}
-                onChange={(e) => setForm({ ...form, body: e.target.value })}
-              />
-            </div>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <Menu className="h-5 w-5" />
+          </Button>
+          <h1 className="text-base font-semibold capitalize">
+            {navItems.find((n) => n.key === section)?.label ?? "Painel"}
+          </h1>
+          <Link to="/" className="ml-auto text-sm text-muted-foreground hover:text-foreground">
+            Ver site
+          </Link>
+        </header>
+
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 md:px-8">
+          {section === "dashboard" && (
+            <div className="space-y-8">
               <div>
-                <Label>Categoria</Label>
-                <Select
-                  value={form.category}
-                  onValueChange={(v) => setForm({ ...form, category: v as typeof form.category })}
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+                  {greeting}
+                  {firstName ? `, ${firstName}` : ""}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Resumo {isAdmin ? "geral da redação" : "dos seus conteúdos"}.
+                </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                <StatCard label="Publicados" value={stats.published} icon={CheckCircle2} />
+                <StatCard label="Pendentes" value={stats.pending} icon={Send} />
+                <StatCard label="Rascunhos" value={stats.draft} icon={FileText} />
+                <StatCard label="Visualizações" value={totalViews} icon={Eye} />
+                {isAdmin && <StatCard label="Usuários" value={totalUsers} icon={Users} />}
+              </div>
+              <AuthorPerformance articles={articles} isAdmin={isAdmin} />
+              {isAdmin && (
+                <PendingReviewSection
+                  articles={articles}
+                  onPublish={(id) => {
+                    const a = articles.find((x: any) => x.id === id);
+                    setConfirmAction({
+                      title: "Publicar artigo?",
+                      description: `"${a?.title ?? "Este artigo"}" ficará visível publicamente no site.`,
+                      confirmLabel: "Publicar",
+                      run: () => mPublish.mutate(id),
+                    });
+                  }}
+                  onUnpublish={(id) => {
+                    const a = articles.find((x: any) => x.id === id);
+                    setConfirmAction({
+                      title: "Voltar para rascunho?",
+                      description: `"${a?.title ?? "Este artigo"}" voltará para rascunho.`,
+                      confirmLabel: "Voltar para rascunho",
+                      run: () => mUnpublish.mutate(id),
+                    });
+                  }}
+                  publishPending={mPublish.isPending}
+                  unpublishPending={mUnpublish.isPending}
+                />
+              )}
+            </div>
+          )}
+
+          {section === "artigos" && (
+            <div className="space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-semibold">Artigos</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Total: <strong className="text-foreground">{articles.length}</strong> ·{" "}
+                    <strong className="text-foreground">{stats.published}</strong> publicados ·{" "}
+                    <strong className="text-foreground">{stats.pending}</strong> pendentes
+                  </p>
+                </div>
+                <Button
+                  onClick={() => {
+                    if (showForm) {
+                      setShowForm(false);
+                      resetForm();
+                    } else {
+                      setShowForm(true);
+                    }
+                  }}
                 >
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  {showForm ? (
+                    <>
+                      <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" /> Novo rascunho
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {showForm && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (editingId) mUpdate.mutate();
+                    else mCreate.mutate();
+                  }}
+                  className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
+                >
+                  <div className="text-sm font-medium text-muted-foreground">
+                    {editingId ? "Editando artigo" : "Novo rascunho"}
+                  </div>
+                  <div>
+                    <Label htmlFor="title">Título</Label>
+                    <Input
+                      id="title"
+                      value={form.title}
+                      onChange={(e) => setForm({ ...form, title: e.target.value })}
+                      required
+                      minLength={3}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="excerpt">Resumo</Label>
+                    <Textarea
+                      id="excerpt"
+                      rows={2}
+                      value={form.excerpt}
+                      onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Imagem de destaque</Label>
+                    <ImageUploader
+                      value={form.image_url}
+                      onChange={(url) => setForm({ ...form, image_url: url })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="body">Conteúdo</Label>
+                    <Textarea
+                      id="body"
+                      rows={8}
+                      value={form.body}
+                      onChange={(e) => setForm({ ...form, body: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <Label>Categoria</Label>
+                      <Select
+                        value={form.category}
+                        onValueChange={(v) =>
+                          setForm({ ...form, category: v as typeof form.category })
+                        }
+                      >
+                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                        <SelectContent>
+                          {categories.map((c) => (
+                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Veredito</Label>
+                      <Select
+                        value={form.verdict}
+                        onValueChange={(v) =>
+                          setForm({ ...form, verdict: v as typeof form.verdict })
+                        }
+                      >
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="verificado">Verificado</SelectItem>
+                          <SelectItem value="falso">Falso</SelectItem>
+                          <SelectItem value="enganoso">Enganoso</SelectItem>
+                          <SelectItem value="parcial">Parcialmente Verdade</SelectItem>
+                          <SelectItem value="apuracao">Em Apuração</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Tipo</Label>
+                      <Select
+                        value={form.type}
+                        onValueChange={(v) => setForm({ ...form, type: v as typeof form.type })}
+                      >
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="noticia">Notícia</SelectItem>
+                          <SelectItem value="golpe">Golpe</SelectItem>
+                          <SelectItem value="fake">Fake News</SelectItem>
+                          <SelectItem value="empresa">Empresa</SelectItem>
+                          <SelectItem value="site">Site</SelectItem>
+                          <SelectItem value="video">Vídeo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  {isAdmin && editingId && (
+                    <div>
+                      <Label>Autor</Label>
+                      <Select
+                        value={form.author_id}
+                        onValueChange={(v) => setForm({ ...form, author_id: v })}
+                      >
+                        <SelectTrigger><SelectValue placeholder="Selecionar autor" /></SelectTrigger>
+                        <SelectContent>
+                          {(usersData?.users ?? []).map((u: any) => (
+                            <SelectItem key={u.id} value={u.id}>
+                              {u.display_name ?? u.id}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Button type="submit" disabled={mCreate.isPending || mUpdate.isPending}>
+                      {editingId ? "Salvar alterações" : "Salvar rascunho"}
+                    </Button>
+                    {editingId && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowForm(false);
+                          resetForm();
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              )}
+
+              <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Filter className="h-4 w-4" /> Filtros
+                </div>
+                <div className="relative min-w-[200px] flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
+                    placeholder="Buscar por título, slug ou autor"
+                    className="pl-9"
+                  />
+                </div>
+                <Select
+                  value={filterCategory}
+                  onValueChange={(v) => {
+                    setFilterCategory(v);
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Categoria" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {categories.map((c) => (
+                    <SelectItem value="all">Todas as categorias</SelectItem>
+                    {articleCategories.map((c) => (
                       <SelectItem key={c} value={c}>{c}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div>
-                <Label>Veredito</Label>
                 <Select
-                  value={form.verdict}
-                  onValueChange={(v) => setForm({ ...form, verdict: v as typeof form.verdict })}
+                  value={filterVerdict}
+                  onValueChange={(v) => {
+                    setFilterVerdict(v);
+                    setPage(1);
+                  }}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Veredito" />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="verificado">Verificado</SelectItem>
-                    <SelectItem value="falso">Falso</SelectItem>
-                    <SelectItem value="enganoso">Enganoso</SelectItem>
-                    <SelectItem value="parcial">Parcialmente Verdade</SelectItem>
-                    <SelectItem value="apuracao">Em Apuração</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Tipo</Label>
-                <Select
-                  value={form.type}
-                  onValueChange={(v) => setForm({ ...form, type: v as typeof form.type })}
-                >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="noticia">Notícia</SelectItem>
-                    <SelectItem value="golpe">Golpe</SelectItem>
-                    <SelectItem value="fake">Fake News</SelectItem>
-                    <SelectItem value="empresa">Empresa</SelectItem>
-                    <SelectItem value="site">Site</SelectItem>
-                    <SelectItem value="video">Vídeo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            {isAdmin && editingId && (
-              <div>
-                <Label>Autor</Label>
-                <Select
-                  value={form.author_id}
-                  onValueChange={(v) => setForm({ ...form, author_id: v })}
-                >
-                  <SelectTrigger><SelectValue placeholder="Selecionar autor" /></SelectTrigger>
-                  <SelectContent>
-                    {(usersData?.users ?? []).map((u: any) => (
-                      <SelectItem key={u.id} value={u.id}>
-                        {u.display_name ?? u.id}
-                      </SelectItem>
+                    <SelectItem value="all">Todos os vereditos</SelectItem>
+                    {Object.entries(verdictLabel).map(([v, label]) => (
+                      <SelectItem key={v} value={v}>{label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-            )}
-            <div className="flex gap-2">
-              <Button type="submit" disabled={mCreate.isPending || mUpdate.isPending}>
-                {editingId ? "Salvar alterações" : "Salvar rascunho"}
-              </Button>
-              {editingId && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setShowForm(false);
-                    resetForm();
+                <Select
+                  value={filterStatus}
+                  onValueChange={(v) => {
+                    setFilterStatus(v);
+                    setPage(1);
                   }}
                 >
-                  Cancelar
-                </Button>
-              )}
-            </div>
-          </form>
-        )}
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os status</SelectItem>
+                    <SelectItem value="published">Publicado</SelectItem>
+                    <SelectItem value="pending_review">Em revisão</SelectItem>
+                    <SelectItem value="draft">Rascunho</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+                  <SelectTrigger className="w-[170px]">
+                    <SelectValue placeholder="Ordenar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Mais recentes</SelectItem>
+                    <SelectItem value="oldest">Mais antigos</SelectItem>
+                    <SelectItem value="views">Mais vistos</SelectItem>
+                    <SelectItem value="title">Título (A-Z)</SelectItem>
+                  </SelectContent>
+                </Select>
+                {(hasFilters || search) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setFilterCategory("all");
+                      setFilterVerdict("all");
+                      setFilterStatus("all");
+                      setSearch("");
+                      setPage(1);
+                    }}
+                  >
+                    <X className="mr-1 h-3.5 w-3.5" /> Limpar
+                  </Button>
+                )}
+                <span className="ml-auto text-sm text-muted-foreground">
+                  {sorted.length} de {articles.length}
+                </span>
+              </div>
 
-        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Filter className="h-4 w-4" /> Filtros
-          </div>
-          <Select value={filterCategory} onValueChange={setFilterCategory}>
-            <SelectTrigger className="w-[190px]">
-              <SelectValue placeholder="Categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as categorias</SelectItem>
-              {articleCategories.map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={filterVerdict} onValueChange={setFilterVerdict}>
-            <SelectTrigger className="w-[190px]">
-              <SelectValue placeholder="Veredito" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os vereditos</SelectItem>
-              {Object.entries(verdictLabel).map(([v, label]) => (
-                <SelectItem key={v} value={v}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[170px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
-              <SelectItem value="published">Publicado</SelectItem>
-              <SelectItem value="pending_review">Em revisão</SelectItem>
-              <SelectItem value="draft">Rascunho</SelectItem>
-            </SelectContent>
-          </Select>
-          {hasFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setFilterCategory("all");
-                setFilterVerdict("all");
-                setFilterStatus("all");
-              }}
-            >
-              <X className="mr-1 h-3.5 w-3.5" /> Limpar
-            </Button>
-          )}
-          <span className="ml-auto text-sm text-muted-foreground">
-            {filteredArticles.length} de {articles.length}
-          </span>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground">Carregando…</div>
-          ) : !articles.length ? (
-            <div className="p-8 text-center text-muted-foreground">
-              Nenhum artigo ainda. Crie um novo rascunho.
-            </div>
-          ) : !filteredArticles.length ? (
-            <div className="p-8 text-center text-muted-foreground">
-              Nenhum artigo corresponde aos filtros selecionados.
-            </div>
-          ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3">Título</th>
-                  {isAdmin && <th className="px-4 py-3">Autor</th>}
-                  <th className="px-4 py-3">Categoria</th>
-                  <th className="px-4 py-3">Veredito</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredArticles.map((a: any) => (
-                  <tr key={a.id} className="border-t border-border">
-                    <td className="px-4 py-3 font-medium text-foreground">
-                      <div>{a.title}</div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const url = `${window.location.origin}/${a.slug}`;
-                          navigator.clipboard.writeText(url);
-                          toast.success("Link copiado!");
+              <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                {isLoading ? (
+                  <div className="p-8 text-center text-muted-foreground">Carregando…</div>
+                ) : !articles.length ? (
+                  <div className="p-8 text-center text-muted-foreground">
+                    Nenhum artigo ainda. Crie um novo rascunho.
+                  </div>
+                ) : !sorted.length ? (
+                  <div className="p-8 text-center text-muted-foreground">
+                    Nenhum artigo corresponde aos filtros selecionados.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[720px] text-sm">
+                      <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+                        <tr>
+                          <th className="px-4 py-3">Título</th>
+                          {isAdmin && <th className="px-4 py-3">Autor</th>}
+                          <th className="px-4 py-3">Categoria</th>
+                          <th className="px-4 py-3">Veredito</th>
+                          <th className="px-4 py-3">Status</th>
+                          <th className="px-4 py-3 text-right">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pageItems.map((a: any) => (
+                          <tr key={a.id} className="border-t border-border hover:bg-muted/30">
+                            <td className="px-4 py-3 font-medium text-foreground">
+                              <div>{a.title}</div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const url = `${window.location.origin}/${a.slug}`;
+                                  navigator.clipboard.writeText(url);
+                                  toast.success("Link copiado!");
+                                }}
+                                className="mt-1 inline-flex items-center gap-1 text-xs font-normal text-muted-foreground hover:text-primary"
+                                title="Clique para copiar"
+                              >
+                                <LinkIcon className="h-3 w-3" />
+                                <span className="truncate">/{a.slug}</span>
+                              </button>
+                            </td>
+                            {isAdmin && (
+                              <td className="px-4 py-3 text-muted-foreground">
+                                {a.author_name ?? "—"}
+                              </td>
+                            )}
+                            <td className="px-4 py-3 text-muted-foreground">
+                              {a.category ? (
+                                a.category
+                              ) : (
+                                <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                                  Sem categoria definida
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-muted-foreground">
+                              {verdictLabel[a.verdict] ?? a.verdict}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[a.status] ?? ""}`}
+                              >
+                                {statusLabel[a.status] ?? a.status}
+                              </span>
+                            </td>
+                            <td className="whitespace-nowrap px-4 py-3">
+                              <div className="flex flex-wrap items-center justify-end gap-2">
+                                {(isAdmin || a.status !== "published") && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="shrink-0"
+                                    onClick={() => startEdit(a)}
+                                  >
+                                    <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
+                                  </Button>
+                                )}
+                                {a.status === "draft" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="shrink-0"
+                                    onClick={() => mReview.mutate(a.id)}
+                                    disabled={mReview.isPending}
+                                  >
+                                    <Send className="mr-1 h-3.5 w-3.5" /> Enviar para revisão
+                                  </Button>
+                                )}
+                                {isAdmin && a.status !== "published" && (
+                                  <Button
+                                    size="sm"
+                                    className="shrink-0"
+                                    onClick={() =>
+                                      setConfirmAction({
+                                        title: "Publicar artigo?",
+                                        description: `"${a.title}" ficará visível publicamente no site.`,
+                                        confirmLabel: "Publicar",
+                                        run: () => mPublish.mutate(a.id),
+                                      })
+                                    }
+                                    disabled={mPublish.isPending}
+                                  >
+                                    <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Publicar
+                                  </Button>
+                                )}
+                                {isAdmin && a.status === "published" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="shrink-0"
+                                    onClick={() =>
+                                      setConfirmAction({
+                                        title: "Voltar para rascunho?",
+                                        description: `"${a.title}" deixará de aparecer no site e voltará como rascunho.`,
+                                        confirmLabel: "Despublicar",
+                                        run: () => mUnpublish.mutate(a.id),
+                                      })
+                                    }
+                                    disabled={mUnpublish.isPending}
+                                  >
+                                    <EyeOff className="mr-1 h-3.5 w-3.5" /> Despublicar
+                                  </Button>
+                                )}
+                                {isAdmin && (
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    className="shrink-0"
+                                    onClick={() =>
+                                      setConfirmAction({
+                                        title: "Mover para a lixeira?",
+                                        description: `"${a.title}" será movido para a lixeira e poderá ser restaurado depois.`,
+                                        confirmLabel: "Mover para lixeira",
+                                        destructive: true,
+                                        run: () => mDelete.mutate(a.id),
+                                      })
+                                    }
+                                    disabled={mDelete.isPending}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {sorted.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span>Mostrar</span>
+                      <Select
+                        value={String(perPage)}
+                        onValueChange={(v) => {
+                          setPerPage(Number(v));
+                          setPage(1);
                         }}
-                        className="mt-1 inline-flex items-center gap-1 text-xs font-normal text-muted-foreground hover:text-primary"
-                        title="Clique para copiar"
                       >
-                        <LinkIcon className="h-3 w-3" />
-                        <span className="truncate">/{a.slug}</span>
-                      </button>
-                    </td>
-                    {isAdmin && (
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {a.author_name ?? "—"}
-                      </td>
-                    )}
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {a.category ? (
-                        a.category
-                      ) : (
-                        <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
-                          Sem categoria definida
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {verdictLabel[a.verdict] ?? a.verdict}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[a.status] ?? ""}`}
-                      >
-                        {statusLabel[a.status] ?? a.status}
+                        <SelectTrigger className="w-[90px]"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">10</SelectItem>
+                          <SelectItem value="20">20</SelectItem>
+                          <SelectItem value="50">50</SelectItem>
+                          <SelectItem value="100">100</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <span>por página</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">
+                        Página {currentPage} de {totalPages}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex flex-wrap items-center justify-end gap-2">
-                        {(isAdmin || a.status !== "published") && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="shrink-0"
-                            onClick={() => startEdit(a)}
-                          >
-                            <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
-                          </Button>
-                        )}
-                        {a.status === "draft" && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="shrink-0"
-                            onClick={() => mReview.mutate(a.id)}
-                            disabled={mReview.isPending}
-                          >
-                            <Send className="mr-1 h-3.5 w-3.5" /> Enviar para revisão
-                          </Button>
-                        )}
-                        {isAdmin && a.status !== "published" && (
-                          <Button
-                            size="sm"
-                            className="shrink-0"
-                            onClick={() =>
-                              setConfirmAction({
-                                title: "Publicar artigo?",
-                                description: `"${a.title}" ficará visível publicamente no site.`,
-                                confirmLabel: "Publicar",
-                                run: () => mPublish.mutate(a.id),
-                              })
-                            }
-                            disabled={mPublish.isPending}
-                          >
-                            <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Publicar
-                          </Button>
-                        )}
-                        {isAdmin && a.status === "published" && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="shrink-0"
-                            onClick={() =>
-                              setConfirmAction({
-                                title: "Voltar para rascunho?",
-                                description: `"${a.title}" deixará de aparecer no site e voltará como rascunho.`,
-                                confirmLabel: "Despublicar",
-                                run: () => mUnpublish.mutate(a.id),
-                              })
-                            }
-                            disabled={mUnpublish.isPending}
-                          >
-                            <EyeOff className="mr-1 h-3.5 w-3.5" /> Despublicar
-                          </Button>
-                        )}
-                        {isAdmin && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="shrink-0"
-                            onClick={() =>
-                              setConfirmAction({
-                                title: "Mover para a lixeira?",
-                                description: `"${a.title}" será movido para a lixeira e poderá ser restaurado depois.`,
-                                confirmLabel: "Mover para lixeira",
-                                destructive: true,
-                                run: () => mDelete.mutate(a.id),
-                              })
-                            }
-                            disabled={mDelete.isPending}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={currentPage <= 1}
+                        onClick={() => setPage(currentPage - 1)}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={currentPage >= totalPages}
+                        onClick={() => setPage(currentPage + 1)}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {isAdmin && <SplitRedirectorManager />}
+            </div>
           )}
-        </div>
-      </section>
-      {isAdmin && <SplitRedirectorManager />}
-      {isAdmin && <CategoriesSection onConfirm={setConfirmAction} />}
-      {isAdmin && <UsersSection currentUserId={user?.id ?? null} />}
-      {isAdmin && <NewsletterSection />}
-      {isAdmin && <TrashSection onConfirm={setConfirmAction} />}
+
+          {section === "categorias" && isAdmin && (
+            <CategoriesSection onConfirm={setConfirmAction} />
+          )}
+          {section === "newsletter" && isAdmin && <NewsletterSection />}
+          {section === "usuarios" && isAdmin && (
+            <UsersSection currentUserId={user?.id ?? null} />
+          )}
+          {section === "lixeira" && <TrashSection onConfirm={setConfirmAction} />}
+          {section === "perfil" && <ProfileSection />}
+        </main>
+      </div>
+
       <AlertDialog
         open={confirmAction !== null}
         onOpenChange={(open) => {
@@ -824,7 +1089,7 @@ function PainelPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </PageShell>
+    </div>
   );
 }
 
@@ -1546,5 +1811,222 @@ function UsersSection({ currentUserId }: { currentUserId: string | null }) {
         </DialogContent>
       </Dialog>
     </section>
+  );
+}
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  icon: any;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:shadow-md">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {label}
+        </span>
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <div className="mt-2 text-3xl font-bold tracking-tight text-foreground">
+        {value.toLocaleString("pt-BR")}
+      </div>
+    </div>
+  );
+}
+
+function AuthorPerformance({
+  articles,
+  isAdmin,
+}: {
+  articles: any[];
+  isAdmin: boolean;
+}) {
+  const published = articles.filter((a) => a.status === "published");
+  const groups = new Map<string, { name: string; items: any[] }>();
+  for (const a of published) {
+    const key = a.author_id ?? "sem-autor";
+    const g = groups.get(key) ?? {
+      name: (a.author_name ?? "Sem autor") as string,
+      items: [] as any[],
+    };
+    g.items.push(a);
+    groups.set(key, g);
+  }
+  const blocks = Array.from(groups.values())
+    .map((g) => ({
+      name: g.name,
+      data: [...g.items]
+        .sort((a, b) => (b.views ?? 0) - (a.views ?? 0))
+        .slice(0, 5)
+        .map((a) => ({
+          name: a.title.length > 34 ? `${a.title.slice(0, 34)}…` : a.title,
+          views: a.views ?? 0,
+        })),
+    }))
+    .filter((b) => b.data.length > 0)
+    .sort(
+      (a, b) =>
+        b.data.reduce((s, d) => s + d.views, 0) -
+        a.data.reduce((s, d) => s + d.views, 0),
+    );
+
+  if (blocks.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground shadow-sm">
+        Ainda não há visualizações registradas para gerar o gráfico.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-lg font-semibold">
+          {isAdmin ? "Top 5 matérias por redator" : "Suas 5 matérias mais acessadas"}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Baseado nas visualizações reais registradas no site.
+        </p>
+      </div>
+      <div className={isAdmin ? "grid gap-4 xl:grid-cols-2" : ""}>
+        {blocks.map((b) => (
+          <div
+            key={b.name}
+            className="rounded-2xl border border-border bg-card p-5 shadow-sm"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <span className="font-semibold text-foreground">{b.name}</span>
+              <span className="text-xs text-muted-foreground">
+                {b.data.reduce((s, d) => s + d.views, 0).toLocaleString("pt-BR")} views
+              </span>
+            </div>
+            <div style={{ width: "100%", height: 40 + b.data.length * 44 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={b.data} layout="vertical" margin={{ left: 8, right: 16 }}>
+                  <CartesianGrid horizontal={false} strokeOpacity={0.15} />
+                  <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    width={170}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <RTooltip
+                    cursor={{ fillOpacity: 0.08 }}
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid var(--border)",
+                      background: "var(--card)",
+                      color: "var(--foreground)",
+                      fontSize: 12,
+                    }}
+                  />
+                  <Bar dataKey="views" name="Visualizações" radius={[0, 6, 6, 0]}>
+                    {b.data.map((_, i) => (
+                      <Cell key={i} fill="var(--primary)" fillOpacity={1 - i * 0.14} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProfileSection() {
+  const { user, displayName, roles, refreshRoles } = useAuth();
+  const [name, setName] = useState(displayName ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [password, setPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      if (name && name !== displayName) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ display_name: name })
+          .eq("id", user.id);
+        if (error) throw error;
+      }
+      const authPayload: { email?: string; password?: string } = {};
+      if (email && email !== user.email) authPayload.email = email;
+      if (password) authPayload.password = password;
+      if (Object.keys(authPayload).length > 0) {
+        const { error } = await supabase.auth.updateUser(authPayload);
+        if (error) throw error;
+      }
+      setPassword("");
+      await refreshRoles();
+      toast.success("Perfil atualizado.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao salvar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const roleLabel = roles.includes("admin")
+    ? "Administrador"
+    : roles.includes("editor")
+      ? "Redator"
+      : "Leitor";
+
+  return (
+    <div className="max-w-xl space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold">Perfil</h2>
+        <p className="text-sm text-muted-foreground">
+          Atualize seus dados de acesso. Função atual: <strong>{roleLabel}</strong>.
+        </p>
+      </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void save();
+        }}
+        className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
+      >
+        <div>
+          <Label htmlFor="profile-name">Nome</Label>
+          <Input
+            id="profile-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="profile-email">E-mail</Label>
+          <Input
+            id="profile-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="profile-password">Nova senha</Label>
+          <Input
+            id="profile-password"
+            type="password"
+            placeholder="Deixe em branco para manter"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            minLength={8}
+          />
+        </div>
+        <Button type="submit" disabled={saving}>
+          {saving ? "Salvando…" : "Salvar alterações"}
+        </Button>
+      </form>
+    </div>
   );
 }
