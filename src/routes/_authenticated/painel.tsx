@@ -198,6 +198,15 @@ type PendingAction = {
   run: () => void;
 };
 
+type PanelSection =
+  | "dashboard"
+  | "artigos"
+  | "categorias"
+  | "newsletter"
+  | "usuarios"
+  | "lixeira"
+  | "perfil";
+
 function PainelPage() {
   const navigate = useNavigate();
   const { roles, displayName, loading, user } = useAuth();
