@@ -29,6 +29,13 @@ import {
   ChevronRight,
   ShieldCheck,
 } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Bar,
   BarChart,
