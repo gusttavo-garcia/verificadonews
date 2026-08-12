@@ -618,133 +618,184 @@ function PainelPage() {
                     if (editingId) mUpdate.mutate();
                     else mCreate.mutate();
                   }}
-                  className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
+                  className="rounded-2xl border border-border bg-card p-6 shadow-sm"
                 >
-                  <div className="text-sm font-medium text-muted-foreground">
-                    {editingId ? "Editando artigo" : "Novo rascunho"}
-                  </div>
-                  <div>
-                    <Label htmlFor="title">Título</Label>
-                    <Input
-                      id="title"
-                      value={form.title}
-                      onChange={(e) => setForm({ ...form, title: e.target.value })}
-                      required
-                      minLength={3}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="excerpt">Resumo</Label>
-                    <Textarea
-                      id="excerpt"
-                      rows={2}
-                      value={form.excerpt}
-                      onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Imagem de destaque</Label>
-                    <ImageUploader
-                      value={form.image_url}
-                      onChange={(url) => setForm({ ...form, image_url: url })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="body">Conteúdo</Label>
-                    <Textarea
-                      id="body"
-                      rows={8}
-                      value={form.body}
-                      onChange={(e) => setForm({ ...form, body: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="mb-6 flex items-center justify-between border-b border-border pb-4">
                     <div>
-                      <Label>Categoria</Label>
-                      <Select
-                        value={form.category}
-                        onValueChange={(v) =>
-                          setForm({ ...form, category: v as typeof form.category })
-                        }
-                      >
-                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                        <SelectContent>
-                          {categories.map((c) => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <h3 className="text-lg font-semibold">
+                        {editingId ? "Editando artigo" : "Novo rascunho"}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {editingId
+                          ? "Revise os campos e salve as alterações."
+                          : "Preencha as informações para criar um novo rascunho."}
+                      </p>
                     </div>
-                    <div>
-                      <Label>Veredito</Label>
-                      <Select
-                        value={form.verdict}
-                        onValueChange={(v) =>
-                          setForm({ ...form, verdict: v as typeof form.verdict })
-                        }
-                      >
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="verificado">Verificado</SelectItem>
-                          <SelectItem value="falso">Falso</SelectItem>
-                          <SelectItem value="enganoso">Enganoso</SelectItem>
-                          <SelectItem value="parcial">Parcialmente Verdade</SelectItem>
-                          <SelectItem value="apuracao">Em Apuração</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Tipo</Label>
-                      <Select
-                        value={form.type}
-                        onValueChange={(v) => setForm({ ...form, type: v as typeof form.type })}
-                      >
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="noticia">Notícia</SelectItem>
-                          <SelectItem value="golpe">Golpe</SelectItem>
-                          <SelectItem value="fake">Fake News</SelectItem>
-                          <SelectItem value="empresa">Empresa</SelectItem>
-                          <SelectItem value="site">Site</SelectItem>
-                          <SelectItem value="video">Vídeo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  {isAdmin && editingId && (
-                    <div>
-                      <Label>Autor</Label>
-                      <Select
-                        value={form.author_id}
-                        onValueChange={(v) => setForm({ ...form, author_id: v })}
-                      >
-                        <SelectTrigger><SelectValue placeholder="Selecionar autor" /></SelectTrigger>
-                        <SelectContent>
-                          {(usersData?.users ?? []).map((u: any) => (
-                            <SelectItem key={u.id} value={u.id}>
-                              {u.display_name ?? u.id}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  <div className="flex gap-2">
-                    <Button type="submit" disabled={mCreate.isPending || mUpdate.isPending}>
-                      {editingId ? "Salvar alterações" : "Salvar rascunho"}
-                    </Button>
-                    {editingId && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setShowForm(false);
-                          resetForm();
-                        }}
-                      >
-                        Cancelar
+                    <div className="flex gap-2">
+                      {editingId && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setShowForm(false);
+                            resetForm();
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                      )}
+                      <Button type="submit" disabled={mCreate.isPending || mUpdate.isPending}>
+                        {editingId ? "Salvar alterações" : "Salvar rascunho"}
                       </Button>
-                    )}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+                    <div className="space-y-6">
+                      <div>
+                        <Label htmlFor="title" className="text-base font-medium">
+                          Título
+                        </Label>
+                        <Input
+                          id="title"
+                          value={form.title}
+                          onChange={(e) => setForm({ ...form, title: e.target.value })}
+                          required
+                          minLength={3}
+                          placeholder="Digite o título do artigo"
+                          className="mt-2"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="excerpt" className="text-base font-medium">
+                          Resumo
+                        </Label>
+                        <Textarea
+                          id="excerpt"
+                          rows={3}
+                          value={form.excerpt}
+                          onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+                          placeholder="Escreva um breve resumo do conteúdo"
+                          className="mt-2 resize-none"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="body" className="text-base font-medium">
+                            Conteúdo
+                          </Label>
+                          <span className="text-xs text-muted-foreground">
+                            {form.body.length.toLocaleString()} caracteres
+                          </span>
+                        </div>
+                        <Textarea
+                          id="body"
+                          value={form.body}
+                          onChange={(e) => setForm({ ...form, body: e.target.value })}
+                          placeholder="Escreva o conteúdo completo do artigo aqui..."
+                          className="mt-2 min-h-[420px] resize-y font-normal leading-relaxed"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-6 rounded-xl border border-border bg-muted/30 p-5">
+                      <div>
+                        <Label className="text-base font-medium">Imagem de destaque</Label>
+                        <div className="mt-2">
+                          <ImageUploader
+                            value={form.image_url}
+                            onChange={(url) => setForm({ ...form, image_url: url })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="text-base font-medium">Categoria</Label>
+                          <Select
+                            value={form.category}
+                            onValueChange={(v) =>
+                              setForm({ ...form, category: v as typeof form.category })
+                            }
+                          >
+                            <SelectTrigger className="mt-2">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {categories.map((c) => (
+                                <SelectItem key={c} value={c}>{c}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-base font-medium">Veredito</Label>
+                          <Select
+                            value={form.verdict}
+                            onValueChange={(v) =>
+                              setForm({ ...form, verdict: v as typeof form.verdict })
+                            }
+                          >
+                            <SelectTrigger className="mt-2">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="verificado">Verificado</SelectItem>
+                              <SelectItem value="falso">Falso</SelectItem>
+                              <SelectItem value="enganoso">Enganoso</SelectItem>
+                              <SelectItem value="parcial">Parcialmente Verdade</SelectItem>
+                              <SelectItem value="apuracao">Em Apuração</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-base font-medium">Tipo</Label>
+                          <Select
+                            value={form.type}
+                            onValueChange={(v) =>
+                              setForm({ ...form, type: v as typeof form.type })
+                            }
+                          >
+                            <SelectTrigger className="mt-2">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="noticia">Notícia</SelectItem>
+                              <SelectItem value="golpe">Golpe</SelectItem>
+                              <SelectItem value="fake">Fake News</SelectItem>
+                              <SelectItem value="empresa">Empresa</SelectItem>
+                              <SelectItem value="site">Site</SelectItem>
+                              <SelectItem value="video">Vídeo</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {isAdmin && editingId && (
+                          <div>
+                            <Label className="text-base font-medium">Autor</Label>
+                            <Select
+                              value={form.author_id}
+                              onValueChange={(v) => setForm({ ...form, author_id: v })}
+                            >
+                              <SelectTrigger className="mt-2">
+                                <SelectValue placeholder="Selecionar autor" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(usersData?.users ?? []).map((u: any) => (
+                                  <SelectItem key={u.id} value={u.id}>
+                                    {u.display_name ?? u.id}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </form>
               )}
