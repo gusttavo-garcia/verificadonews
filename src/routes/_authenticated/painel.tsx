@@ -1041,7 +1041,7 @@ function PainelPage() {
                                     )}
                                     {isAdmin && (
                                       <DropdownMenuItem
-                                        variant="destructive"
+                                        className="text-destructive focus:text-destructive"
                                         onSelect={() =>
                                           setConfirmAction({
                                             title: "Mover para a lixeira?",
