@@ -132,21 +132,26 @@ function ImageUploader({
   };
 
   return (
-    <div className="mt-1 space-y-2">
+    <div className="space-y-3">
       {value ? (
-        <div className="relative aspect-[16/9] w-full max-w-sm overflow-hidden rounded-lg border border-border bg-muted">
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg border border-border bg-muted">
           <img src={value} alt="Prévia" className="h-full w-full object-cover" />
           <button
             type="button"
             onClick={() => onChange("")}
-            className="absolute right-2 top-2 rounded-full bg-background/90 p-1 text-foreground shadow hover:bg-background"
+            className="absolute right-2 top-2 rounded-full bg-background/90 p-1.5 text-foreground shadow hover:bg-background"
             title="Remover imagem"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-      ) : null}
-      <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
+      ) : (
+        <div className="flex aspect-[16/9] w-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/50 text-muted-foreground">
+          <Upload className="mb-2 h-8 w-8 opacity-50" />
+          <span className="text-xs">Nenhuma imagem selecionada</span>
+        </div>
+      )}
+      <label className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
         <Upload className="h-4 w-4" />
         {uploading ? "Enviando…" : value ? "Trocar imagem" : "Enviar imagem"}
         <input
