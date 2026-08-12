@@ -29,6 +29,13 @@ import {
   ChevronRight,
   ShieldCheck,
 } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Bar,
   BarChart,
@@ -971,7 +978,7 @@ function PainelPage() {
                               </span>
                             </td>
                             <td className="whitespace-nowrap px-4 py-3">
-                              <div className="flex flex-wrap items-center justify-end gap-2">
+                              <div className="flex items-center justify-end gap-2">
                                 {(isAdmin || a.status !== "published") && (
                                   <Button
                                     size="sm"
@@ -982,71 +989,75 @@ function PainelPage() {
                                     <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
                                   </Button>
                                 )}
-                                {a.status === "draft" && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="shrink-0"
-                                    onClick={() => mReview.mutate(a.id)}
-                                    disabled={mReview.isPending}
-                                  >
-                                    <Send className="mr-1 h-3.5 w-3.5" /> Enviar para revisão
-                                  </Button>
-                                )}
-                                {isAdmin && a.status !== "published" && (
-                                  <Button
-                                    size="sm"
-                                    className="shrink-0"
-                                    onClick={() =>
-                                      setConfirmAction({
-                                        title: "Publicar artigo?",
-                                        description: `"${a.title}" ficará visível publicamente no site.`,
-                                        confirmLabel: "Publicar",
-                                        run: () => mPublish.mutate(a.id),
-                                      })
-                                    }
-                                    disabled={mPublish.isPending}
-                                  >
-                                    <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Publicar
-                                  </Button>
-                                )}
-                                {isAdmin && a.status === "published" && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="shrink-0"
-                                    onClick={() =>
-                                      setConfirmAction({
-                                        title: "Voltar para rascunho?",
-                                        description: `"${a.title}" deixará de aparecer no site e voltará como rascunho.`,
-                                        confirmLabel: "Despublicar",
-                                        run: () => mUnpublish.mutate(a.id),
-                                      })
-                                    }
-                                    disabled={mUnpublish.isPending}
-                                  >
-                                    <EyeOff className="mr-1 h-3.5 w-3.5" /> Despublicar
-                                  </Button>
-                                )}
-                                {isAdmin && (
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    className="shrink-0"
-                                    onClick={() =>
-                                      setConfirmAction({
-                                        title: "Mover para a lixeira?",
-                                        description: `"${a.title}" será movido para a lixeira e poderá ser restaurado depois.`,
-                                        confirmLabel: "Mover para lixeira",
-                                        destructive: true,
-                                        run: () => mDelete.mutate(a.id),
-                                      })
-                                    }
-                                    disabled={mDelete.isPending}
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </Button>
-                                )}
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-8 w-8 shrink-0 p-0"
+                                      aria-label="Mais ações"
+                                    >
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-56">
+                                    {a.status === "draft" && (
+                                      <DropdownMenuItem
+                                        onSelect={() => mReview.mutate(a.id)}
+                                        disabled={mReview.isPending}
+                                      >
+                                        <Send className="mr-2 h-4 w-4" /> Enviar para revisão
+                                      </DropdownMenuItem>
+                                    )}
+                                    {isAdmin && a.status !== "published" && (
+                                      <DropdownMenuItem
+                                        onSelect={() =>
+                                          setConfirmAction({
+                                            title: "Publicar artigo?",
+                                            description: `"${a.title}" ficará visível publicamente no site.`,
+                                            confirmLabel: "Publicar",
+                                            run: () => mPublish.mutate(a.id),
+                                          })
+                                        }
+                                        disabled={mPublish.isPending}
+                                      >
+                                        <CheckCircle2 className="mr-2 h-4 w-4" /> Publicar
+                                      </DropdownMenuItem>
+                                    )}
+                                    {isAdmin && a.status === "published" && (
+                                      <DropdownMenuItem
+                                        onSelect={() =>
+                                          setConfirmAction({
+                                            title: "Voltar para rascunho?",
+                                            description: `"${a.title}" deixará de aparecer no site e voltará como rascunho.`,
+                                            confirmLabel: "Despublicar",
+                                            run: () => mUnpublish.mutate(a.id),
+                                          })
+                                        }
+                                        disabled={mUnpublish.isPending}
+                                      >
+                                        <EyeOff className="mr-2 h-4 w-4" /> Despublicar
+                                      </DropdownMenuItem>
+                                    )}
+                                    {isAdmin && (
+                                      <DropdownMenuItem
+                                        className="text-destructive focus:text-destructive"
+                                        onSelect={() =>
+                                          setConfirmAction({
+                                            title: "Mover para a lixeira?",
+                                            description: `"${a.title}" será movido para a lixeira e poderá ser restaurado depois.`,
+                                            confirmLabel: "Mover para lixeira",
+                                            destructive: true,
+                                            run: () => mDelete.mutate(a.id),
+                                          })
+                                        }
+                                        disabled={mDelete.isPending}
+                                      >
+                                        <Trash2 className="mr-2 h-4 w-4" /> Mover para lixeira
+                                      </DropdownMenuItem>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
                             </td>
                           </tr>
