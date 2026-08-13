@@ -1933,7 +1933,9 @@ function AuthorPerformance({
         .sort((a, b) => (b.views ?? 0) - (a.views ?? 0))
         .slice(0, 5)
         .map((a) => ({
-          name: a.title.length > 34 ? `${a.title.slice(0, 34)}…` : a.title,
+          name: a.title.length > 55 ? `${a.title.slice(0, 55)}…` : a.title,
+          fullTitle: a.title,
+          slug: a.slug,
           views: a.views ?? 0,
         })),
     }))
@@ -1959,10 +1961,10 @@ function AuthorPerformance({
           {isAdmin ? "Top 5 matérias por redator" : "Suas 5 matérias mais acessadas"}
         </h3>
         <p className="text-sm text-muted-foreground">
-          Baseado nas visualizações reais registradas no site.
+          Baseado nas visualizações reais registradas no site. Clique no nome da matéria para abri-la.
         </p>
       </div>
-      <div className={isAdmin ? "grid gap-4 xl:grid-cols-2" : ""}>
+      <div className="grid gap-4">
         {blocks.map((b) => (
           <div
             key={b.name}
@@ -1974,19 +1976,21 @@ function AuthorPerformance({
                 {b.data.reduce((s, d) => s + d.views, 0).toLocaleString("pt-BR")} views
               </span>
             </div>
-            <div style={{ width: "100%", height: 40 + b.data.length * 44 }}>
+            <div style={{ width: "100%", height: 60 + b.data.length * 52 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={b.data} layout="vertical" margin={{ left: 8, right: 16 }}>
+                <BarChart data={b.data} layout="vertical" margin={{ left: 8, right: 24, top: 8, bottom: 8 }}>
                   <CartesianGrid horizontal={false} strokeOpacity={0.15} />
-                  <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <XAxis type="number" tick={{ fontSize: 12 }} allowDecimals={false} />
                   <YAxis
                     type="category"
                     dataKey="name"
-                    width={170}
-                    tick={{ fontSize: 11 }}
+                    width={280}
+                    tick={<ArticleTick />}
                   />
                   <RTooltip
                     cursor={{ fillOpacity: 0.08 }}
+                    formatter={(value: number) => [value.toLocaleString("pt-BR"), "Visualizações"]}
+                    labelFormatter={(_, p: any) => p?.payload?.fullTitle ?? ""}
                     contentStyle={{
                       borderRadius: 12,
                       border: "1px solid var(--border)",
@@ -2007,6 +2011,40 @@ function AuthorPerformance({
         ))}
       </div>
     </div>
+  );
+}
+
+function ArticleTick({ x, y, payload }: { x?: number; y?: number; payload?: { value?: string; slug?: string; fullTitle?: string } }) {
+  const label = payload?.value ?? "";
+  const slug = payload?.slug ?? "";
+  if (!slug) {
+    return (
+      <text x={x} y={y} dy={4} fontSize={12} fill="var(--muted-foreground)">
+        {label}
+      </text>
+    );
+  }
+  return (
+    <g transform={`translate(${x ?? 0},${y ?? 0})`}>
+      <a
+        href={`/${slug}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={payload?.fullTitle ?? label}
+      >
+        <text
+          x={-8}
+          y={4}
+          textAnchor="end"
+          fontSize={12}
+          fill="var(--primary)"
+          className="cursor-pointer hover:underline"
+          style={{ textDecoration: "underline", textDecorationColor: "var(--primary)", textUnderlineOffset: 3 }}
+        >
+          {label}
+        </text>
+      </a>
+    </g>
   );
 }
 
