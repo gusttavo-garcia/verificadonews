@@ -465,9 +465,12 @@ function PainelPage() {
 
   const sidebar = (
     <div className="flex h-full flex-col gap-6 p-4">
-      <Link to="/" className="flex items-center gap-2 px-2 text-sm font-semibold">
-        <ShieldCheck className="h-5 w-5 text-primary" />
-        Verificado News
+      <Link to="/" className="flex items-center gap-2 px-2">
+        <img
+          src={logo}
+          alt="Verificado News"
+          className="h-8 w-auto object-contain"
+        />
       </Link>
       <Button className="w-full justify-start" onClick={openNewDraft}>
         <Plus className="mr-2 h-4 w-4" /> Novo rascunho
