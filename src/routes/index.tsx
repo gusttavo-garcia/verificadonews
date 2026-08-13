@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Search,
   TrendingUp,
@@ -8,12 +8,17 @@ import {
   AlertTriangle,
   Newspaper,
   LayoutGrid,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { PageShell } from "@/components/site/page-shell";
 import { ArticleCard } from "@/components/site/article-card";
 import { Button } from "@/components/ui/button";
 import { articles, type Article } from "@/lib/mock-data";
 import { listPublicArticles } from "@/lib/public-articles.functions";
+import { listCategories } from "@/lib/categories.functions";
 import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
