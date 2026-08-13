@@ -78,6 +78,12 @@ const shortcuts: Shortcut[] = [
 function Index() {
   const { live } = Route.useLoaderData();
   const [q, setQ] = useState("");
+  const categoriesRef = useRef<HTMLDivElement>(null);
+  const fetchCategories = useServerFn(listCategories);
+  const { data: catData } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => fetchCategories(),
+  });
   const sortedArticles = useMemo(
     () => [...(live.length > 0 ? live : articles)].sort((a, b) => b.date.localeCompare(a.date)),
     [live],
@@ -100,14 +106,33 @@ function Index() {
   );
   const listFor = (kind?: Shortcut["list"]) =>
     kind === "recent" ? recent : kind === "golpes" ? golpes : kind === "fake" ? fakes : [];
-  const topCategories = useMemo(() => {
+  const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
     for (const a of sortedArticles) {
       if (!a.category) continue;
       counts.set(a.category, (counts.get(a.category) ?? 0) + 1);
     }
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    return counts;
   }, [sortedArticles]);
+  const categoriesWithMeta = useMemo(() => {
+    const rows = catData?.categories ?? [];
+    const named = new Map<string, { name: string; description?: string }>();
+    for (const c of rows) {
+      named.set(c.name, { name: c.name, description: c.description ?? undefined });
+    }
+    for (const [name] of categoryCounts) {
+      if (!named.has(name)) named.set(name, { name });
+    }
+    return [...named.values()]
+      .map((c) => ({ ...c, count: categoryCounts.get(c.name) ?? 0 }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "pt-BR"));
+  }, [catData, categoryCounts]);
+  const scrollCategories = (dir: "left" | "right") => {
+    const el = categoriesRef.current;
+    if (!el) return;
+    const amount = el.clientWidth * 0.75;
+    el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  };
   return (
     <PageShell>
       {/* Hero */}
