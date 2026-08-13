@@ -2019,7 +2019,14 @@ function ArticleTick({ x, y, payload }: { x?: number; y?: number; payload?: { va
   const slug = payload?.slug ?? "";
   if (!slug) {
     return (
-      <text x={x} y={y} dy={4} fontSize={12} fill="var(--muted-foreground)">
+      <text
+        x={(x ?? 0) - 270}
+        y={y}
+        dy={4}
+        textAnchor="start"
+        fontSize={12}
+        fill="var(--muted-foreground)"
+      >
         {label}
       </text>
     );
@@ -2033,9 +2040,9 @@ function ArticleTick({ x, y, payload }: { x?: number; y?: number; payload?: { va
         title={payload?.fullTitle ?? label}
       >
         <text
-          x={-8}
+          x={-270}
           y={4}
-          textAnchor="end"
+          textAnchor="start"
           fontSize={12}
           fill="var(--primary)"
           className="cursor-pointer hover:underline"
