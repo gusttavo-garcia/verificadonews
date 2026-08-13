@@ -212,14 +212,11 @@ function Index() {
             })}
         </div>
 
-        {/* Categories — full-width, styled differently */}
-        {topCategories.length > 0 && (
-          <div className="mt-4 rounded-2xl border border-border/60 bg-gradient-to-br from-primary/[0.08] via-secondary/[0.12] to-accent/[0.08] p-6 transition hover:shadow-sm">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <Link
-                to="/categorias"
-                className="group flex items-center gap-3"
-              >
+        {/* Categories — horizontal scroll with name + description */}
+        {categoriesWithMeta.length > 0 && (
+          <div className="mt-6 rounded-2xl border border-border/60 bg-gradient-to-br from-primary/[0.08] via-secondary/[0.12] to-accent/[0.08] p-6 transition hover:shadow-sm">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <Link to="/categorias" className="group flex items-center gap-3">
                 <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm">
                   <LayoutGrid className="h-5 w-5" />
                 </div>
@@ -232,19 +229,53 @@ function Index() {
                   </p>
                 </div>
               </Link>
-              <div className="flex flex-wrap gap-2">
-                {topCategories.map(([c, n]) => (
-                  <Link
-                    key={c}
-                    to="/categorias"
-                    hash={c}
-                    className="rounded-full border border-border bg-background/80 px-3 py-1.5 text-sm text-foreground backdrop-blur-sm transition hover:border-primary hover:bg-background hover:text-primary"
-                  >
-                    {c}{" "}
-                    <span className="text-muted-foreground/80">({n})</span>
-                  </Link>
-                ))}
+              <div className="hidden gap-2 sm:flex">
+                <button
+                  type="button"
+                  onClick={() => scrollCategories("left")}
+                  aria-label="Categorias anteriores"
+                  className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background/80 text-foreground backdrop-blur-sm transition hover:border-primary hover:text-primary"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollCategories("right")}
+                  aria-label="Próximas categorias"
+                  className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background/80 text-foreground backdrop-blur-sm transition hover:border-primary hover:text-primary"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
               </div>
+            </div>
+            <div
+              ref={categoriesRef}
+              className="scrollbar-hide -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-1"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {categoriesWithMeta.map((c) => (
+                <Link
+                  key={c.name}
+                  to="/categorias"
+                  hash={c.name}
+                  className="group w-[260px] shrink-0 snap-start rounded-xl border border-border bg-background/90 p-4 shadow-sm transition hover:border-primary hover:bg-background hover:shadow-md sm:w-[300px]"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <h4 className="line-clamp-1 text-base font-semibold text-foreground group-hover:text-primary">
+                      {c.name}
+                    </h4>
+                    <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                      {c.count}
+                    </span>
+                  </div>
+                  <p className="mt-2 line-clamp-2 min-h-[2.5rem] text-sm text-muted-foreground">
+                    {c.description || "Verificações sobre " + c.name.toLowerCase()}
+                  </p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary opacity-0 transition group-hover:opacity-100">
+                    Ver verificações <ChevronRight className="h-3.5 w-3.5" />
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
         )}
