@@ -976,7 +976,7 @@ function PainelPage() {
                             </td>
                             <td className="px-4 py-3">
                               <span
-                                className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[a.status] ?? ""}`}
+                                className={`inline-block whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[a.status] ?? ""}`}
                               >
                                 {statusLabel[a.status] ?? a.status}
                               </span>
