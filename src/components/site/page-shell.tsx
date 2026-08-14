@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { SiteHeader } from "./header";
 import { SiteFooter } from "./footer";
 import { SearchBar } from "./search-bar";
+import { ScrollToTop } from "./scroll-to-top";
 
 export function PageShell({ children }: { children: ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export function PageShell({ children }: { children: ReactNode }) {
       <SiteHeader />
       <main className="flex-1">{children}</main>
       <SiteFooter />
+      <ScrollToTop />
     </div>
   );
 }
