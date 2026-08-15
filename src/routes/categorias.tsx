@@ -8,6 +8,7 @@ import { ArticleCard } from "@/components/site/article-card";
 import { articles as ALL, type Article } from "@/lib/mock-data";
 import { listPublicArticles } from "@/lib/public-articles.functions";
 import { listCategories } from "@/lib/categories.functions";
+import { categorySlug } from "@/lib/category-slug";
 import { Tag } from "lucide-react";
 
 export const Route = createFileRoute("/categorias")({
@@ -81,8 +82,8 @@ function CategoriasPage() {
             return (
               <Link
                 key={c}
-                to="/categorias"
-                hash={c}
+                to="/categoria/$slug"
+                params={{ slug: categorySlug(c) }}
                 className="rounded-full border border-border bg-card px-4 py-2 text-sm hover:border-primary hover:text-primary"
               >
                 {c} <span className="text-muted-foreground">({count})</span>
@@ -105,9 +106,18 @@ function CategoriasPage() {
                 </p>
               ) : null}
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {items.map((a) => (
+                {items.slice(0, 3).map((a) => (
                   <ArticleCard key={a.slug} article={a} />
                 ))}
+              </div>
+              <div className="mt-5 flex justify-center">
+                <Link
+                  to="/categoria/$slug"
+                  params={{ slug: categorySlug(c) }}
+                  className="rounded-full border border-border bg-card px-5 py-2 text-sm font-medium hover:border-primary hover:text-primary"
+                >
+                  Ver todas ({items.length})
+                </Link>
               </div>
             </div>
           );
