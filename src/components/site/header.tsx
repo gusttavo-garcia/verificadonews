@@ -1,17 +1,19 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown, LayoutDashboard, LogIn, LogOut, Menu, Search, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import logo from "@/assets/logo.png";
 import { ThemeToggle } from "./theme-toggle";
 import { useAuth, useIsStaff } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { listCategories } from "@/lib/categories.functions";
 
 const nav = [
   { to: "/", label: "Início" },
   { to: "/noticias", label: "Notícias" },
   { to: "/golpes", label: "Golpes" },
   { to: "/fake-news", label: "Fake News" },
-  { to: "/categorias", label: "Categorias" },
 ] as const;
 
 const institucional = [
@@ -49,8 +51,17 @@ function HeaderSearch({ onSubmitted }: { onSubmitted?: () => void }) {
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [instOpen, setInstOpen] = useState(false);
+  const [catOpen, setCatOpen] = useState(false);
+  const [mobileCatOpen, setMobileCatOpen] = useState(false);
   const { session, signOut, loading } = useAuth();
   const isStaff = useIsStaff();
+  const fetchCategories = useServerFn(listCategories);
+  const { data: catData } = useQuery({
+    queryKey: ["header-categories"],
+    queryFn: () => fetchCategories(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const categories = (catData?.categories ?? []).filter((c) => c.name);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
@@ -70,6 +81,43 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
+          <div
+            className="relative"
+            onMouseEnter={() => setCatOpen(true)}
+            onMouseLeave={() => setCatOpen(false)}
+          >
+            <button
+              className="flex items-center gap-1 rounded-full px-3 py-1.5 text-sm text-foreground/70 hover:bg-muted [&.active]:bg-primary/10 [&.active]:text-primary"
+              aria-expanded={catOpen}
+              aria-label="Abrir menu de categorias"
+              onClick={() => setCatOpen((v) => !v)}
+            >
+              Categorias <ChevronDown className="h-4 w-4" />
+            </button>
+            {catOpen && (
+              <div className="absolute left-0 top-full w-56 pt-2">
+                <div className="max-h-72 overflow-y-auto rounded-xl border border-border bg-popover p-2 shadow-lg">
+                  <Link
+                    to="/categorias"
+                    className="block rounded-lg px-3 py-2 text-sm font-medium text-foreground/90 hover:bg-muted"
+                  >
+                    Ver todas
+                  </Link>
+                  <div className="my-1 border-t border-border" />
+                  {categories.map((c) => (
+                    <Link
+                      key={c.name}
+                      to="/categorias"
+                      hash={c.name}
+                      className="block rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-muted"
+                    >
+                      {c.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <div
             className="relative"
             onMouseEnter={() => setInstOpen(true)}
@@ -146,7 +194,49 @@ export function SiteHeader() {
             <div className="pb-2">
               <HeaderSearch onSubmitted={() => setOpen(false)} />
             </div>
-            {[...nav, ...institucional].map((i) => (
+            {nav.map((i) => (
+              <Link
+                key={i.to}
+                to={i.to}
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-muted"
+              >
+                {i.label}
+              </Link>
+            ))}
+            <button
+              onClick={() => setMobileCatOpen((v) => !v)}
+              aria-expanded={mobileCatOpen}
+              className="flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-foreground/80 hover:bg-muted"
+            >
+              <span>Categorias</span>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${mobileCatOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {mobileCatOpen && (
+              <div className="flex flex-col gap-1 border-l-2 border-border pl-4">
+                <Link
+                  to="/categorias"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/90 hover:bg-muted"
+                >
+                  Ver todas
+                </Link>
+                {categories.map((c) => (
+                  <Link
+                    key={c.name}
+                    to="/categorias"
+                    hash={c.name}
+                    onClick={() => setOpen(false)}
+                    className="rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-muted"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+            {institucional.map((i) => (
               <Link
                 key={i.to}
                 to={i.to}
