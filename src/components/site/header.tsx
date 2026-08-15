@@ -52,6 +52,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [instOpen, setInstOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
+  const [mobileCatOpen, setMobileCatOpen] = useState(false);
   const { session, signOut, loading } = useAuth();
   const isStaff = useIsStaff();
   const fetchCategories = useServerFn(listCategories);
