@@ -1,10 +1,13 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown, LayoutDashboard, LogIn, LogOut, Menu, Search, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import logo from "@/assets/logo.png";
 import { ThemeToggle } from "./theme-toggle";
 import { useAuth, useIsStaff } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { listCategories } from "@/lib/categories.functions";
 
 const nav = [
   { to: "/", label: "Início" },
