@@ -7,6 +7,7 @@ import logo from "@/assets/logo.png";
 import { ThemeToggle } from "./theme-toggle";
 import { useAuth, useIsStaff } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { categorySlug } from "@/lib/category-slug";
 import { listCategories } from "@/lib/categories.functions";
 
 const nav = [
@@ -107,8 +108,8 @@ export function SiteHeader() {
                   {categories.map((c) => (
                     <Link
                       key={c.name}
-                      to="/categorias"
-                      hash={c.name}
+                      to="/categoria/$slug"
+                      params={{ slug: categorySlug(c.name) }}
                       className="block rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-muted"
                     >
                       {c.name}
@@ -226,8 +227,8 @@ export function SiteHeader() {
                 {categories.map((c) => (
                   <Link
                     key={c.name}
-                    to="/categorias"
-                    hash={c.name}
+                    to="/categoria/$slug"
+                    params={{ slug: categorySlug(c.name) }}
                     onClick={() => setOpen(false)}
                     className="rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-muted"
                   >
