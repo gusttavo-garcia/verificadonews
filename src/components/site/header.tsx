@@ -51,8 +51,16 @@ function HeaderSearch({ onSubmitted }: { onSubmitted?: () => void }) {
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [instOpen, setInstOpen] = useState(false);
+  const [catOpen, setCatOpen] = useState(false);
   const { session, signOut, loading } = useAuth();
   const isStaff = useIsStaff();
+  const fetchCategories = useServerFn(listCategories);
+  const { data: catData } = useQuery({
+    queryKey: ["header-categories"],
+    queryFn: () => fetchCategories(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const categories = (catData?.categories ?? []).filter((c) => c.name);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
