@@ -82,6 +82,43 @@ export function SiteHeader() {
           ))}
           <div
             className="relative"
+            onMouseEnter={() => setCatOpen(true)}
+            onMouseLeave={() => setCatOpen(false)}
+          >
+            <button
+              className="flex items-center gap-1 rounded-full px-3 py-1.5 text-sm text-foreground/70 hover:bg-muted [&.active]:bg-primary/10 [&.active]:text-primary"
+              aria-expanded={catOpen}
+              aria-label="Abrir menu de categorias"
+              onClick={() => setCatOpen((v) => !v)}
+            >
+              Categorias <ChevronDown className="h-4 w-4" />
+            </button>
+            {catOpen && (
+              <div className="absolute left-0 top-full w-56 pt-2">
+                <div className="max-h-72 overflow-y-auto rounded-xl border border-border bg-popover p-2 shadow-lg">
+                  <Link
+                    to="/categorias"
+                    className="block rounded-lg px-3 py-2 text-sm font-medium text-foreground/90 hover:bg-muted"
+                  >
+                    Ver todas
+                  </Link>
+                  <div className="my-1 border-t border-border" />
+                  {categories.map((c) => (
+                    <Link
+                      key={c.name}
+                      to="/categorias"
+                      hash={c.name}
+                      className="block rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-muted"
+                    >
+                      {c.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <div
+            className="relative"
             onMouseEnter={() => setInstOpen(true)}
             onMouseLeave={() => setInstOpen(false)}
           >
