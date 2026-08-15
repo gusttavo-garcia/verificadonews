@@ -194,7 +194,49 @@ export function SiteHeader() {
             <div className="pb-2">
               <HeaderSearch onSubmitted={() => setOpen(false)} />
             </div>
-            {[...nav, ...institucional].map((i) => (
+            {nav.map((i) => (
+              <Link
+                key={i.to}
+                to={i.to}
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-muted"
+              >
+                {i.label}
+              </Link>
+            ))}
+            <button
+              onClick={() => setMobileCatOpen((v) => !v)}
+              aria-expanded={mobileCatOpen}
+              className="flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-foreground/80 hover:bg-muted"
+            >
+              <span>Categorias</span>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${mobileCatOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {mobileCatOpen && (
+              <div className="flex flex-col gap-1 border-l-2 border-border pl-4">
+                <Link
+                  to="/categorias"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/90 hover:bg-muted"
+                >
+                  Ver todas
+                </Link>
+                {categories.map((c) => (
+                  <Link
+                    key={c.name}
+                    to="/categorias"
+                    hash={c.name}
+                    onClick={() => setOpen(false)}
+                    className="rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-muted"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+            {institucional.map((i) => (
               <Link
                 key={i.to}
                 to={i.to}
