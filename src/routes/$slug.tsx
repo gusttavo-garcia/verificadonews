@@ -134,6 +134,18 @@ function VerificacaoPage() {
   const bodyHtml = body
     ? (marked.parse(body, { async: false }) as string)
     : "";
+  const bodyParts = (() => {
+    if (!bodyHtml) return ["", ""];
+    const chunks = bodyHtml.split("</p>");
+    if (chunks.length < 4) return [bodyHtml, ""];
+    const mid = Math.ceil((chunks.length - 1) / 2);
+    return [
+      chunks.slice(0, mid).join("</p>") + "</p>",
+      chunks.slice(mid).join("</p>"),
+    ];
+  })();
+  const bodyFirstHalf = bodyParts[0];
+  const bodySecondHalf = bodyParts[1];
   const confidence = 99;
   const [copied, setCopied] = useState(false);
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
