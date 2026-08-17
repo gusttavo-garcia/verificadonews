@@ -245,10 +245,19 @@ function VerificacaoPage() {
         <AdBlock slots={slots} position="after_intro" />
 
         {bodyHtml ? (
-          <div
-            className="prose-verificado mt-10 space-y-5 text-base leading-relaxed text-foreground/90"
-            dangerouslySetInnerHTML={{ __html: bodyHtml }}
-          />
+          <>
+            <div
+              className="prose-verificado mt-10 space-y-5 text-base leading-relaxed text-foreground/90"
+              dangerouslySetInnerHTML={{ __html: bodyFirstHalf }}
+            />
+            <AdBlock slots={slots} position="mid_content" />
+            {bodySecondHalf && (
+              <div
+                className="prose-verificado space-y-5 text-base leading-relaxed text-foreground/90"
+                dangerouslySetInnerHTML={{ __html: bodySecondHalf }}
+              />
+            )}
+          </>
         ) : (
         <div className="mt-10 space-y-5 text-base leading-relaxed text-foreground/90">
           <p>
