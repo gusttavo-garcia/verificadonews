@@ -211,3 +211,5 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
+import { CookieConsent } from "@/components/site/cookie-consent";
