@@ -14,13 +14,16 @@ import {
   registerArticleView,
 } from "@/lib/public-articles.functions";
 import { SITE_URL } from "@/lib/seo";
+import { listAdSlots } from "@/lib/ads.functions";
+import { AdBlock } from "@/components/site/ad-block";
 
 export const Route = createFileRoute("/$slug")({
   loader: async ({ params }) => {
     const fallback = articles.find((a) => a.slug === params.slug);
-    const [{ article: row }, { articles: rows }] = await Promise.all([
+    const [{ article: row }, { articles: rows }, { slots }] = await Promise.all([
       getPublicArticle({ data: { slug: params.slug } }),
       listPublicArticles(),
+      listAdSlots(),
     ]);
     const related: Article[] = (rows ?? []).map((r) => {
       const fb = articles.find((a) => a.slug === r.slug);
@@ -39,7 +42,7 @@ export const Route = createFileRoute("/$slug")({
     });
     if (!row) {
       if (!fallback) throw notFound();
-      return { article: fallback, body: "", related };
+      return { article: fallback, body: "", related, slots };
     }
     const article: Article = {
       slug: row.slug,
@@ -53,7 +56,7 @@ export const Route = createFileRoute("/$slug")({
       type: row.type as Article["type"],
       image: row.image_url ?? fallback?.image,
     };
-    return { article, body: row.body ?? "", related };
+    return { article, body: row.body ?? "", related, slots };
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) return { meta: [] };
@@ -121,7 +124,7 @@ export const Route = createFileRoute("/$slug")({
 });
 
 function VerificacaoPage() {
-  const { article, body, related } = Route.useLoaderData();
+  const { article, body, related, slots } = Route.useLoaderData();
   useEffect(() => {
     const key = `viewed:${article.slug}`;
     if (sessionStorage.getItem(key)) return;
@@ -145,6 +148,7 @@ function VerificacaoPage() {
   return (
     <PageShell>
       <article className="mx-auto max-w-3xl px-4 py-14">
+        <AdBlock slots={slots} position="top" />
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <VerdictBadge verdict={article.verdict} />
           <span className="rounded-full bg-[color:var(--brand-yellow)]/50 px-2.5 py-0.5 text-xs font-medium text-[oklch(0.35_0.08_60)]">
@@ -238,6 +242,8 @@ function VerificacaoPage() {
           </p>
         </div>
 
+        <AdBlock slots={slots} position="after_intro" />
+
         {bodyHtml ? (
           <div
             className="prose-verificado mt-10 space-y-5 text-base leading-relaxed text-foreground/90"
@@ -265,6 +271,8 @@ function VerificacaoPage() {
         </div>
         )}
 
+        <AdBlock slots={slots} position="after_content" />
+
         <div className="mt-10 flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-sm">
           <span className="inline-flex items-center gap-1.5">
             <Calendar className="h-4 w-4 text-primary" />
@@ -279,6 +287,7 @@ function VerificacaoPage() {
 
         <RelatedArticles current={article} pool={related} />
         <NewsletterOptIn />
+        <AdBlock slots={slots} position="before_comments" />
         <CommentsSection slug={article.slug} />
       </article>
     </PageShell>
