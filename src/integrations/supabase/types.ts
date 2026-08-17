@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_slots: {
+        Row: {
+          code: string
+          created_at: string
+          enabled: boolean
+          id: string
+          label: string
+          position: string
+          updated_at: string
+        }
+        Insert: {
+          code?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          label: string
+          position: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          label?: string
+          position?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       articles: {
         Row: {
           author_id: string | null
