@@ -29,6 +29,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
+  Megaphone,
 } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
 import {
@@ -87,6 +88,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { listNewsletterSubscribers } from "@/lib/comments.functions";
+import { listAdSlots, updateAdSlot } from "@/lib/ads.functions";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -216,6 +219,7 @@ type PanelSection =
   | "artigos"
   | "categorias"
   | "newsletter"
+  | "anuncios"
   | "usuarios"
   | "lixeira"
   | "perfil";
@@ -446,6 +450,7 @@ function PainelPage() {
           { key: "artigos", label: "Artigos", icon: FileText },
           { key: "categorias", label: "Categorias", icon: FolderTree },
           { key: "newsletter", label: "Inscritos na Newsletter", icon: Mail },
+          { key: "anuncios", label: "Anúncios", icon: Megaphone },
           { key: "usuarios", label: "Usuários", icon: Users },
           { key: "lixeira", label: "Lixeira", icon: Trash2 },
           { key: "perfil", label: "Perfil", icon: UserCircle },
@@ -1123,6 +1128,7 @@ function PainelPage() {
             <CategoriesSection onConfirm={setConfirmAction} />
           )}
           {section === "newsletter" && isAdmin && <NewsletterSection />}
+          {section === "anuncios" && isAdmin && <AdsSection />}
           {section === "usuarios" && isAdmin && (
             <UsersSection currentUserId={user?.id ?? null} />
           )}
@@ -1170,6 +1176,91 @@ function TrashSection({
   onConfirm: (action: PendingAction) => void;
 }) {
   return <TrashSectionInner onConfirm={onConfirm} />;
+}
+
+function AdsSection() {
+  const qc = useQueryClient();
+  const listFn = useServerFn(listAdSlots);
+  const updateFn = useServerFn(updateAdSlot);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+
+  const { data, isLoading } = useQuery({ queryKey: ["ad-slots"], queryFn: () => listFn() });
+  const slots = data?.slots ?? [];
+
+  const mUpdate = useMutation({
+    mutationFn: (v: { id: string; enabled: boolean; code: string }) => updateFn({ data: v }),
+    onSuccess: () => {
+      toast.success("Bloco de anúncio atualizado.");
+      qc.invalidateQueries({ queryKey: ["ad-slots"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+  });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-bold text-foreground">Blocos de anúncios dos artigos</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Cole aqui o código do anúncio (AdSense, Ad Manager ou HTML) para cada posição da página
+          do artigo. Blocos desativados ou sem código não são exibidos.
+        </p>
+      </div>
+
+      {isLoading && <p className="text-sm text-muted-foreground">Carregando…</p>}
+
+      <div className="space-y-4">
+        {slots.map((slot) => {
+          const code = drafts[slot.id] ?? slot.code;
+          const dirty = code !== slot.code;
+          return (
+            <div key={slot.id} className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="font-semibold text-foreground">{slot.label}</div>
+                  <div className="text-xs text-muted-foreground">
+                    Posição: <code>{slot.position}</code>
+                  </div>
+                </div>
+                <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Switch
+                    checked={slot.enabled}
+                    onCheckedChange={(checked) =>
+                      mUpdate.mutate({ id: slot.id, enabled: checked, code })
+                    }
+                  />
+                  {slot.enabled ? "Ativo" : "Inativo"}
+                </label>
+              </div>
+              <Textarea
+                value={code}
+                onChange={(e) => setDrafts((d) => ({ ...d, [slot.id]: e.target.value }))}
+                rows={6}
+                spellCheck={false}
+                placeholder="<ins class=&quot;adsbygoogle&quot; ...></ins>"
+                className="mt-4 font-mono text-xs"
+              />
+              <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
+                {dirty && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setDrafts((d) => ({ ...d, [slot.id]: slot.code }))}
+                  >
+                    Cancelar
+                  </Button>
+                )}
+                <Button
+                  disabled={!dirty || mUpdate.isPending}
+                  onClick={() => mUpdate.mutate({ id: slot.id, enabled: slot.enabled, code })}
+                >
+                  Salvar código
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function CategoriesSection({
