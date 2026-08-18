@@ -2075,7 +2075,7 @@ function AuthorPerformance({
                   <YAxis
                     type="category"
                     dataKey="name"
-                    width={280}
+                    width={380}
                     tick={<ArticleTick />}
                   />
                   <RTooltip
@@ -2108,41 +2108,47 @@ function AuthorPerformance({
 function ArticleTick({ x, y, payload }: { x?: number; y?: number; payload?: { value?: string; slug?: string; fullTitle?: string } }) {
   const label = payload?.value ?? "";
   const slug = payload?.slug ?? "";
+  const width = 360;
+  const height = 24;
+  const fx = (x ?? 0) - width;
+  const fy = (y ?? 0) - height / 2;
+
   if (!slug) {
     return (
-      <text
-        x={(x ?? 0) - 270}
-        y={y}
-        dy={4}
-        textAnchor="start"
-        fontSize={12}
-        fill="var(--muted-foreground)"
-      >
-        {label}
-      </text>
+      <foreignObject x={fx} y={fy} width={width} height={height}>
+        <div
+          className="flex h-full items-center text-xs text-muted-foreground"
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            width: `${width}px`,
+          }}
+        >
+          {label}
+        </div>
+      </foreignObject>
     );
   }
+
   return (
-    <g transform={`translate(${x ?? 0},${y ?? 0})`}>
+    <foreignObject x={fx} y={fy} width={width} height={height}>
       <a
         href={`/${slug}`}
         target="_blank"
         rel="noopener noreferrer"
         title={payload?.fullTitle ?? label}
+        className="flex h-full items-center text-xs text-primary hover:underline"
+        style={{
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          width: `${width}px`,
+        }}
       >
-        <text
-          x={-270}
-          y={4}
-          textAnchor="start"
-          fontSize={12}
-          fill="var(--primary)"
-          className="cursor-pointer hover:underline"
-          style={{ textDecoration: "underline", textDecorationColor: "var(--primary)", textUnderlineOffset: 3 }}
-        >
-          {label}
-        </text>
+        {label}
       </a>
-    </g>
+    </foreignObject>
   );
 }
 
