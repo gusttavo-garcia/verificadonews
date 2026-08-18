@@ -2075,7 +2075,7 @@ function AuthorPerformance({
                   <YAxis
                     type="category"
                     dataKey="name"
-                    width={280}
+                    width={380}
                     tick={<ArticleTick />}
                   />
                   <RTooltip
