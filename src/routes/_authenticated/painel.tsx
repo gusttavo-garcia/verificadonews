@@ -931,23 +931,23 @@ function PainelPage() {
                     Nenhum artigo corresponde aos filtros selecionados.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[720px] text-sm">
+                  <div>
+                    <table className="w-full table-fixed text-sm">
                       <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
                         <tr>
                           <th className="px-4 py-3">Título</th>
-                          {isAdmin && <th className="px-4 py-3">Autor</th>}
-                          <th className="px-4 py-3">Categoria</th>
-                          <th className="px-4 py-3">Veredito</th>
-                          <th className="px-4 py-3">Status</th>
-                          <th className="px-4 py-3 text-right">Ações</th>
+                          {isAdmin && <th className="hidden w-[12%] px-4 py-3 lg:table-cell">Autor</th>}
+                          <th className="hidden w-[12%] px-4 py-3 md:table-cell">Categoria</th>
+                          <th className="hidden w-[12%] px-4 py-3 lg:table-cell">Veredito</th>
+                          <th className="w-[14%] px-4 py-3">Status</th>
+                          <th className="w-[16%] px-4 py-3 text-right">Ações</th>
                         </tr>
                       </thead>
                       <tbody>
                         {pageItems.map((a: any) => (
                           <tr key={a.id} className="border-t border-border hover:bg-muted/30">
                             <td className="px-4 py-3 font-medium text-foreground">
-                              <div>{a.title}</div>
+                              <div className="break-words">{a.title}</div>
                               <button
                                 type="button"
                                 onClick={() => {
@@ -963,20 +963,20 @@ function PainelPage() {
                               </button>
                             </td>
                             {isAdmin && (
-                              <td className="px-4 py-3 text-muted-foreground">
+                              <td className="hidden px-4 py-3 text-muted-foreground lg:table-cell">
                                 {a.author_name ?? "—"}
                               </td>
                             )}
-                            <td className="px-4 py-3 text-muted-foreground">
+                            <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">
                               {a.category ? (
                                 a.category
                               ) : (
-                                <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                                <span className="inline-block rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
                                   Sem categoria definida
                                 </span>
                               )}
                             </td>
-                            <td className="px-4 py-3 text-muted-foreground">
+                            <td className="hidden px-4 py-3 text-muted-foreground lg:table-cell">
                               {verdictLabel[a.verdict] ?? a.verdict}
                             </td>
                             <td className="px-4 py-3">
