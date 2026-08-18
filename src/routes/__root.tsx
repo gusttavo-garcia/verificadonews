@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { ScrollToTop } from "@/components/site/scroll-to-top";
+import { CookieConsent } from "@/components/site/cookie-consent";
 
 function NotFoundComponent() {
   return (
@@ -207,9 +208,8 @@ function RootComponent() {
         <Outlet />
         <Toaster />
         <ScrollToTop />
+        <CookieConsent />
       </AuthProvider>
     </QueryClientProvider>
   );
 }
-
-import { CookieConsent } from "@/components/site/cookie-consent";
