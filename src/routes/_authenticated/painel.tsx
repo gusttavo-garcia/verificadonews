@@ -2117,7 +2117,6 @@ function ArticleTick({ x, y, payload }: { x?: number; y?: number; payload?: { va
     return (
       <foreignObject x={fx} y={fy} width={width} height={height}>
         <div
-          xmlns="http://www.w3.org/1999/xhtml"
           className="flex h-full items-center text-xs text-muted-foreground"
           style={{
             overflow: "hidden",
@@ -2135,7 +2134,6 @@ function ArticleTick({ x, y, payload }: { x?: number; y?: number; payload?: { va
   return (
     <foreignObject x={fx} y={fy} width={width} height={height}>
       <a
-        xmlns="http://www.w3.org/1999/xhtml"
         href={`/${slug}`}
         target="_blank"
         rel="noopener noreferrer"
