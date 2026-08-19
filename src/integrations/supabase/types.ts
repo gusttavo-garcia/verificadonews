@@ -22,6 +22,7 @@ export type Database = {
           enabled: boolean
           id: string
           label: string
+          paragraph_no: number
           position: string
           updated_at: string
         }
@@ -32,6 +33,7 @@ export type Database = {
           enabled?: boolean
           id?: string
           label: string
+          paragraph_no?: number
           position: string
           updated_at?: string
         }
@@ -42,6 +44,7 @@ export type Database = {
           enabled?: boolean
           id?: string
           label?: string
+          paragraph_no?: number
           position?: string
           updated_at?: string
         }

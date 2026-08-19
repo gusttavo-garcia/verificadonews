@@ -1,0 +1,1 @@
+ALTER TABLE public.ad_slots ADD COLUMN IF NOT EXISTS paragraph_no integer NOT NULL DEFAULT 1;
