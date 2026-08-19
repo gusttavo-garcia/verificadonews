@@ -1182,83 +1182,180 @@ function AdsSection() {
   const qc = useQueryClient();
   const listFn = useServerFn(listAdSlots);
   const updateFn = useServerFn(updateAdSlot);
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [active, setActive] = useState(1);
+  const [drafts, setDrafts] = useState<
+    Record<string, { code: string; label: string; position: string; enabled: boolean }>
+  >({});
 
   const { data, isLoading } = useQuery({ queryKey: ["ad-slots"], queryFn: () => listFn() });
   const slots = data?.slots ?? [];
 
   const mUpdate = useMutation({
-    mutationFn: (v: { id: string; enabled: boolean; code: string }) => updateFn({ data: v }),
+    mutationFn: (v: {
+      id: string;
+      enabled: boolean;
+      code: string;
+      label: string;
+      position: string;
+    }) => updateFn({ data: v as never }),
     onSuccess: () => {
-      toast.success("Bloco de anúncio atualizado.");
+      toast.success("Configurações do bloco salvas.");
       qc.invalidateQueries({ queryKey: ["ad-slots"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
   });
 
+  const positions: { value: string; label: string }[] = [
+    { value: "", label: "Desativado" },
+    { value: "top", label: "Topo do artigo (acima do título)" },
+    { value: "after_intro", label: "Após o resumo / resposta rápida" },
+    { value: "mid_content", label: "No meio do conteúdo" },
+    { value: "after_content", label: "Após o conteúdo" },
+    { value: "before_comments", label: "Antes dos comentários" },
+  ];
+
+  const slot = slots.find((s) => s.block_no === active) ?? slots[0];
+  const draft = slot
+    ? (drafts[slot.id] ?? {
+        code: slot.code,
+        label: slot.label,
+        position: slot.position,
+        enabled: slot.enabled,
+      })
+    : null;
+  const dirty =
+    !!slot &&
+    !!draft &&
+    (draft.code !== slot.code ||
+      draft.label !== slot.label ||
+      draft.position !== slot.position ||
+      draft.enabled !== slot.enabled);
+
+  const patch = (v: Partial<NonNullable<typeof draft>>) => {
+    if (!slot || !draft) return;
+    setDrafts((d) => ({ ...d, [slot.id]: { ...draft, ...v } }));
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-foreground">Blocos de anúncios dos artigos</h2>
+        <h2 className="text-xl font-bold text-foreground">Gerenciador de blocos de anúncios</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Cole aqui o código do anúncio (AdSense, Ad Manager ou HTML) para cada posição da página
-          do artigo. Blocos desativados ou sem código não são exibidos.
+          Escolha um bloco numerado, cole o código (AdSense, Ad Manager ou HTML) e defina em qual
+          posição do artigo ele será inserido. Blocos desativados ou sem código não aparecem no site.
         </p>
       </div>
 
       {isLoading && <p className="text-sm text-muted-foreground">Carregando…</p>}
 
-      <div className="space-y-4">
-        {slots.map((slot) => {
-          const code = drafts[slot.id] ?? slot.code;
-          const dirty = code !== slot.code;
-          return (
-            <div key={slot.id} className="rounded-xl border border-border bg-card p-5 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <div className="font-semibold text-foreground">{slot.label}</div>
-                  <div className="text-xs text-muted-foreground">
-                    Posição: <code>{slot.position}</code>
-                  </div>
-                </div>
-                <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Switch
-                    checked={slot.enabled}
-                    onCheckedChange={(checked) =>
-                      mUpdate.mutate({ id: slot.id, enabled: checked, code })
-                    }
-                  />
-                  {slot.enabled ? "Ativo" : "Inativo"}
-                </label>
-              </div>
-              <Textarea
-                value={code}
-                onChange={(e) => setDrafts((d) => ({ ...d, [slot.id]: e.target.value }))}
-                rows={6}
-                spellCheck={false}
-                placeholder="<ins class=&quot;adsbygoogle&quot; ...></ins>"
-                className="mt-4 font-mono text-xs"
-              />
-              <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
-                {dirty && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => setDrafts((d) => ({ ...d, [slot.id]: slot.code }))}
-                  >
-                    Cancelar
-                  </Button>
-                )}
-                <Button
-                  disabled={!dirty || mUpdate.isPending}
-                  onClick={() => mUpdate.mutate({ id: slot.id, enabled: slot.enabled, code })}
+      {slot && draft && (
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          {/* Abas numeradas */}
+          <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-muted/40 p-2">
+            {slots.map((s) => {
+              const isActive = s.block_no === (slot?.block_no ?? 0);
+              const configured = !!s.code.trim() && s.enabled && s.position !== "";
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setActive(s.block_no)}
+                  title={s.label}
+                  className={`relative h-9 w-10 rounded-md border text-sm font-medium transition ${
+                    isActive
+                      ? "border-primary bg-background text-primary shadow-sm"
+                      : "border-border bg-background/60 text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  Salvar código
-                </Button>
-              </div>
+                  {s.block_no}
+                  {configured && (
+                    <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Cabeçalho do bloco */}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-foreground">Bloco {slot.block_no}</span>
+              <Input
+                value={draft.label}
+                onChange={(e) => patch({ label: e.target.value })}
+                placeholder="Nome do bloco"
+                className="h-8 w-56"
+              />
             </div>
-          );
-        })}
-      </div>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Switch
+                checked={draft.enabled}
+                onCheckedChange={(checked) => patch({ enabled: checked })}
+              />
+              {draft.enabled ? "Ativo" : "Inativo"}
+            </label>
+          </div>
+
+          {/* Editor de código */}
+          <Textarea
+            value={draft.code}
+            onChange={(e) => patch({ code: e.target.value })}
+            rows={14}
+            spellCheck={false}
+            placeholder='<ins class="adsbygoogle" ...></ins>'
+            className="mt-3 rounded-md border-0 bg-zinc-900 font-mono text-xs text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-1"
+          />
+
+          {/* Rodapé de configuração */}
+          <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/30 p-3">
+            <span className="text-sm text-muted-foreground">Inserção</span>
+            <select
+              value={draft.position}
+              onChange={(e) => patch({ position: e.target.value })}
+              className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"
+            >
+              {positions.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            <span className="text-xs text-muted-foreground">
+              {draft.code.length} caracteres
+            </span>
+            <div className="ml-auto flex items-center gap-2">
+              {dirty && (
+                <Button
+                  variant="ghost"
+                  onClick={() =>
+                    setDrafts((d) => {
+                      const n = { ...d };
+                      delete n[slot.id];
+                      return n;
+                    })
+                  }
+                >
+                  Cancelar
+                </Button>
+              )}
+              <Button
+                disabled={!dirty || mUpdate.isPending}
+                onClick={() =>
+                  mUpdate.mutate({
+                    id: slot.id,
+                    enabled: draft.enabled,
+                    code: draft.code,
+                    label: draft.label,
+                    position: draft.position,
+                  })
+                }
+              >
+                Salvar configurações
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
