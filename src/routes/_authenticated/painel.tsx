@@ -1209,6 +1209,7 @@ function AdsSection() {
     { value: "", label: "Desativado" },
     { value: "top", label: "Topo do artigo (acima do título)" },
     { value: "after_intro", label: "Após o resumo / resposta rápida" },
+    { value: "after_paragraph", label: "Após o parágrafo" },
     { value: "mid_content", label: "No meio do conteúdo" },
     { value: "after_content", label: "Após o conteúdo" },
     { value: "before_comments", label: "Antes dos comentários" },
@@ -1221,6 +1222,7 @@ function AdsSection() {
         label: slot.label,
         position: slot.position,
         enabled: slot.enabled,
+        paragraph_no: slot.paragraph_no ?? 1,
       })
     : null;
   const dirty =
@@ -1229,6 +1231,7 @@ function AdsSection() {
     (draft.code !== slot.code ||
       draft.label !== slot.label ||
       draft.position !== slot.position ||
+      draft.paragraph_no !== (slot.paragraph_no ?? 1) ||
       draft.enabled !== slot.enabled);
 
   const patch = (v: Partial<NonNullable<typeof draft>>) => {
@@ -1320,6 +1323,23 @@ function AdsSection() {
                 </option>
               ))}
             </select>
+            {draft.position === "after_paragraph" && (
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  max={50}
+                  value={draft.paragraph_no}
+                  onChange={(e) =>
+                    patch({
+                      paragraph_no: Math.min(50, Math.max(1, Number(e.target.value) || 1)),
+                    })
+                  }
+                  className="h-9 w-20"
+                />
+                <span className="text-xs text-muted-foreground">nº do parágrafo</span>
+              </div>
+            )}
             <span className="text-xs text-muted-foreground">
               {draft.code.length} caracteres
             </span>
@@ -1347,6 +1367,7 @@ function AdsSection() {
                     code: draft.code,
                     label: draft.label,
                     position: draft.position,
+                    paragraph_no: draft.paragraph_no,
                   })
                 }
               >
