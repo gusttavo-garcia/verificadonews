@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type AdSlot = {
   id: string;
+  block_no: number;
   position: string;
   label: string;
   enabled: boolean;
@@ -31,8 +32,8 @@ function publicClient() {
 export const listAdSlots = createServerFn({ method: "GET" }).handler(async () => {
   const { data } = await (publicClient() as any)
     .from("ad_slots")
-    .select("id, position, label, enabled, code")
-    .order("created_at", { ascending: true });
+    .select("id, block_no, position, label, enabled, code")
+    .order("block_no", { ascending: true });
   return { slots: (data ?? []) as AdSlot[] };
 });
 
@@ -43,6 +44,10 @@ export const updateAdSlot = createServerFn({ method: "POST" })
       .object({
         id: z.string().uuid(),
         enabled: z.boolean(),
+        label: z.string().max(120).optional(),
+        position: z
+          .enum(["", "top", "after_intro", "mid_content", "after_content", "before_comments"])
+          .optional(),
         code: z.string().max(8000).default(""),
       })
       .parse(input),
@@ -50,7 +55,12 @@ export const updateAdSlot = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { error } = await (context.supabase as any)
       .from("ad_slots")
-      .update({ enabled: data.enabled, code: data.code })
+      .update({
+        enabled: data.enabled,
+        code: data.code,
+        ...(data.label !== undefined ? { label: data.label } : {}),
+        ...(data.position !== undefined ? { position: data.position } : {}),
+      })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
