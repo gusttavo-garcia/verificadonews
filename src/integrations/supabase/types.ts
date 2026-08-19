@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       ad_slots: {
         Row: {
+          block_no: number
           code: string
           created_at: string
           enabled: boolean
@@ -25,6 +26,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          block_no: number
           code?: string
           created_at?: string
           enabled?: boolean
@@ -34,6 +36,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          block_no?: number
           code?: string
           created_at?: string
           enabled?: boolean
