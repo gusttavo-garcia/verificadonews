@@ -10,6 +10,7 @@ export type AdSlot = {
   label: string;
   enabled: boolean;
   code: string;
+  paragraph_no: number;
 };
 
 function publicClient() {
@@ -32,7 +33,7 @@ function publicClient() {
 export const listAdSlots = createServerFn({ method: "GET" }).handler(async () => {
   const { data } = await (publicClient() as any)
     .from("ad_slots")
-    .select("id, block_no, position, label, enabled, code")
+    .select("id, block_no, position, label, enabled, code, paragraph_no")
     .order("block_no", { ascending: true });
   return { slots: (data ?? []) as AdSlot[] };
 });
@@ -46,8 +47,17 @@ export const updateAdSlot = createServerFn({ method: "POST" })
         enabled: z.boolean(),
         label: z.string().max(120).optional(),
         position: z
-          .enum(["", "top", "after_intro", "mid_content", "after_content", "before_comments"])
+          .enum([
+            "",
+            "top",
+            "after_intro",
+            "after_paragraph",
+            "mid_content",
+            "after_content",
+            "before_comments",
+          ])
           .optional(),
+        paragraph_no: z.number().int().min(1).max(50).optional(),
         code: z.string().max(8000).default(""),
       })
       .parse(input),
@@ -60,6 +70,7 @@ export const updateAdSlot = createServerFn({ method: "POST" })
         code: data.code,
         ...(data.label !== undefined ? { label: data.label } : {}),
         ...(data.position !== undefined ? { position: data.position } : {}),
+        ...(data.paragraph_no !== undefined ? { paragraph_no: data.paragraph_no } : {}),
       })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
