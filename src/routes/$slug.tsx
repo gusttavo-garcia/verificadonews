@@ -15,7 +15,7 @@ import {
 } from "@/lib/public-articles.functions";
 import { SITE_URL } from "@/lib/seo";
 import { listAdSlots } from "@/lib/ads.functions";
-import { AdBlock } from "@/components/site/ad-block";
+import { AdBlock, AdBlockParagraph } from "@/components/site/ad-block";
 
 export const Route = createFileRoute("/$slug")({
   loader: async ({ params }) => {
@@ -137,18 +137,14 @@ function VerificacaoPage() {
   const paragraphSlots = slots.filter(
     (s) => s.position === "after_paragraph" && s.enabled && s.code.trim(),
   );
-  const bodyParts = (() => {
-    if (!bodyHtml) return ["", ""];
-    const chunks = bodyHtml.split("</p>");
-    if (chunks.length < 4) return [bodyHtml, ""];
-    const mid = Math.ceil((chunks.length - 1) / 2);
-    return [
-      chunks.slice(0, mid).join("</p>") + "</p>",
-      chunks.slice(mid).join("</p>"),
-    ];
+  const bodyChunks = (() => {
+    if (!bodyHtml) return [] as string[];
+    return bodyHtml
+      .split(/(?<=<\/p>)/)
+      .map((c) => c.trim())
+      .filter(Boolean);
   })();
-  const bodyFirstHalf = bodyParts[0];
-  const bodySecondHalf = bodyParts[1];
+  const midIndex = Math.max(1, Math.ceil(bodyChunks.length / 2));
   const confidence = 99;
   const [copied, setCopied] = useState(false);
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -260,19 +256,18 @@ function VerificacaoPage() {
         <AdBlock slots={slots} position="after_intro" />
 
         {bodyHtml ? (
-          <>
-            <div
-              className="prose-verificado mt-10 space-y-5 text-base leading-relaxed text-foreground/90"
-              dangerouslySetInnerHTML={{ __html: bodyFirstHalf }}
-            />
-            <AdBlock slots={slots} position="mid_content" />
-            {bodySecondHalf && (
-              <div
-                className="prose-verificado space-y-5 text-base leading-relaxed text-foreground/90"
-                dangerouslySetInnerHTML={{ __html: bodySecondHalf }}
-              />
-            )}
-          </>
+          <div className="mt-10">
+            {bodyChunks.map((chunk, i) => (
+              <div key={i}>
+                <div
+                  className="prose-verificado space-y-5 text-base leading-relaxed text-foreground/90"
+                  dangerouslySetInnerHTML={{ __html: chunk }}
+                />
+                <AdBlockParagraph slots={slots} paragraph={i + 1} />
+                {i + 1 === midIndex && <AdBlock slots={slots} position="mid_content" />}
+              </div>
+            ))}
+          </div>
         ) : (
         <div className="mt-10 space-y-5 text-base leading-relaxed text-foreground/90">
           <p>
