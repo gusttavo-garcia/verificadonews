@@ -37,3 +37,21 @@ export function AdBlock({ slots, position }: { slots: AdSlot[]; position: string
     </>
   );
 }
+
+export function AdBlockParagraph({ slots, paragraph }: { slots: AdSlot[]; paragraph: number }) {
+  const active = slots.filter(
+    (s) =>
+      s.position === "after_paragraph" &&
+      s.enabled &&
+      s.code.trim() &&
+      (s.paragraph_no ?? 1) === paragraph,
+  );
+  if (active.length === 0) return null;
+  return (
+    <>
+      {active.map((slot) => (
+        <SingleAd key={slot.id} slot={slot} />
+      ))}
+    </>
+  );
+}

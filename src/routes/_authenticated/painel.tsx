@@ -1184,7 +1184,10 @@ function AdsSection() {
   const updateFn = useServerFn(updateAdSlot);
   const [active, setActive] = useState(1);
   const [drafts, setDrafts] = useState<
-    Record<string, { code: string; label: string; position: string; enabled: boolean }>
+    Record<
+      string,
+      { code: string; label: string; position: string; enabled: boolean; paragraph_no: number }
+    >
   >({});
 
   const { data, isLoading } = useQuery({ queryKey: ["ad-slots"], queryFn: () => listFn() });
@@ -1197,6 +1200,7 @@ function AdsSection() {
       code: string;
       label: string;
       position: string;
+      paragraph_no: number;
     }) => updateFn({ data: v as never }),
     onSuccess: () => {
       toast.success("Configurações do bloco salvas.");
