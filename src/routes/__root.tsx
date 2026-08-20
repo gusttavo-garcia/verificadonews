@@ -15,6 +15,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { ScrollToTop } from "@/components/site/scroll-to-top";
 import { CookieConsent } from "@/components/site/cookie-consent";
+import { PagePreloader } from "@/components/site/page-preloader";
 
 function NotFoundComponent() {
   return (
@@ -206,6 +207,7 @@ function RootComponent() {
       <AuthProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <PagePreloader />
         <Toaster />
         <ScrollToTop />
         <CookieConsent />
