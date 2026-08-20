@@ -134,9 +134,6 @@ function VerificacaoPage() {
   const bodyHtml = body
     ? (marked.parse(body, { async: false }) as string)
     : "";
-  const paragraphSlots = slots.filter(
-    (s) => s.position === "after_paragraph" && s.enabled && s.code.trim(),
-  );
   const bodyChunks = (() => {
     if (!bodyHtml) return [] as string[];
     return bodyHtml
