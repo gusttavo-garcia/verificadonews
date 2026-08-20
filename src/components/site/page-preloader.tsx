@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 
 export function PagePreloader() {
   const isPending = useRouterState({
-    select: (s) =>
-      s.status === "pending" || Object.keys(s.pendingMatches ?? {}).length > 0,
+    select: (s) => s.status === "pending",
   });
 
   const [show, setShow] = useState(false);
