@@ -15,16 +15,20 @@ import {
 } from "@/lib/public-articles.functions";
 import { SITE_URL } from "@/lib/seo";
 import { listAdSlots } from "@/lib/ads.functions";
+import { listCategories } from "@/lib/categories.functions";
 import { AdBlock, AdBlockParagraph } from "@/components/site/ad-block";
+import { ArticleSidebar } from "@/components/site/article-sidebar";
 
 export const Route = createFileRoute("/$slug")({
   loader: async ({ params }) => {
     const fallback = articles.find((a) => a.slug === params.slug);
-    const [{ article: row }, { articles: rows }, { slots }] = await Promise.all([
-      getPublicArticle({ data: { slug: params.slug } }),
-      listPublicArticles(),
-      listAdSlots(),
-    ]);
+    const [{ article: row }, { articles: rows }, { slots }, { categories }] =
+      await Promise.all([
+        getPublicArticle({ data: { slug: params.slug } }),
+        listPublicArticles(),
+        listAdSlots(),
+        listCategories(),
+      ]);
     const related: Article[] = (rows ?? []).map((r) => {
       const fb = articles.find((a) => a.slug === r.slug);
       return {
