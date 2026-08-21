@@ -1,15 +1,19 @@
 import { Link } from "@tanstack/react-router";
 import { formatDate, type Article } from "@/lib/mock-data";
 import { categorySlug } from "@/lib/category-slug";
+import { AdBlock } from "@/components/site/ad-block";
+import type { AdSlot } from "@/lib/ads.functions";
 
 export function ArticleSidebar({
   articles,
   categories,
   currentSlug,
+  slots = [],
 }: {
   articles: Article[];
   categories: { id: string; name: string }[];
   currentSlug: string;
+  slots?: AdSlot[];
 }) {
   const recent = articles.filter((a) => a.slug !== currentSlug).slice(0, 6);
   const names = new Set<string>(categories.map((c) => c.name));
