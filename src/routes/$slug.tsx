@@ -128,7 +128,7 @@ export const Route = createFileRoute("/$slug")({
 });
 
 function VerificacaoPage() {
-  const { article, body, related, slots } = Route.useLoaderData();
+  const { article, body, related, slots, categories } = Route.useLoaderData();
   useEffect(() => {
     const key = `viewed:${article.slug}`;
     if (sessionStorage.getItem(key)) return;
