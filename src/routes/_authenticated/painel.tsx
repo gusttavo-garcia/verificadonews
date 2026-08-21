@@ -1217,6 +1217,7 @@ function AdsSection() {
     { value: "mid_content", label: "No meio do conteúdo" },
     { value: "after_content", label: "Após o conteúdo" },
     { value: "before_comments", label: "Antes dos comentários" },
+    { value: "sidebar_bottom", label: "Abaixo da coluna lateral" },
   ];
 
   const slot = slots.find((s) => s.block_no === active) ?? slots[0];
