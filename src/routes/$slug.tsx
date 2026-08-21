@@ -46,7 +46,7 @@ export const Route = createFileRoute("/$slug")({
     });
     if (!row) {
       if (!fallback) throw notFound();
-      return { article: fallback, body: "", related, slots };
+      return { article: fallback, body: "", related, slots, categories };
     }
     const article: Article = {
       slug: row.slug,
@@ -60,7 +60,7 @@ export const Route = createFileRoute("/$slug")({
       type: row.type as Article["type"],
       image: row.image_url ?? fallback?.image,
     };
-    return { article, body: row.body ?? "", related, slots };
+    return { article, body: row.body ?? "", related, slots, categories };
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) return { meta: [] };
@@ -128,7 +128,7 @@ export const Route = createFileRoute("/$slug")({
 });
 
 function VerificacaoPage() {
-  const { article, body, related, slots } = Route.useLoaderData();
+  const { article, body, related, slots, categories } = Route.useLoaderData();
   useEffect(() => {
     const key = `viewed:${article.slug}`;
     if (sessionStorage.getItem(key)) return;
@@ -159,7 +159,8 @@ function VerificacaoPage() {
   };
   return (
     <PageShell>
-      <article className="mx-auto max-w-3xl px-4 py-14">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <article className="min-w-0 max-w-3xl">
         <AdBlock slots={slots} position="top" />
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <VerdictBadge verdict={article.verdict} />
@@ -310,6 +311,12 @@ function VerificacaoPage() {
         <AdBlock slots={slots} position="before_comments" />
         <CommentsSection slug={article.slug} />
       </article>
+        <ArticleSidebar
+          articles={related}
+          categories={categories as { id: string; name: string }[]}
+          currentSlug={article.slug}
+        />
+      </div>
     </PageShell>
   );
 }
