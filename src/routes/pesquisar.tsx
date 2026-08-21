@@ -44,10 +44,10 @@ function PesquisarPage() {
     staleTime: 60 * 1000,
   });
 
-  const pool = useMemo(() => {
+  const pool = useMemo<Article[]>(() => {
     const rows = liveData?.articles ?? [];
     if (rows.length === 0) return articles;
-    return rows.map((r) => {
+    return rows.map((r): Article => {
       const fb = articles.find((a) => a.slug === r.slug);
       return {
         slug: r.slug,
