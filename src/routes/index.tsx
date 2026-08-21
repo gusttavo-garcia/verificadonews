@@ -78,6 +78,7 @@ const shortcuts: Shortcut[] = [
 function Index() {
   const { live } = Route.useLoaderData();
   const [q, setQ] = useState("");
+  const navigate = useNavigate();
   const categoriesRef = useRef<HTMLDivElement>(null);
   const fetchCategories = useServerFn(listCategories);
   const { data: catData } = useQuery({
