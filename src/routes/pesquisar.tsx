@@ -11,6 +11,8 @@ import { ArticleCard } from "@/components/site/article-card";
 import { Button } from "@/components/ui/button";
 import { articles } from "@/lib/mock-data";
 import { getTrendingSearches } from "@/lib/trends.functions";
+import { listPublicArticles } from "@/lib/public-articles.functions";
+import type { Article } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/pesquisar")({
   validateSearch: zodValidator(
