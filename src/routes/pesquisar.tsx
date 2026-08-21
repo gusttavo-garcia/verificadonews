@@ -11,6 +11,8 @@ import { ArticleCard } from "@/components/site/article-card";
 import { Button } from "@/components/ui/button";
 import { articles } from "@/lib/mock-data";
 import { getTrendingSearches } from "@/lib/trends.functions";
+import { listPublicArticles } from "@/lib/public-articles.functions";
+import type { Article } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/pesquisar")({
   validateSearch: zodValidator(
@@ -35,13 +37,43 @@ function PesquisarPage() {
   });
   const trends = trendsData?.trends ?? [];
 
+  const fetchArticles = useServerFn(listPublicArticles);
+  const { data: liveData } = useQuery({
+    queryKey: ["public-articles"],
+    queryFn: () => fetchArticles(),
+    staleTime: 60 * 1000,
+  });
+
+  const pool = useMemo<Article[]>(() => {
+    const rows = liveData?.articles ?? [];
+    if (rows.length === 0) return articles;
+    return rows.map((r): Article => {
+      const fb = articles.find((a) => a.slug === r.slug);
+      return {
+        slug: r.slug,
+        title: r.title,
+        excerpt: r.excerpt ?? "",
+        verdict: r.verdict as (typeof articles)[number]["verdict"],
+        category: r.category as (typeof articles)[number]["category"],
+        date: (r.published_at ?? r.created_at ?? "").slice(0, 10),
+        author: r.author_name ?? "Equipe Verificado News",
+        views: r.views ?? 0,
+        type: r.type as (typeof articles)[number]["type"],
+        image: r.image_url ?? fb?.image,
+      };
+    });
+  }, [liveData]);
+
   const results = useMemo(() => {
     if (!q.trim()) return [];
     const s = q.toLowerCase();
-    return articles.filter(
-      (a) => a.title.toLowerCase().includes(s) || a.excerpt.toLowerCase().includes(s),
+    return pool.filter(
+      (a) =>
+        a.title.toLowerCase().includes(s) ||
+        (a.excerpt ?? "").toLowerCase().includes(s) ||
+        (a.category ?? "").toLowerCase().includes(s),
     );
-  }, [q]);
+  }, [q, pool]);
 
   return (
     <PageShell>

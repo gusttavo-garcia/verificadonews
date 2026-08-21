@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import {
   Search,
@@ -78,6 +78,7 @@ const shortcuts: Shortcut[] = [
 function Index() {
   const { live } = Route.useLoaderData();
   const [q, setQ] = useState("");
+  const navigate = useNavigate();
   const categoriesRef = useRef<HTMLDivElement>(null);
   const fetchCategories = useServerFn(listCategories);
   const { data: catData } = useQuery({
@@ -152,6 +153,8 @@ function Index() {
             className="mx-auto mt-10 flex max-w-2xl items-center overflow-hidden rounded-full border border-border bg-background p-1.5 shadow-sm"
             onSubmit={(e) => {
               e.preventDefault();
+              if (!q.trim()) return;
+              navigate({ to: "/pesquisar", search: { q: q.trim() } as never });
             }}
           >
             <div className="flex flex-1 items-center gap-3 px-4">
