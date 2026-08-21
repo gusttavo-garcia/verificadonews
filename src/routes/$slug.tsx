@@ -46,7 +46,7 @@ export const Route = createFileRoute("/$slug")({
     });
     if (!row) {
       if (!fallback) throw notFound();
-      return { article: fallback, body: "", related, slots };
+      return { article: fallback, body: "", related, slots, categories };
     }
     const article: Article = {
       slug: row.slug,
