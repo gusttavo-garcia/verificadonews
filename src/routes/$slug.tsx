@@ -311,6 +311,12 @@ function VerificacaoPage() {
         <AdBlock slots={slots} position="before_comments" />
         <CommentsSection slug={article.slug} />
       </article>
+        <ArticleSidebar
+          articles={related}
+          categories={categories as { id: string; name: string }[]}
+          currentSlug={article.slug}
+        />
+      </div>
     </PageShell>
   );
 }
