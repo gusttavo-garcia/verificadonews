@@ -315,6 +315,7 @@ function VerificacaoPage() {
           articles={related}
           categories={categories as { id: string; name: string }[]}
           currentSlug={article.slug}
+          slots={slots}
         />
       </div>
     </PageShell>

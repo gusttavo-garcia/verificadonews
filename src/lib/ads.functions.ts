@@ -55,6 +55,7 @@ export const updateAdSlot = createServerFn({ method: "POST" })
             "mid_content",
             "after_content",
             "before_comments",
+            "sidebar_bottom",
           ])
           .optional(),
         paragraph_no: z.number().int().min(1).max(50).optional(),
