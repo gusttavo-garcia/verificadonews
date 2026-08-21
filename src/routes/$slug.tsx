@@ -159,7 +159,8 @@ function VerificacaoPage() {
   };
   return (
     <PageShell>
-      <article className="mx-auto max-w-3xl px-4 py-14">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <article className="min-w-0 max-w-3xl">
         <AdBlock slots={slots} position="top" />
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <VerdictBadge verdict={article.verdict} />
