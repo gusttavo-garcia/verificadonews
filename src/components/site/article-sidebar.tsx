@@ -63,6 +63,8 @@ export function ArticleSidebar({
           ))}
         </ul>
       </section>
+
+      <AdBlock slots={slots} position="sidebar_bottom" />
     </aside>
   );
 }
