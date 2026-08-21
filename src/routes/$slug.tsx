@@ -60,7 +60,7 @@ export const Route = createFileRoute("/$slug")({
       type: row.type as Article["type"],
       image: row.image_url ?? fallback?.image,
     };
-    return { article, body: row.body ?? "", related, slots };
+    return { article, body: row.body ?? "", related, slots, categories };
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) return { meta: [] };
