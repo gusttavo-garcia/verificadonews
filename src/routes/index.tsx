@@ -152,6 +152,8 @@ function Index() {
             className="mx-auto mt-10 flex max-w-2xl items-center overflow-hidden rounded-full border border-border bg-background p-1.5 shadow-sm"
             onSubmit={(e) => {
               e.preventDefault();
+              if (!q.trim()) return;
+              navigate({ to: "/pesquisar", search: { q: q.trim() } as never });
             }}
           >
             <div className="flex flex-1 items-center gap-3 px-4">
