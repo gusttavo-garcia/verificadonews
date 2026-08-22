@@ -217,6 +217,22 @@ function Index() {
                       {s.label}
                     </h3>
                   </Link>
+                  {!s.list && hotSearches.length > 0 && (
+                    <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+                      {hotSearches.map((term) => (
+                        <li key={term} className="flex gap-2">
+                          <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
+                          <Link
+                            to="/pesquisar"
+                            search={{ q: term }}
+                            className="line-clamp-1 hover:text-primary hover:underline"
+                          >
+                            {term}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {items.length > 0 && (
                     <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
                       {items.map((r) => (
@@ -233,6 +249,7 @@ function Index() {
                       ))}
                     </ul>
                   )}
+
                 </div>
               );
             })}
