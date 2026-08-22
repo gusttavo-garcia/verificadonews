@@ -107,6 +107,29 @@ function Index() {
   );
   const listFor = (kind?: Shortcut["list"]) =>
     kind === "recent" ? recent : kind === "golpes" ? golpes : kind === "fake" ? fakes : [];
+  const hotSearches = useMemo(() => {
+    const stop = new Set([
+      "para","como","sobre","mais","the","que","com","por","dos","das","uma","não","nao","você",
+      "voce","seu","sua","são","sao","foi","tem","isso","este","esta","esse","essa","pelo","pela",
+      "após","apos","entre","ser","tudo","teve","será","sera","fake","news","vídeo","video","novo",
+      "nova","brasil","governo",
+    ]);
+    const counts = new Map<string, number>();
+    for (const a of sortedArticles) {
+      if (a.category) counts.set(a.category, (counts.get(a.category) ?? 0) + 3);
+      for (const raw of a.title.split(/[^\p{L}\p{N}]+/u)) {
+        const w = raw.toLowerCase();
+        if (w.length < 5 || stop.has(w)) continue;
+        const term = raw[0].toUpperCase() + raw.slice(1);
+        counts.set(term, (counts.get(term) ?? 0) + 1);
+      }
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR"))
+      .slice(0, 4)
+      .map(([term]) => term);
+  }, [sortedArticles]);
+
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
     for (const a of sortedArticles) {
@@ -194,6 +217,22 @@ function Index() {
                       {s.label}
                     </h3>
                   </Link>
+                  {!s.list && hotSearches.length > 0 && (
+                    <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+                      {hotSearches.map((term) => (
+                        <li key={term} className="flex gap-2">
+                          <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
+                          <Link
+                            to="/pesquisar"
+                            search={{ q: term }}
+                            className="line-clamp-1 hover:text-primary hover:underline"
+                          >
+                            {term}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {items.length > 0 && (
                     <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
                       {items.map((r) => (
@@ -210,6 +249,7 @@ function Index() {
                       ))}
                     </ul>
                   )}
+
                 </div>
               );
             })}
