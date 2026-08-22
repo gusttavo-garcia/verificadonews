@@ -55,6 +55,67 @@ export const listMyArticles = createServerFn({ method: "GET" })
     return { articles: data ?? [], isAdmin: admin };
   });
 
+// Loads a single article for the editor page (RLS: own article or admin)
+export const getArticleById = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase
+      .from("articles")
+      .select(
+        "id, slug, title, excerpt, body, type, status, category, verdict, author_name, author_id, created_at, updated_at, published_at, views, image_url",
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Artigo não encontrado.");
+    return { article: row, isAdmin: await isAdmin(context) };
+  });
+
+// Creates an empty draft immediately when the editor page opens
+export const createEmptyDraft = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const admin = await isAdmin(context);
+    const editor = await isEditor(context);
+    if (!admin && !editor) throw new Error("Forbidden");
+
+    const { data: profile } = await context.supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", context.userId)
+      .maybeSingle();
+
+    const { data: cat } = await context.supabase
+      .from("categories")
+      .select("name")
+      .order("name")
+      .limit(1)
+      .maybeSingle();
+
+    const slug = `rascunho-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+
+    const { data: row, error } = await context.supabase
+      .from("articles")
+      .insert({
+        title: "Rascunho sem título",
+        excerpt: "",
+        body: "",
+        category: cat?.name ?? "Geral",
+        verdict: "apuracao",
+        type: "noticia",
+        slug,
+        author_id: context.userId,
+        author_name: profile?.display_name ?? null,
+        status: "draft",
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: row.id as string };
+  });
+
+
 export const createArticle = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
