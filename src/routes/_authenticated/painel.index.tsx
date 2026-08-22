@@ -181,7 +181,7 @@ function ImageUploader({
   );
 }
 
-export const Route = createFileRoute("/_authenticated/painel")({
+export const Route = createFileRoute("/_authenticated/painel/")({
   component: PainelPage,
   head: () => ({ meta: [{ title: "Painel — Verificado News" }] }),
 });
