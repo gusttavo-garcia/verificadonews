@@ -1,62 +1,40 @@
-# Autenticação + Painel Editorial
+# Editor de artigos em página própria + edição de texto rica
 
-## Backend (Lovable Cloud)
+## 1. Página separada para criar/editar
 
-**Habilitar Lovable Cloud** e configurar login Email/Senha + Google.
+Hoje o formulário de rascunho abre dentro da própria tela do painel. Passa a ser uma página dedicada:
 
-### Schema (migração única)
+- `/painel/novo` — ao abrir, o sistema **já cria automaticamente um rascunho vazio** no banco (título provisório "Rascunho sem título") e redireciona para `/painel/editar/<id>`. Isso garante que nada se perca se a aba fechar.
+- `/painel/editar/<id>` — editor completo do artigo (título, resumo, conteúdo, categoria, veredito, tipo, imagem de destaque).
+- Salvamento automático a cada poucos segundos após parar de digitar, com indicador "Salvando… / Salvo às HH:MM" no topo, mais botão "Salvar" manual.
+- Ações no topo da página: Voltar ao painel, Pedir revisão (redator) ou Publicar (administrador), e Excluir (vai para a lixeira).
+- No painel, o botão "Novo rascunho" e o botão "Editar" de cada artigo passam a navegar para essas páginas em vez de abrir o modal atual.
 
-1. `public.profiles` — `id uuid PK → auth.users`, `display_name text`, `created_at`. Trigger `on_auth_user_created` cria profile automaticamente com `raw_user_meta_data->>'display_name'` ou email.
-2. `public.app_role` enum: `admin | editor | reader`.
-3. `public.user_roles` — `(user_id, role)`, com trigger que insere `reader` para todo novo usuário.
-4. Função `public.has_role(uuid, app_role)` SECURITY DEFINER (evita recursão RLS).
-5. `public.articles` — id, slug único, title, excerpt, body, category, verdict, cover_url, `status` (`draft | pending_review | published`), `author_id`, `published_at`, timestamps.
-   - RLS:
-     - SELECT público: só `status = 'published'`.
-     - SELECT próprio: autor vê os seus (qualquer status).
-     - SELECT admin: vê tudo.
-     - INSERT: editores/admins (autor = auth.uid()).
-     - UPDATE: autor pode editar seus rascunhos e mover `draft → pending_review`; admin pode tudo (incluindo `pending_review → published`).
-     - DELETE: só admin.
-6. Migrar artigos mock atuais para a tabela como `published`, `author_id` = usuário admin do sistema (criado pelo próprio dono do site depois, ou `NULL` autor "Equipe Verificado" — usar coluna adicional `author_name` para exibição quando não houver autor).
-7. GRANTs: `authenticated` full; `anon` SELECT em articles (RLS filtra); `authenticated` SELECT em user_roles/profiles próprio.
+Rascunhos vazios (sem título alterado e sem conteúdo) continuam visíveis só para o próprio autor, como já acontece hoje.
 
-### Server functions (`src/lib/*.functions.ts`)
+## 2. Editor de texto visual (sem markdown)
 
-- `getPublishedArticles`, `getArticleBySlug` — públicos, cliente publishable.
-- `getMyArticles` — editor: seus artigos; admin: todos.
-- `requestReview(articleId)` — editor muda status para `pending_review`.
-- `publishArticle(articleId)` / `deleteArticle(articleId)` — só admin (`has_role`).
-- `createDraft(...)` / `updateDraft(...)` — editor/admin.
+Substituir a caixa de texto simples por um editor rico com barra de ferramentas:
 
-## Frontend
+- Títulos H1, H2, H3 e parágrafo
+- Negrito, itálico, sublinhado, tachado, destaque (grifado)
+- Listas com marcadores e numeradas, citação, linha divisória
+- Link (inserir/remover) e limpar formatação
+- Desfazer/refazer e contador de caracteres
+- Área de edição alta (mesma altura confortável de hoje) com a mesma tipografia do site, para o texto ficar igual ao que sai publicado
 
-### Header
-- Deslogado: botão **"Entrar"** (primary vermelho, à direita).
-- Logado como reader: botão **"Sair"** (accent verde).
-- Logado como editor/admin: botões **"Painel"** (outline) + **"Sair"** (verde).
+Formatação é aplicada selecionando o texto e clicando no botão — sem escrever markdown.
 
-### Rotas novas
-- `/auth` (público) — tabs "Entrar" / "Cadastrar" (email+senha) + botão Google. Cadastro cria conta como reader automaticamente. `redirectTo = window.location.origin`.
-- `/_authenticated/painel` — layout gated. Redireciona reader para `/`.
-  - `/painel` — lista artigos do usuário com status, botão "Pedir revisão" nos drafts. Admin vê seção extra "Aguardando aprovação" com botões **Publicar** / **Excluir**.
-  - `/painel/novo` — form de rascunho (editor/admin).
-  - `/painel/editar/$id` — edita rascunho próprio.
+## 3. Compatibilidade com os artigos existentes
 
-### Homepage e listagens
-- Passam a consumir `getPublishedArticles` (dados reais migrados). Página de detalhe usa `getArticleBySlug`.
-- Mock antigo permanece só como seed inicial na migração.
-
-### Comportamento pós-login
-- Reader: volta para `/`.
-- Editor/Admin: vai para `/painel`.
+- O conteúdo passa a ser salvo como HTML.
+- Artigos antigos em markdown continuam funcionando: ao abrir no editor, o markdown é convertido para o formato visual; na publicação, o site detecta se o conteúdo é HTML ou markdown e renderiza corretamente.
+- A inserção de blocos de anúncio por parágrafo continua funcionando igual, pois continua baseada nos parágrafos do conteúdo final.
 
 ## Notas técnicas
 
-- `onAuthStateChange` no `__root.tsx` → `router.invalidate()` + `queryClient.invalidateQueries()` filtrado.
-- `attachSupabaseAuth` middleware em `src/start.ts`.
-- Role check via `has_role()` RPC no cliente para decidir CTA "Painel"; server sempre re-valida.
-- Admin inicial: criado manualmente pelo dono via SQL/painel Cloud (documentar no chat após implementar).
-- Google OAuth: chamar `supabase--configure_social_auth` para habilitar Google no provider.
-
-Confirma pra eu implementar?
+- Editor: TipTap (`@tiptap/react` + StarterKit, Underline, Highlight, Link) — leve, controlado, gera HTML limpo.
+- Novas rotas: `src/routes/_authenticated/painel.novo.tsx` e `src/routes/_authenticated/painel.editar.$id.tsx`; painel atual vira lista/dashboard.
+- Nova server function `createEmptyDraft` em `src/lib/articles.functions.ts` (redator/admin), reutilizando `createArticle`; `updateArticle` usado no autosave.
+- `src/routes/$slug.tsx`: renderizar direto quando o corpo já for HTML (detecção por tag inicial), senão passar por `marked` como hoje; sanitizar o HTML antes de renderizar.
+- `getArticleById` (autor ou admin) para carregar o artigo na página de edição.
