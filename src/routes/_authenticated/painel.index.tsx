@@ -306,12 +306,6 @@ function PainelPage() {
         ]
   ) as { key: PanelSection; label: string; icon: any }[];
 
-  const openNewDraft = () => {
-    resetForm();
-    setShowForm(true);
-    setSection("artigos");
-  };
-
   const sidebar = (
     <div className="flex h-full flex-col gap-6 p-4">
       <Link to="/" className="flex items-center gap-2 px-2">
@@ -321,9 +315,12 @@ function PainelPage() {
           className="h-8 w-auto object-contain"
         />
       </Link>
-      <Button className="w-full justify-start" onClick={openNewDraft}>
-        <Plus className="mr-2 h-4 w-4" /> Novo rascunho
+      <Button className="w-full justify-start" asChild>
+        <Link to="/painel/novo">
+          <Plus className="mr-2 h-4 w-4" /> Novo rascunho
+        </Link>
       </Button>
+
       <nav className="flex flex-1 flex-col gap-1">
         <div className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           Menu
