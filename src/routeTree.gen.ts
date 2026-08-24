@@ -29,6 +29,7 @@ import { Route as RFolderRouteImport } from './routes/r/$folder'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 import { Route as AuthenticatedPainelIndexRouteImport } from './routes/_authenticated/painel.index'
 import { Route as RFolderRouteRouteImport } from './routes/r/$folder/$route'
+import { Route as AuthenticatedPainelNovoRouteImport } from './routes/_authenticated/painel.novo'
 
 const TransparenciaRoute = TransparenciaRouteImport.update({
   id: '/transparencia',
@@ -130,6 +131,11 @@ const RFolderRouteRoute = RFolderRouteRouteImport.update({
   path: '/$route',
   getParentRoute: () => RFolderRoute,
 } as any)
+const AuthenticatedPainelNovoRoute = AuthenticatedPainelNovoRouteImport.update({
+  id: '/painel/novo',
+  path: '/painel/novo',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/transparencia': typeof TransparenciaRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/r/$folder': typeof RFolderRouteWithChildren
+  '/painel/novo': typeof AuthenticatedPainelNovoRoute
   '/r/$folder/$route': typeof RFolderRouteRoute
   '/painel/': typeof AuthenticatedPainelIndexRoute
 }
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/transparencia': typeof TransparenciaRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/r/$folder': typeof RFolderRouteWithChildren
+  '/painel/novo': typeof AuthenticatedPainelNovoRoute
   '/r/$folder/$route': typeof RFolderRouteRoute
   '/painel': typeof AuthenticatedPainelIndexRoute
 }
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/transparencia': typeof TransparenciaRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/r/$folder': typeof RFolderRouteWithChildren
+  '/_authenticated/painel/novo': typeof AuthenticatedPainelNovoRoute
   '/r/$folder/$route': typeof RFolderRouteRoute
   '/_authenticated/painel/': typeof AuthenticatedPainelIndexRoute
 }
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/transparencia'
     | '/categoria/$slug'
     | '/r/$folder'
+    | '/painel/novo'
     | '/r/$folder/$route'
     | '/painel/'
   fileRoutesByTo: FileRoutesByTo
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/transparencia'
     | '/categoria/$slug'
     | '/r/$folder'
+    | '/painel/novo'
     | '/r/$folder/$route'
     | '/painel'
   id:
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/transparencia'
     | '/categoria/$slug'
     | '/r/$folder'
+    | '/_authenticated/painel/novo'
     | '/r/$folder/$route'
     | '/_authenticated/painel/'
   fileRoutesById: FileRoutesById
@@ -426,14 +438,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RFolderRouteRouteImport
       parentRoute: typeof RFolderRoute
     }
+    '/_authenticated/painel/novo': {
+      id: '/_authenticated/painel/novo'
+      path: '/painel/novo'
+      fullPath: '/painel/novo'
+      preLoaderRoute: typeof AuthenticatedPainelNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPainelNovoRoute: typeof AuthenticatedPainelNovoRoute
   AuthenticatedPainelIndexRoute: typeof AuthenticatedPainelIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPainelNovoRoute: AuthenticatedPainelNovoRoute,
   AuthenticatedPainelIndexRoute: AuthenticatedPainelIndexRoute,
 }
 
