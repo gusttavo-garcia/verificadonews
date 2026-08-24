@@ -236,89 +236,10 @@ function PainelPage() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
   });
 
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    title: "",
-    excerpt: "",
-    body: "",
-    category: "",
-    verdict: "verificado" as
-      | "verificado"
-      | "falso"
-      | "enganoso"
-      | "parcial"
-      | "apuracao",
-    type: "noticia" as "noticia" | "golpe" | "empresa" | "site" | "video" | "fake",
-    image_url: "",
-    author_id: "" as string,
-  });
-
-  const resetForm = () => {
-    setForm({
-      title: "",
-      excerpt: "",
-      body: "",
-      category: "",
-      verdict: "verificado",
-      type: "noticia",
-      image_url: "",
-      author_id: "",
-    });
-    setEditingId(null);
-  };
-
   const startEdit = (a: any) => {
-    setEditingId(a.id);
-    setForm({
-      title: a.title ?? "",
-      excerpt: a.excerpt ?? "",
-      body: a.body ?? "",
-      category: a.category ?? "",
-      verdict: a.verdict ?? "verificado",
-      type: a.type ?? "noticia",
-      image_url: a.image_url ?? "",
-      author_id: a.author_id ?? "",
-    });
-    setShowForm(true);
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    navigate({ to: "/painel/editar/$id", params: { id: a.id } });
   };
 
-  const mCreate = useMutation({
-    mutationFn: () => createFn({ data: form }),
-    onSuccess: () => {
-      toast.success("Rascunho criado.");
-      setShowForm(false);
-      resetForm();
-      invalidate();
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
-  });
-
-  const mUpdate = useMutation({
-    mutationFn: () => {
-      if (!editingId) throw new Error("Sem artigo em edição");
-      const payload: any = {
-        id: editingId,
-        title: form.title,
-        excerpt: form.excerpt,
-        body: form.body,
-        category: form.category,
-        verdict: form.verdict,
-        type: form.type,
-        image_url: form.image_url ? form.image_url : null,
-      };
-      if (isAdmin && form.author_id) payload.author_id = form.author_id;
-      return updateFn({ data: payload });
-    },
-    onSuccess: () => {
-      toast.success("Artigo atualizado.");
-      setShowForm(false);
-      resetForm();
-      invalidate();
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
-  });
 
   if (!isStaff) return null;
 
