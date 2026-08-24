@@ -103,84 +103,6 @@ import {
 import { SplitRedirectorManager } from "@/components/site/split-redirector-manager";
 import type { AppRole } from "@/hooks/use-auth";
 
-function ImageUploader({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (url: string) => void;
-}) {
-  const [uploading, setUploading] = useState(false);
-
-  const handleFile = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Selecione uma imagem.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Imagem muito grande (máx. 5 MB).");
-      return;
-    }
-    setUploading(true);
-    try {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("article-images")
-        .upload(path, file, { cacheControl: "31536000", upsert: false });
-      if (upErr) throw upErr;
-      const { data: signed, error: sErr } = await supabase.storage
-        .from("article-images")
-        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10); // 10 anos
-      if (sErr || !signed) throw sErr ?? new Error("URL falhou");
-      onChange(signed.signedUrl);
-      toast.success("Imagem enviada!");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Falha no upload");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      {value ? (
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg border border-border bg-muted">
-          <img src={value} alt="Prévia" className="h-full w-full object-cover" />
-          <button
-            type="button"
-            onClick={() => onChange("")}
-            className="absolute right-2 top-2 rounded-full bg-background/90 p-1.5 text-foreground shadow hover:bg-background"
-            title="Remover imagem"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      ) : (
-        <div className="flex aspect-[16/9] w-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/50 text-muted-foreground">
-          <Upload className="mb-2 h-8 w-8 opacity-50" />
-          <span className="text-xs">Nenhuma imagem selecionada</span>
-        </div>
-      )}
-      <label className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
-        <Upload className="h-4 w-4" />
-        {uploading ? "Enviando…" : value ? "Trocar imagem" : "Enviar imagem"}
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          disabled={uploading}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) void handleFile(f);
-            e.target.value = "";
-          }}
-        />
-      </label>
-    </div>
-  );
-}
-
 export const Route = createFileRoute("/_authenticated/painel/")({
   component: PainelPage,
   head: () => ({ meta: [{ title: "Painel — Verificado News" }] }),
@@ -314,89 +236,10 @@ function PainelPage() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
   });
 
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    title: "",
-    excerpt: "",
-    body: "",
-    category: "",
-    verdict: "verificado" as
-      | "verificado"
-      | "falso"
-      | "enganoso"
-      | "parcial"
-      | "apuracao",
-    type: "noticia" as "noticia" | "golpe" | "empresa" | "site" | "video" | "fake",
-    image_url: "",
-    author_id: "" as string,
-  });
-
-  const resetForm = () => {
-    setForm({
-      title: "",
-      excerpt: "",
-      body: "",
-      category: "",
-      verdict: "verificado",
-      type: "noticia",
-      image_url: "",
-      author_id: "",
-    });
-    setEditingId(null);
-  };
-
   const startEdit = (a: any) => {
-    setEditingId(a.id);
-    setForm({
-      title: a.title ?? "",
-      excerpt: a.excerpt ?? "",
-      body: a.body ?? "",
-      category: a.category ?? "",
-      verdict: a.verdict ?? "verificado",
-      type: a.type ?? "noticia",
-      image_url: a.image_url ?? "",
-      author_id: a.author_id ?? "",
-    });
-    setShowForm(true);
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    navigate({ to: "/painel/editar/$id", params: { id: a.id } });
   };
 
-  const mCreate = useMutation({
-    mutationFn: () => createFn({ data: form }),
-    onSuccess: () => {
-      toast.success("Rascunho criado.");
-      setShowForm(false);
-      resetForm();
-      invalidate();
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
-  });
-
-  const mUpdate = useMutation({
-    mutationFn: () => {
-      if (!editingId) throw new Error("Sem artigo em edição");
-      const payload: any = {
-        id: editingId,
-        title: form.title,
-        excerpt: form.excerpt,
-        body: form.body,
-        category: form.category,
-        verdict: form.verdict,
-        type: form.type,
-        image_url: form.image_url ? form.image_url : null,
-      };
-      if (isAdmin && form.author_id) payload.author_id = form.author_id;
-      return updateFn({ data: payload });
-    },
-    onSuccess: () => {
-      toast.success("Artigo atualizado.");
-      setShowForm(false);
-      resetForm();
-      invalidate();
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
-  });
 
   if (!isStaff) return null;
 
@@ -463,12 +306,6 @@ function PainelPage() {
         ]
   ) as { key: PanelSection; label: string; icon: any }[];
 
-  const openNewDraft = () => {
-    resetForm();
-    setShowForm(true);
-    setSection("artigos");
-  };
-
   const sidebar = (
     <div className="flex h-full flex-col gap-6 p-4">
       <Link to="/" className="flex items-center gap-2 px-2">
@@ -478,9 +315,12 @@ function PainelPage() {
           className="h-8 w-auto object-contain"
         />
       </Link>
-      <Button className="w-full justify-start" onClick={openNewDraft}>
-        <Plus className="mr-2 h-4 w-4" /> Novo rascunho
+      <Button className="w-full justify-start" asChild>
+        <Link to="/painel/novo">
+          <Plus className="mr-2 h-4 w-4" /> Novo rascunho
+        </Link>
       </Button>
+
       <nav className="flex flex-1 flex-col gap-1">
         <div className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           Menu
@@ -610,216 +450,13 @@ function PainelPage() {
                     <strong className="text-foreground">{stats.pending}</strong> pendentes
                   </p>
                 </div>
-                <Button
-                  onClick={() => {
-                    if (showForm) {
-                      setShowForm(false);
-                      resetForm();
-                    } else {
-                      setShowForm(true);
-                    }
-                  }}
-                >
-                  {showForm ? (
-                    <>
-                      <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="mr-2 h-4 w-4" /> Novo rascunho
-                    </>
-                  )}
+                <Button asChild>
+                  <Link to="/painel/novo">
+                    <Plus className="mr-2 h-4 w-4" /> Novo rascunho
+                  </Link>
                 </Button>
               </div>
 
-              {showForm && (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (editingId) mUpdate.mutate();
-                    else mCreate.mutate();
-                  }}
-                  className="rounded-2xl border border-border bg-card p-6 shadow-sm"
-                >
-                  <div className="mb-6 flex items-center justify-between border-b border-border pb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        {editingId ? "Editando artigo" : "Novo rascunho"}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {editingId
-                          ? "Revise os campos e salve as alterações."
-                          : "Preencha as informações para criar um novo rascunho."}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      {editingId && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            setShowForm(false);
-                            resetForm();
-                          }}
-                        >
-                          Cancelar
-                        </Button>
-                      )}
-                      <Button type="submit" disabled={mCreate.isPending || mUpdate.isPending}>
-                        {editingId ? "Salvar alterações" : "Salvar rascunho"}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-                    <div className="space-y-6">
-                      <div>
-                        <Label htmlFor="title" className="text-base font-medium">
-                          Título
-                        </Label>
-                        <Input
-                          id="title"
-                          value={form.title}
-                          onChange={(e) => setForm({ ...form, title: e.target.value })}
-                          required
-                          minLength={3}
-                          placeholder="Digite o título do artigo"
-                          className="mt-2"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="excerpt" className="text-base font-medium">
-                          Resumo
-                        </Label>
-                        <Textarea
-                          id="excerpt"
-                          rows={3}
-                          value={form.excerpt}
-                          onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-                          placeholder="Escreva um breve resumo do conteúdo"
-                          className="mt-2 resize-none"
-                        />
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="body" className="text-base font-medium">
-                            Conteúdo
-                          </Label>
-                          <span className="text-xs text-muted-foreground">
-                            {form.body.length.toLocaleString()} caracteres
-                          </span>
-                        </div>
-                        <Textarea
-                          id="body"
-                          value={form.body}
-                          onChange={(e) => setForm({ ...form, body: e.target.value })}
-                          placeholder="Escreva o conteúdo completo do artigo aqui..."
-                          className="mt-2 min-h-[420px] resize-y font-normal leading-relaxed"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-6 rounded-xl border border-border bg-muted/30 p-5">
-                      <div>
-                        <Label className="text-base font-medium">Imagem de destaque</Label>
-                        <div className="mt-2">
-                          <ImageUploader
-                            value={form.image_url}
-                            onChange={(url) => setForm({ ...form, image_url: url })}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div>
-                          <Label className="text-base font-medium">Categoria</Label>
-                          <Select
-                            value={form.category}
-                            onValueChange={(v) =>
-                              setForm({ ...form, category: v as typeof form.category })
-                            }
-                          >
-                            <SelectTrigger className="mt-2">
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {categories.map((c) => (
-                                <SelectItem key={c} value={c}>{c}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label className="text-base font-medium">Veredito</Label>
-                          <Select
-                            value={form.verdict}
-                            onValueChange={(v) =>
-                              setForm({ ...form, verdict: v as typeof form.verdict })
-                            }
-                          >
-                            <SelectTrigger className="mt-2">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="verificado">Verificado</SelectItem>
-                              <SelectItem value="falso">Falso</SelectItem>
-                              <SelectItem value="enganoso">Enganoso</SelectItem>
-                              <SelectItem value="parcial">Parcialmente Verdade</SelectItem>
-                              <SelectItem value="apuracao">Em Apuração</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label className="text-base font-medium">Tipo</Label>
-                          <Select
-                            value={form.type}
-                            onValueChange={(v) =>
-                              setForm({ ...form, type: v as typeof form.type })
-                            }
-                          >
-                            <SelectTrigger className="mt-2">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="noticia">Notícia</SelectItem>
-                              <SelectItem value="golpe">Golpe</SelectItem>
-                              <SelectItem value="fake">Fake News</SelectItem>
-                              <SelectItem value="empresa">Empresa</SelectItem>
-                              <SelectItem value="site">Site</SelectItem>
-                              <SelectItem value="video">Vídeo</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {isAdmin && editingId && (
-                          <div>
-                            <Label className="text-base font-medium">Autor</Label>
-                            <Select
-                              value={form.author_id}
-                              onValueChange={(v) => setForm({ ...form, author_id: v })}
-                            >
-                              <SelectTrigger className="mt-2">
-                                <SelectValue placeholder="Selecionar autor" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {(usersData?.users ?? []).map((u: any) => (
-                                  <SelectItem key={u.id} value={u.id}>
-                                    {u.display_name ?? u.id}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              )}
 
               <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm">
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
