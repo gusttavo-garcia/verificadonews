@@ -196,3 +196,50 @@ a[href*="lovable.dev"][target="_blank"],
 .prose-verificado img {
   @apply mt-6 rounded-xl;
 }
+
+/* Editor visual (TipTap) — títulos e formatação visíveis na caixa de texto */
+.editor-content h1 {
+  @apply mt-6 text-3xl font-extrabold leading-tight text-foreground;
+}
+.editor-content h2 {
+  @apply mt-6 text-2xl font-bold leading-tight text-foreground;
+}
+.editor-content h3 {
+  @apply mt-5 text-xl font-semibold leading-snug text-foreground;
+}
+.editor-content p {
+  @apply mt-4 leading-relaxed;
+}
+.editor-content strong {
+  @apply font-bold;
+}
+.editor-content em {
+  @apply italic;
+}
+.editor-content u {
+  @apply underline;
+}
+.editor-content s {
+  @apply line-through;
+}
+.editor-content mark {
+  @apply rounded bg-[color:var(--secondary)] px-1 text-foreground;
+}
+.editor-content ul {
+  @apply mt-4 list-disc space-y-1 pl-6;
+}
+.editor-content ol {
+  @apply mt-4 list-decimal space-y-1 pl-6;
+}
+.editor-content blockquote {
+  @apply mt-4 border-l-4 border-border pl-4 italic text-muted-foreground;
+}
+.editor-content hr {
+  @apply my-6 border-border;
+}
+.editor-content a {
+  @apply text-primary underline underline-offset-2;
+}
+.editor-content > *:first-child {
+  @apply mt-0;
+}
