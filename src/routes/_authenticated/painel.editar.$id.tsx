@@ -454,6 +454,8 @@ function EditorArtigoPage() {
           )}
         </AlertDialogContent>
       </AlertDialog>
+        </div>
+      </div>
     </div>
   );
 }
