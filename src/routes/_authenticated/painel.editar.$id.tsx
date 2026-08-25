@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ImageUploader } from "@/components/site/image-uploader";
 import { RichTextEditor } from "@/components/site/rich-text-editor";
+import { EditorSidebar } from "@/components/site/editor-sidebar";
 import { useAuth, useIsStaff } from "@/hooks/use-auth";
 import { listCategories } from "@/lib/categories.functions";
 import { listUsers } from "@/lib/users.functions";
