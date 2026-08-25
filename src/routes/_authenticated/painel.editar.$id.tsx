@@ -81,7 +81,7 @@ function EditorArtigoPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { roles, loading } = useAuth();
+  const { roles, loading, user, displayName } = useAuth();
   const isStaff = useIsStaff();
   const isAdmin = roles.includes("admin");
 
