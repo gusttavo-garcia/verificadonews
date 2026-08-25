@@ -67,7 +67,7 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     editorProps: {
       attributes: {
         class:
-          "prose prose-neutral dark:prose-invert max-w-none min-h-[420px] px-4 py-3 focus:outline-none",
+          "editor-content max-w-none min-h-[70vh] px-5 py-4 text-base focus:outline-none",
         "data-placeholder": placeholder ?? "",
       },
     },
