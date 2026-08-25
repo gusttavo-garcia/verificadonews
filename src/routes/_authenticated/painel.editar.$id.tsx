@@ -244,7 +244,16 @@ function EditorArtigoPage() {
   } as const;
 
   return (
-    <div className="mx-auto w-full max-w-6xl p-4 md:p-8">
+    <div className="flex min-h-screen bg-[color:var(--surface)]">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-border bg-card lg:block">
+        <EditorSidebar
+          currentLabel={status === "draft" ? "Criando artigo" : "Editando artigo"}
+          userLabel={displayName ?? user?.email ?? null}
+          roleLabel={isAdmin ? "Administrador" : "Redator"}
+        />
+      </aside>
+      <div className="min-w-0 flex-1">
+        <div className="mx-auto w-full max-w-6xl p-4 md:p-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
