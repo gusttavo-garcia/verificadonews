@@ -50,6 +50,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          image_model: string
+          language: string
+          singleton: boolean
+          style_instructions: string
+          text_model: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          image_model?: string
+          language?: string
+          singleton?: boolean
+          style_instructions?: string
+          text_model?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          image_model?: string
+          language?: string
+          singleton?: boolean
+          style_instructions?: string
+          text_model?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       articles: {
         Row: {
           author_id: string | null
