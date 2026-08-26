@@ -253,7 +253,7 @@ function EditorArtigoPage() {
         />
       </aside>
       <div className="min-w-0 flex-1">
-        <div className="mx-auto w-full max-w-6xl p-4 md:p-8">
+        <div className="w-full max-w-7xl p-4 md:p-6 lg:pl-6 lg:pr-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>

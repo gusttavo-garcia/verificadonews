@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 import { createEmptyDraft } from "@/lib/articles.functions";
 
 export const Route = createFileRoute("/_authenticated/painel/novo")({
@@ -29,9 +28,10 @@ function NovoArtigoPage() {
   }, [createDraft, navigate]);
 
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-muted-foreground">
-      <Loader2 className="h-7 w-7 animate-spin text-primary" />
-      <p className="text-sm">Criando rascunho…</p>
+    <div className="min-h-screen bg-[color:var(--surface)]">
+      <span className="sr-only" role="status" aria-live="polite">
+        Criando rascunho…
+      </span>
     </div>
   );
 }
