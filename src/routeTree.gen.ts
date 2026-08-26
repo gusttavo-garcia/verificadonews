@@ -27,6 +27,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RFolderRouteImport } from './routes/r/$folder'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
+import { Route as ApiGenerateImageRouteImport } from './routes/api/generate-image'
 import { Route as AuthenticatedPainelIndexRouteImport } from './routes/_authenticated/painel.index'
 import { Route as RFolderRouteRouteImport } from './routes/r/$folder/$route'
 import { Route as AuthenticatedPainelNovoRouteImport } from './routes/_authenticated/painel.novo'
@@ -121,6 +122,11 @@ const CategoriaSlugRoute = CategoriaSlugRouteImport.update({
   path: '/categoria/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGenerateImageRoute = ApiGenerateImageRouteImport.update({
+  id: '/api/generate-image',
+  path: '/api/generate-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedPainelIndexRoute =
   AuthenticatedPainelIndexRouteImport.update({
     id: '/painel/',
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/transparencia': typeof TransparenciaRoute
+  '/api/generate-image': typeof ApiGenerateImageRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/r/$folder': typeof RFolderRouteWithChildren
   '/painel/novo': typeof AuthenticatedPainelNovoRoute
@@ -183,6 +190,7 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/transparencia': typeof TransparenciaRoute
+  '/api/generate-image': typeof ApiGenerateImageRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/r/$folder': typeof RFolderRouteWithChildren
   '/painel/novo': typeof AuthenticatedPainelNovoRoute
@@ -208,6 +216,7 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/transparencia': typeof TransparenciaRoute
+  '/api/generate-image': typeof ApiGenerateImageRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/r/$folder': typeof RFolderRouteWithChildren
   '/_authenticated/painel/novo': typeof AuthenticatedPainelNovoRoute
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/transparencia'
+    | '/api/generate-image'
     | '/categoria/$slug'
     | '/r/$folder'
     | '/painel/novo'
@@ -256,6 +266,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/transparencia'
+    | '/api/generate-image'
     | '/categoria/$slug'
     | '/r/$folder'
     | '/painel/novo'
@@ -280,6 +291,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/transparencia'
+    | '/api/generate-image'
     | '/categoria/$slug'
     | '/r/$folder'
     | '/_authenticated/painel/novo'
@@ -305,6 +317,7 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   TransparenciaRoute: typeof TransparenciaRoute
+  ApiGenerateImageRoute: typeof ApiGenerateImageRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
   RFolderRoute: typeof RFolderRouteWithChildren
 }
@@ -437,6 +450,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriaSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/generate-image': {
+      id: '/api/generate-image'
+      path: '/api/generate-image'
+      fullPath: '/api/generate-image'
+      preLoaderRoute: typeof ApiGenerateImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/painel/': {
       id: '/_authenticated/painel/'
       path: '/painel'
@@ -511,6 +531,7 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   TransparenciaRoute: TransparenciaRoute,
+  ApiGenerateImageRoute: ApiGenerateImageRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,
   RFolderRoute: RFolderRouteWithChildren,
 }
