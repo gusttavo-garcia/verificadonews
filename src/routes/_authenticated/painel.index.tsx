@@ -145,6 +145,7 @@ type PanelSection =
   | "newsletter"
   | "anuncios"
   | "usuarios"
+  | "integracoes"
   | "lixeira"
   | "perfil";
 
