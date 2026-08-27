@@ -26,7 +26,7 @@ const TEXT_MODELS = [
 
 const IMAGE_MODELS = [
   { value: "openai/gpt-image-2", label: "GPT Image 2 — fotos e capas (recomendado)" },
-  { value: "google/gemini-3-pro-image-preview", label: "Gemini 3 Pro Image — ilustrações" },
+  { value: "google/gemini-3-pro-image", label: "Gemini 3 Pro Image — ilustrações" },
 ];
 
 export function IntegrationsSection() {

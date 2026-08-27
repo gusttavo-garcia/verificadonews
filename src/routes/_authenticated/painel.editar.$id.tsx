@@ -12,6 +12,9 @@ import {
   CheckCircle2,
   Trash2,
   ExternalLink,
+  Sparkles,
+  Wand2,
+  ImagePlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +43,8 @@ import { EditorSidebar } from "@/components/site/editor-sidebar";
 import { useAuth, useIsStaff } from "@/hooks/use-auth";
 import { listCategories } from "@/lib/categories.functions";
 import { listUsers } from "@/lib/users.functions";
+import { aiAssist, getAiSettings } from "@/lib/ai.functions";
+import { generateAndUploadImage } from "@/lib/ai-image";
 import {
   getArticleById,
   updateArticle,
@@ -92,6 +97,8 @@ function EditorArtigoPage() {
   const deleteFn = useServerFn(deleteArticle);
   const listCategoriesFn = useServerFn(listCategories);
   const listUsersFn = useServerFn(listUsers);
+  const aiFn = useServerFn(aiAssist);
+  const aiSettingsFn = useServerFn(getAiSettings);
 
   useEffect(() => {
     if (!loading && !isStaff) {
@@ -118,6 +125,15 @@ function EditorArtigoPage() {
     queryFn: () => listUsersFn(),
     enabled: isStaff && isAdmin,
   });
+
+  const { data: aiData } = useQuery({
+    queryKey: ["ai-settings"],
+    queryFn: () => aiSettingsFn(),
+    enabled: isStaff,
+  });
+  const aiEnabled = (aiData?.settings?.enabled ?? false) && (aiData?.hasKey ?? false);
+  const imageModel = aiData?.settings?.image_model;
+  const [aiBusy, setAiBusy] = useState<string | null>(null);
 
   const [form, setForm] = useState<FormState | null>(null);
   const [dirty, setDirty] = useState(false);
@@ -181,6 +197,57 @@ function EditorArtigoPage() {
     }, 2500);
     return () => clearTimeout(t);
   }, [dirty, form]);
+
+  const runAi = async (
+    mode: "draft" | "improve" | "excerpt" | "title",
+    label: string,
+  ) => {
+    if (!form) return;
+    if (mode !== "improve" && mode !== "excerpt" && !form.title.trim()) {
+      toast.error("Escreva o título primeiro para a IA ter contexto.");
+      return;
+    }
+    setAiBusy(mode);
+    try {
+      const { output } = await aiFn({
+        data: {
+          mode,
+          title: form.title,
+          content: form.body,
+          instruction: form.excerpt,
+        },
+      });
+      if (!output) throw new Error("A IA não retornou conteúdo.");
+      if (mode === "draft" || mode === "improve") patch({ body: output });
+      else if (mode === "excerpt") patch({ excerpt: output.replace(/^"|"$/g, "") });
+      else patch({ title: output.replace(/^"|"$/g, "") });
+      toast.success(`${label} pronto!`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro na IA");
+    } finally {
+      setAiBusy(null);
+    }
+  };
+
+  const generateCover = async () => {
+    if (!form?.title.trim()) {
+      toast.error("Escreva o título primeiro.");
+      return;
+    }
+    setAiBusy("cover");
+    try {
+      const url = await generateAndUploadImage(
+        `Imagem editorial de capa para uma matéria jornalística de checagem de fatos. Tema: "${form.title}". Estilo fotográfico realista, sem texto na imagem, iluminação natural, proporção 16:9.`,
+        imageModel,
+      );
+      patch({ image_url: url });
+      toast.success("Imagem de destaque gerada!");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao gerar imagem");
+    } finally {
+      setAiBusy(null);
+    }
+  };
 
   const runAction = async (action: "review" | "publish" | "delete") => {
     try {
@@ -347,11 +414,82 @@ function EditorArtigoPage() {
               value={form.body}
               onChange={(html) => patch({ body: html })}
               placeholder="Escreva o conteúdo completo do artigo aqui..."
+              imageModel={imageModel}
+              aiImageEnabled={aiEnabled}
             />
           </div>
         </div>
 
         <div className="space-y-6 rounded-2xl border border-border bg-muted/30 p-5">
+          {aiEnabled && (
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <Sparkles className="h-4 w-4" /> Assistente de IA
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Gere e refine o conteúdo. Revise sempre antes de publicar.
+              </p>
+              <div className="mt-3 grid gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="justify-start"
+                  disabled={aiBusy !== null}
+                  onClick={() => void runAi("draft", "Rascunho")}
+                >
+                  {aiBusy === "draft" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Wand2 className="mr-2 h-4 w-4" />
+                  )}
+                  Gerar rascunho pelo título
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="justify-start"
+                  disabled={aiBusy !== null}
+                  onClick={() => void runAi("improve", "Texto melhorado")}
+                >
+                  {aiBusy === "improve" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-2 h-4 w-4" />
+                  )}
+                  Melhorar o texto atual
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="justify-start"
+                  disabled={aiBusy !== null}
+                  onClick={() => void runAi("excerpt", "Resumo")}
+                >
+                  {aiBusy === "excerpt" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-2 h-4 w-4" />
+                  )}
+                  Criar resumo
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="justify-start"
+                  disabled={aiBusy !== null}
+                  onClick={() => void runAi("title", "Título")}
+                >
+                  {aiBusy === "title" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-2 h-4 w-4" />
+                  )}
+                  Sugerir título
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div>
             <Label className="text-base font-medium">Imagem de destaque</Label>
             <div className="mt-2">
@@ -360,6 +498,22 @@ function EditorArtigoPage() {
                 onChange={(url) => patch({ image_url: url })}
               />
             </div>
+            {aiEnabled && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-2 w-full"
+                disabled={aiBusy !== null}
+                onClick={() => void generateCover()}
+              >
+                {aiBusy === "cover" ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ImagePlus className="mr-2 h-4 w-4" />
+                )}
+                Gerar imagem com IA
+              </Button>
+            )}
           </div>
 
           <div>
