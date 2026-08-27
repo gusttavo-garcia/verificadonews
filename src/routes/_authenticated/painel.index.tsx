@@ -30,6 +30,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Megaphone,
+  Sparkles,
 } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
 import {
@@ -101,6 +102,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SplitRedirectorManager } from "@/components/site/split-redirector-manager";
+import { IntegrationsSection } from "@/components/site/integrations-section";
 import type { AppRole } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/painel/")({
@@ -295,6 +297,7 @@ function PainelPage() {
           { key: "newsletter", label: "Inscritos na Newsletter", icon: Mail },
           { key: "anuncios", label: "Anúncios", icon: Megaphone },
           { key: "usuarios", label: "Usuários", icon: Users },
+          { key: "integracoes", label: "Integrações", icon: Sparkles },
           { key: "lixeira", label: "Lixeira", icon: Trash2 },
           { key: "perfil", label: "Perfil", icon: UserCircle },
         ]
@@ -769,6 +772,8 @@ function PainelPage() {
           {section === "usuarios" && isAdmin && (
             <UsersSection currentUserId={user?.id ?? null} />
           )}
+          {section === "integracoes" && isAdmin && <IntegrationsSection />}
+
           {section === "lixeira" && <TrashSection onConfirm={setConfirmAction} />}
           {section === "perfil" && <ProfileSection />}
         </main>
