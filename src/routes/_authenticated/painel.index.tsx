@@ -89,7 +89,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { listNewsletterSubscribers } from "@/lib/comments.functions";
-import { listAdSlots, updateAdSlot } from "@/lib/ads.functions";
+import { listAdSlotsStaff, updateAdSlot } from "@/lib/ads.functions";
 import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
@@ -823,7 +823,7 @@ function TrashSection({
 
 function AdsSection() {
   const qc = useQueryClient();
-  const listFn = useServerFn(listAdSlots);
+  const listFn = useServerFn(listAdSlotsStaff);
   const updateFn = useServerFn(updateAdSlot);
   const [active, setActive] = useState(1);
   const [drafts, setDrafts] = useState<
