@@ -24,7 +24,9 @@ import {
   ImagePlus,
   Sparkles,
   Loader2,
+  Images,
 } from "lucide-react";
+import { PexelsPicker } from "@/components/site/pexels-picker";
 
 type Props = {
   value: string;
@@ -87,6 +89,7 @@ export function RichTextEditor({
 }: Props) {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [busy, setBusy] = useState<null | "upload" | "ai">(null);
+  const [pexelsOpen, setPexelsOpen] = useState(false);
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -289,6 +292,9 @@ export function RichTextEditor({
             )}
           </ToolButton>
         )}
+        <ToolButton title="Buscar imagem gratuita (Pexels)" onClick={() => setPexelsOpen(true)}>
+          <Images className="h-4 w-4" />
+        </ToolButton>
         <ToolButton
           title="Limpar formatação"
           onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
@@ -318,6 +324,21 @@ export function RichTextEditor({
         }}
       />
       <EditorContent editor={editor} />
+      <PexelsPicker
+        open={pexelsOpen}
+        onOpenChange={setPexelsOpen}
+        onSelect={(photo) => {
+          editor
+            .chain()
+            .focus()
+            .setImage({
+              src: photo.full,
+              alt: photo.alt || `Foto de ${photo.photographer} no Pexels`,
+            })
+            .run();
+          toast.success(`Imagem de ${photo.photographer} inserida (Pexels).`);
+        }}
+      />
     </div>
   );
 }

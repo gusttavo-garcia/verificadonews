@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getAiSettings, updateAiSettings, testAiConnection } from "@/lib/ai.functions";
+import { ApiKeysSection } from "@/components/site/api-keys-section";
 
 const TEXT_MODELS = [
   { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash — equilíbrio (recomendado)" },
@@ -196,6 +197,8 @@ export function IntegrationsSection() {
           </div>
         </div>
       </div>
+
+      <ApiKeysSection />
 
       <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-5 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">Como usar no editor de artigos</p>
