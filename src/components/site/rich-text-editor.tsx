@@ -24,7 +24,9 @@ import {
   ImagePlus,
   Sparkles,
   Loader2,
+  Images,
 } from "lucide-react";
+import { PexelsPicker } from "@/components/site/pexels-picker";
 
 type Props = {
   value: string;
