@@ -198,6 +198,8 @@ export function IntegrationsSection() {
         </div>
       </div>
 
+      <ApiKeysSection />
+
       <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-5 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">Como usar no editor de artigos</p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
