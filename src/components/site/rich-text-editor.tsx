@@ -292,6 +292,9 @@ export function RichTextEditor({
             )}
           </ToolButton>
         )}
+        <ToolButton title="Buscar imagem gratuita (Pexels)" onClick={() => setPexelsOpen(true)}>
+          <Images className="h-4 w-4" />
+        </ToolButton>
         <ToolButton
           title="Limpar formatação"
           onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
