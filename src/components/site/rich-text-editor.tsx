@@ -324,6 +324,21 @@ export function RichTextEditor({
         }}
       />
       <EditorContent editor={editor} />
+      <PexelsPicker
+        open={pexelsOpen}
+        onOpenChange={setPexelsOpen}
+        onSelect={(photo) => {
+          editor
+            .chain()
+            .focus()
+            .setImage({
+              src: photo.full,
+              alt: photo.alt || `Foto de ${photo.photographer} no Pexels`,
+            })
+            .run();
+          toast.success(`Imagem de ${photo.photographer} inserida (Pexels).`);
+        }}
+      />
     </div>
   );
 }
