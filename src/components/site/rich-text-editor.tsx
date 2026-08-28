@@ -89,6 +89,7 @@ export function RichTextEditor({
 }: Props) {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [busy, setBusy] = useState<null | "upload" | "ai">(null);
+  const [pexelsOpen, setPexelsOpen] = useState(false);
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
