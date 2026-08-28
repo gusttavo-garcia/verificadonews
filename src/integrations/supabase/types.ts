@@ -200,6 +200,36 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_keys: {
+        Row: {
+          api_key: string
+          created_at: string
+          enabled: boolean
+          id: string
+          label: string
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          api_key?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          label?: string
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          label?: string
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
