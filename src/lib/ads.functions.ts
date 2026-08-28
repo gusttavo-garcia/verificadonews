@@ -38,6 +38,18 @@ export const listAdSlots = createServerFn({ method: "GET" }).handler(async () =>
   return { slots: (data ?? []) as AdSlot[] };
 });
 
+// Staff-only listing (includes disabled slots and their raw code)
+export const listAdSlotsStaff = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await (context.supabase as any)
+      .from("ad_slots")
+      .select("id, block_no, position, label, enabled, code, paragraph_no")
+      .order("block_no", { ascending: true });
+    if (error) throw new Error(error.message);
+    return { slots: (data ?? []) as AdSlot[] };
+  });
+
 export const updateAdSlot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
